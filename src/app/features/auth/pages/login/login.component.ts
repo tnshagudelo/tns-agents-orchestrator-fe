@@ -90,7 +90,12 @@ export class LoginComponent {
   submit(): void {
     if (this.form.invalid) return;
     const { username, password } = this.form.getRawValue();
-    this.authService.login({ username: username!, password: password! });
-    this.router.navigate(['/dashboard']);
+    this.authService.login({ username: username!, password: password! }).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => {
+        // Display error feedback to the user
+        this.form.setErrors({ loginFailed: true });
+      },
+    });
   }
 }

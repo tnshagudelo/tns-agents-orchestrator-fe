@@ -4,6 +4,7 @@ import {
   HttpRequest,
   HttpHandlerFn,
 } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { finalize } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -28,8 +29,7 @@ export const loadingInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
-  // Avoid circular injection: use a factory function pattern
-  const loadingService = new LoadingService();
+  const loadingService = inject(LoadingService);
   loadingService.increment();
   return next(req).pipe(finalize(() => loadingService.decrement()));
 };

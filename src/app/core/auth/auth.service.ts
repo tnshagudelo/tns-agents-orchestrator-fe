@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { AuthState, LoginRequest, User } from '../../shared/models';
 
 @Injectable({ providedIn: 'root' })
@@ -13,7 +14,7 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._state().isAuthenticated);
   readonly currentUser = computed(() => this._state().user);
 
-  login(credentials: LoginRequest): void {
+  login(credentials: LoginRequest): Observable<User> {
     this._state.update(s => ({ ...s, isLoading: true }));
     // Replace with actual HTTP call via AuthApiService
     const mockUser: User = {
@@ -25,6 +26,7 @@ export class AuthService {
     };
     localStorage.setItem('auth_token', mockUser.token!);
     this._state.set({ user: mockUser, isAuthenticated: true, isLoading: false });
+    return of(mockUser);
   }
 
   logout(): void {
