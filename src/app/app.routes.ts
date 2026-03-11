@@ -34,6 +34,11 @@ export const routes: Routes = [
           import('./features/monitoring/monitoring.routes').then(m => m.MONITORING_ROUTES),
       },
       {
+        path: 'projectmanageragent',
+        loadChildren: () =>
+          import('./features/projectmanageragent/projectmanageragent.routes').then(m => m.PROJECTMANAGERAGENT_ROUTES),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),

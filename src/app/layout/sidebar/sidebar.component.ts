@@ -58,7 +58,7 @@ interface NavItem {
       flex-direction: column;
       width: 240px;
       height: 100%;
-      background: #1a237e;
+      background: #da6ccf;
       color: white;
       transition: width 0.3s ease;
       overflow: hidden;
@@ -102,5 +102,6 @@ export class SidebarComponent {
     { label: 'Agents', icon: 'smart_toy', route: '/agents' },
     { label: 'Orchestration', icon: 'account_tree', route: '/orchestration' },
     { label: 'Monitoring', icon: 'monitor_heart', route: '/monitoring' },
+    { label: 'PM Agent', icon: 'hub', route: '/projectmanageragent' },
   ];
 }
