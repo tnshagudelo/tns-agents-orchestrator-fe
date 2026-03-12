@@ -12,7 +12,7 @@ export interface ChatMessage {
 @Injectable({ providedIn: 'root' })
 export class AgentChatService {
 
-  private readonly apiUrl = 'https://tu-api/api/agent/stream';
+  private readonly apiUrl = 'https://localhost:7292/api/agent/stream';
   private sessionId: string = crypto.randomUUID();
 
   /**
