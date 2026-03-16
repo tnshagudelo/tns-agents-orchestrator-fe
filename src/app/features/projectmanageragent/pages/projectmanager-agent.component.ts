@@ -105,7 +105,7 @@ import { AgentChatService, ChatMessage } from '../services/agent-chat.service';
                 <div class="message-bubble">
                   @if (msg.role === 'assistant') {
                     <!-- Markdown para respuestas del agente — renderiza tablas y listas -->
-                    <markdown [data]="msg.content" class="markdown-content"></markdown>
+                    <markdown [data]="msg.content" mermaid class="markdown-content"></markdown>
                     @if (msg.isStreaming) {
                       <span class="cursor">▌</span>
                     }
@@ -544,6 +544,8 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
         this.notifications.error('Error al conectar con el agente');
       },
       complete: () => {
+        // Sanitiza mermaid antes de marcar como completo
+        assistantMsg.content     = this.fixMermaidBlocks(assistantMsg.content);
         assistantMsg.isStreaming = false;
         this.messages.update(msgs => [...msgs]);
         this.isLoading.set(false);
@@ -568,6 +570,62 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
     this.messages.set([]);
     this.chatService.resetSession();
   }
+
+  private fixMermaidBlocks(content: string): string {
+  // Caso 1: tiene backticks pero todo en una línea — arregla saltos de línea
+  content = content.replace(
+    /```mermaid\s*([\s\S]*?)```/g,
+    (_, block) => '```mermaid\n' + this.formatMermaidBlock(block) + '\n```'
+  );
+
+  // Caso 2: no tiene backticks — detecta por keywords y los envuelve
+  const mermaidTypes = ['gantt', 'pie', 'timeline', 'sequenceDiagram', 'flowchart', 'graph'];
+
+  mermaidTypes.forEach(type => {
+    // Busca el keyword fuera de un bloque de código existente
+    const regex = new RegExp(
+      `(?<!\`\`\`mermaid[\\s\\S]*?)(${type}\\s+(?:title\\s+)?[^\\n\`]+(?:\\s+(?:dateFormat|section|title)[^\\n\`]+)*)`,
+      'g'
+    );
+
+    content = content.replace(regex, (match) => {
+      // Si ya está dentro de backticks, no lo toques
+      if (content.includes('```mermaid\n' + match)) return match;
+      return '```mermaid\n' + this.formatMermaidBlock(match) + '\n```';
+    });
+  });
+
+  return content;
+}
+
+private formatMermaidBlock(block: string): string {
+  // Palabras clave que deben ir en su propia línea
+  const keywords = [
+    'dateFormat', 'axisFormat', 'todayMarker',
+    'section ', 'title ', 'gantt', 'pie ', 'timeline',
+    'sequenceDiagram', 'flowchart', 'graph '
+  ];
+
+  let result = block.trim();
+
+  // Agrega salto de línea antes de cada keyword
+  keywords.forEach(kw => {
+    result = result.replace(
+      new RegExp(`(?<!\\n)(${kw})`, 'g'),
+      '\n$1'
+    );
+  });
+
+  // Cada entrada con : también va en su propia línea (tareas del gantt, pie, timeline)
+  result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
+
+  // Limpia líneas vacías y espacios
+  return result
+    .split('\n')
+    .map((l: string) => l.trimEnd())
+    .filter((l: string) => l.trim().length > 0)
+    .join('\n');
+}
 
   private addMessage(role: 'user' | 'assistant', content: string): ChatMessage {
     const msg: ChatMessage = {

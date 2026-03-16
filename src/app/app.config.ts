@@ -7,6 +7,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { MarkdownModule } from 'ngx-markdown';
+import mermaid from 'mermaid';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
-    importProvidersFrom(MarkdownModule.forRoot())
+    importProvidersFrom(
+      MarkdownModule.forRoot(),      
+    )    
   ],
 };
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme:       'default',
+  securityLevel: 'loose'  // necesario para que ngx-markdown lo renderice
+});
