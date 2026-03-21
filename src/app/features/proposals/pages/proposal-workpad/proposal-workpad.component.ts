@@ -405,18 +405,19 @@ export class ProposalWorkpadComponent implements OnInit {
     const p = this.proposal();
     if (!p) return;
     const iter = this.currentIterationData();
+    const riskLevelMap: Record<string, number> = { low: 0, medium: 1, high: 2 };
     const payload = {
       content,
       components: iter?.components ?? [],
       teamSize: iter?.teamSize ?? 0,
       durationWeeks: iter?.durationWeeks ?? 0,
       budgetUsd: iter?.budgetUsd ?? 0,
-      riskLevel: (iter?.riskLevel ?? 'medium') as 'low' | 'medium' | 'high',
+      riskLevel: (riskLevelMap[iter?.riskLevel ?? 'medium'] ?? 1) as unknown as 'low' | 'medium' | 'high',
     };
     this.proposalsService.updateIteration(p.id, payload).subscribe({
       next: updated => {
         this.selectedIteration.set(updated.currentIteration);
-        this.notifications.error('Iteración guardada');
+        this.notifications.success('Iteración guardada');
       },
       error: () => this.notifications.error('Error al guardar iteración'),
     });
