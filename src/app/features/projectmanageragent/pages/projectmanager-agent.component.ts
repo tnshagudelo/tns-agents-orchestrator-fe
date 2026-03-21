@@ -106,7 +106,7 @@ import mermaid from 'mermaid';
                 <div class="message-bubble">
                   @if (msg.role === 'assistant') {
                     <!-- Markdown para respuestas del agente — renderiza tablas y listas -->
-                    <markdown [data]="msg.content" mermaid class="markdown-content"></markdown>
+                    <markdown [data]="msg.content" class="markdown-content"></markdown>
                     @if (msg.isStreaming) {
                       <span class="cursor">▌</span>
                     }
@@ -481,8 +481,9 @@ import mermaid from 'mermaid';
 })
 
 export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterViewChecked {
-  
+
    @ViewChild('messagesEnd') private messagesEnd!: ElementRef;
+   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   protected readonly chatService     = inject(AgentChatService);
   private readonly notifications     = inject(NotificationService);
@@ -503,13 +504,10 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
   ];
 
   private shouldScroll = false;
+  private shouldRenderMermaid = false;
 
-  ngOnInit(): void {    
-    mermaid.initialize({
-      startOnLoad: false,
-      theme:       'default',
-      securityLevel: 'loose'  // necesario para que ngx-markdown lo renderice
-    });
+  ngOnInit(): void {
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
   }
 
   ngAfterViewChecked(): void {
@@ -517,6 +515,26 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
       this.scrollToBottom();
       this.shouldScroll = false;
     }
+    if (this.shouldRenderMermaid) {
+      this.shouldRenderMermaid = false;
+      this.renderMermaidDivs();
+    }
+  }
+
+  private renderMermaidDivs(): void {
+    const container: HTMLElement = this.messagesContainer?.nativeElement;
+    if (!container) return;
+    const divs = Array.from(
+      container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
+    );
+    if (!divs.length) return;
+    divs.forEach(el => {
+      const decoded = el.textContent ?? '';
+      el.textContent = decoded;
+      el.removeAttribute('data-processed');
+      el.setAttribute('data-mermaid-processed', 'true');
+    });
+    mermaid.run({ nodes: divs }).catch(() => {});
   }
 
   ngOnDestroy(): void {}
@@ -551,12 +569,12 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
         this.notifications.error('Error al conectar con el agente');
       },
       complete: () => {
-        // Sanitiza mermaid antes de marcar como completo
         assistantMsg.content     = this.fixMermaidBlocks(assistantMsg.content);
         assistantMsg.isStreaming = false;
         this.messages.update(msgs => [...msgs]);
         this.isLoading.set(false);
         this.shouldScroll = true;
+        this.shouldRenderMermaid = true;
       },
     });
   }

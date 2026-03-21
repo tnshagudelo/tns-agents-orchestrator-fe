@@ -1,4 +1,5 @@
-import { Component, effect, inject, input, output, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, input, output, signal, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
+import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -49,7 +50,7 @@ export interface ChatPanelMessage {
             </div>
             <div class="msg-bubble">
               @if (msg.role === 'assistant') {
-                <markdown [data]="msg.content" mermaid class="md-content"></markdown>
+                <markdown [data]="msg.content" class="md-content"></markdown>
                 @if (msg.isStreaming) { <span class="cursor">▌</span> }
               } @else {
                 <p>{{ msg.content }}</p>
@@ -165,8 +166,9 @@ export interface ChatPanelMessage {
     }
   `],
 })
-export class ProposalChatPanelComponent implements AfterViewChecked {
+export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesEnd') private messagesEnd!: ElementRef;
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   proposalId = input.required<string>();
   projectName = input.required<string>();
@@ -178,6 +180,7 @@ export class ProposalChatPanelComponent implements AfterViewChecked {
   protected messages = signal<ChatPanelMessage[]>([]);
   protected inputText = '';
   private shouldScroll = false;
+  private shouldRenderMermaid = false;
   private lastCompletedContent = '';
 
   protected showSaveIteration = signal(false);
@@ -187,6 +190,10 @@ export class ProposalChatPanelComponent implements AfterViewChecked {
     'Reduce el presupuesto un 20%',
     'Agrega módulo de reportes',
   ];
+
+  ngOnInit(): void {
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  }
 
   protected lastIsUser() {
     const msgs = this.messages();
@@ -198,6 +205,27 @@ export class ProposalChatPanelComponent implements AfterViewChecked {
       this.messagesEnd?.nativeElement?.scrollIntoView({ behavior: 'smooth' });
       this.shouldScroll = false;
     }
+    if (this.shouldRenderMermaid) {
+      this.shouldRenderMermaid = false;
+      this.renderMermaidDivs();
+    }
+  }
+
+  private renderMermaidDivs(): void {
+    const container: HTMLElement = this.messagesContainer?.nativeElement;
+    if (!container) return;
+    const divs = Array.from(
+      container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
+    );
+    if (!divs.length) return;
+    divs.forEach(el => {
+      // textContent auto-decodes HTML entities (e.g. --&gt; → -->)
+      const decoded = el.textContent ?? '';
+      el.textContent = decoded;
+      el.removeAttribute('data-processed'); // ensure mermaid re-processes
+      el.setAttribute('data-mermaid-processed', 'true');
+    });
+    mermaid.run({ nodes: divs }).catch(() => {/* suppress parse errors */});
   }
 
   useSuggestion(text: string): void {
@@ -229,11 +257,13 @@ export class ProposalChatPanelComponent implements AfterViewChecked {
         this.notifications.error('Error al conectar con el agente');
       },
       complete: () => {
+        agentMsg.content = this.fixMermaidBlocks(agentMsg.content);
         agentMsg.isStreaming = false;
         this.lastCompletedContent = agentMsg.content;
         this.messages.update(m => [...m]);
         this.showSaveIteration.set(true);
         this.shouldScroll = true;
+        this.shouldRenderMermaid = true;
       },
     });
   }
@@ -253,6 +283,38 @@ export class ProposalChatPanelComponent implements AfterViewChecked {
   addExternalMessage(text: string): void {
     this.inputText = text;
     this.send();
+  }
+
+  private fixMermaidBlocks(content: string): string {
+    content = content.replace(
+      /```mermaid\s*([\s\S]*?)```/g,
+      (_, block) => '```mermaid\n' + this.formatMermaidBlock(block) + '\n```'
+    );
+    const mermaidTypes = ['gantt', 'pie', 'timeline', 'sequenceDiagram', 'flowchart', 'graph'];
+    mermaidTypes.forEach(type => {
+      const regex = new RegExp(
+        `(?<!\`\`\`mermaid[\\s\\S]*?)(${type}\\s+(?:title\\s+)?[^\\n\`]+(?:\\s+(?:dateFormat|section|title)[^\\n\`]+)*)`,
+        'g'
+      );
+      content = content.replace(regex, match => {
+        if (content.includes('```mermaid\n' + match)) return match;
+        return '```mermaid\n' + this.formatMermaidBlock(match) + '\n```';
+      });
+    });
+    return content;
+  }
+
+  private formatMermaidBlock(block: string): string {
+    const keywords = [
+      'dateFormat', 'axisFormat', 'todayMarker', 'section ', 'title ',
+      'gantt', 'pie ', 'timeline', 'sequenceDiagram', 'flowchart', 'graph ',
+    ];
+    let result = block.trim();
+    keywords.forEach(kw => {
+      result = result.replace(new RegExp(`(?<!\\n)(${kw})`, 'g'), '\n$1');
+    });
+    result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
+    return result.split('\n').map((l: string) => l.trimEnd()).filter((l: string) => l.trim().length > 0).join('\n');
   }
 
   private addMsg(role: 'user' | 'assistant', content: string): ChatPanelMessage {
