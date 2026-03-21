@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, effect, computed, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -216,7 +216,7 @@ interface KanbanColumn {
             <div class="kanban-column">
               <div class="col-header" [style.border-top-color]="col.color">
                 <span>{{ col.label }}</span>
-                <span class="col-count">{{ col.cards.length }}</span>
+                <span class="col-count">{{ kanbanCounts()[col.status] }}</span>
               </div>
               <div class="col-body"
                 cdkDropList
@@ -406,6 +406,21 @@ export class ProposalsDashboardComponent implements OnInit {
     return all
       .filter(p => !status || p.status === status)
       .filter(p => !text || p.name?.toLowerCase().includes(text) || p.projectName?.toLowerCase().includes(text));
+  });
+
+  // Signal-based counts for kanban headers — avoids NG0100 from mutable array reads
+  readonly kanbanCounts = computed(() => {
+    const all = this.proposalsService.proposals() ?? [];
+    const text = this.filterText().toLowerCase();
+    const filtered = text ? all.filter(p => p.name?.toLowerCase().includes(text) || p.projectName?.toLowerCase().includes(text)) : all;
+    const finalCount = filtered.filter(p => p.status === 'approved' || p.status === 'rejected').length;
+    return {
+      draft:            filtered.filter(p => p.status === 'draft').length,
+      in_review:        filtered.filter(p => p.status === 'in_review').length,
+      pending_approval: filtered.filter(p => p.status === 'pending_approval').length,
+      approved:         finalCount,
+      rejected:         finalCount,
+    } satisfies Record<ProposalStatus, number>;
   });
 
   constructor() {
