@@ -396,7 +396,7 @@ export class ProposalWorkpadComponent implements OnInit {
     const id = this.proposal()?.id;
     if (!id) return;
     this.proposalsService.submitForReview(id).subscribe({
-      next: () => this.notifications.error('Propuesta enviada a revisión'),
+      next: () => this.notifications.success('Propuesta enviada a revisión'),
       error: () => this.notifications.error('Error al enviar a revisión'),
     });
   }
@@ -448,7 +448,7 @@ export class ProposalWorkpadComponent implements OnInit {
 
   copyContent(): void {
     const content = this.currentIterationData()?.content ?? '';
-    navigator.clipboard.writeText(content).then(() => this.notifications.error('Copiado al portapapeles'));
+    navigator.clipboard.writeText(content).then(() => this.notifications.success('Copiado al portapapeles'));
   }
 
   exportMarkdown(): void {

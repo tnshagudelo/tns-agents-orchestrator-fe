@@ -371,7 +371,7 @@ export class ProposalReviewComponent implements OnInit {
     if (!p) return;
     const role: ProposalRole = p.status === 'in_review' ? 'reviewer' : 'approver';
     this.proposalsService.decide(p.id, role, status).subscribe({
-      next: () => this.notifications.error(`Decisión registrada: ${status}`),
+      next: () => this.notifications.success(`Decisión registrada: ${status}`),
       error: () => this.notifications.error('Error al registrar decisión'),
     });
   }
@@ -400,7 +400,7 @@ export class ProposalReviewComponent implements OnInit {
     this.proposalsService.decide(p.id, role, decision, this.decisionNote).subscribe({
       next: () => {
         this.cancelDecision();
-        this.notifications.error('Decisión registrada');
+        this.notifications.success('Decisión registrada');
       },
       error: () => this.notifications.error('Error al registrar decisión'),
     });
