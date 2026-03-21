@@ -22,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MarkdownModule } from 'ngx-markdown';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AgentChatService, ChatMessage } from '../services/agent-chat.service';
+import mermaid from 'mermaid';
 
 @Component({
   selector: 'app-project-manager-agent',
@@ -503,7 +504,13 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
 
   private shouldScroll = false;
 
-  ngOnInit(): void {}
+  ngOnInit(): void {    
+    mermaid.initialize({
+      startOnLoad: false,
+      theme:       'default',
+      securityLevel: 'loose'  // necesario para que ngx-markdown lo renderice
+    });
+  }
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
