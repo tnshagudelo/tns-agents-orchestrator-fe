@@ -37,7 +37,7 @@ export class ProposalChatService {
         },
         body: JSON.stringify({
           message,
-          agent: 'ProjectManagerAgent',
+          agent: 'ArchitectureAgent',
           metadata: { sessionId, projectName },
         }),
       }).then(response => {

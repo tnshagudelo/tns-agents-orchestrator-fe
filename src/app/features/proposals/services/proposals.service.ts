@@ -61,7 +61,7 @@ export class ProposalsService extends BaseApiService {
   }
 
   submitForReview(id: string): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/submit`, {}).pipe(
+    return this.post<any>(`/proposals/${id}/submit`, { userId: CURRENT_USER.id }).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
@@ -75,14 +75,32 @@ export class ProposalsService extends BaseApiService {
   }
 
   addComment(id: string, comment: Omit<ProposalComment, 'id' | 'createdAt'>): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/comments`, comment).pipe(
+    const roleIntMap: Record<ProposalRole, number> = { builder: 0, reviewer: 1, approver: 2 };
+    const payload = {
+      authorId: comment.authorId,
+      authorName: comment.authorName,
+      authorRole: roleIntMap[comment.authorRole] ?? 0,
+      body: comment.body,
+      iterationVersion: comment.iterationVersion,
+    };
+    return this.post<any>(`/proposals/${id}/comments`, payload).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
   }
 
   decide(id: string, role: ProposalRole, status: ProposalApprovalStep['status'], note?: string): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/decisions`, { role, status, note }).pipe(
+    const decisionMap: Record<string, string> = {
+      approved:           'Approve',
+      rejected:           'Reject',
+      changes_requested:  'RequestChanges',
+    };
+    const payload = {
+      userId: CURRENT_USER.id,
+      decision: decisionMap[status] ?? 'Approve',
+      note: note ?? null,
+    };
+    return this.post<any>(`/proposals/${id}/decisions`, payload).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
@@ -133,6 +151,10 @@ export class ProposalsService extends BaseApiService {
       changes_requested:  'changes_requested',
     };
     return map[value?.toLowerCase().replace(/ /g, '')] ?? 'pending';
+  }
+
+  private _capitalize(value: string): string {
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
   }
 
   private _syncLocal(updated: Proposal): void {

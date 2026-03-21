@@ -124,10 +124,16 @@ export interface ChatPanelMessage {
     .message-user .msg-avatar { background: #2D1B6B; color: white; }
 
     .msg-bubble {
-      max-width: 80%; background: #f5f5f5; border-radius: 4px 12px 12px 12px; padding: 10px 14px;
+      max-width: 80%; background: #ede9fe; border: 1px solid #c4b5fd;
+      border-radius: 4px 12px 12px 12px; padding: 10px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       p { margin: 0; font-size: 0.88rem; line-height: 1.5; }
     }
-    .message-user .msg-bubble { background: #2D1B6B; color: white; border-radius: 12px 4px 12px 12px; }
+    .message-user .msg-bubble {
+      background: #2D1B6B; color: white; border: none;
+      border-radius: 12px 4px 12px 12px;
+      box-shadow: 0 1px 3px rgba(45,27,107,0.3);
+    }
 
     .thinking { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: rgba(0,0,0,0.5); }
 
