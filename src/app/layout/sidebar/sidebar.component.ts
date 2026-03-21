@@ -103,6 +103,7 @@ export class SidebarComponent {
     { label: 'Orchestration', icon: 'account_tree', route: '/orchestration' },
     { label: 'Monitoring', icon: 'monitor_heart', route: '/monitoring' },
     { label: 'PM Agent', icon: 'hub', route: '/projectmanageragent' },
+    { label: 'Proposals', icon: 'description', route: '/proposals' },
     { label: 'Sessions', icon: 'history', route: '/sessions' },
   ];
 }
