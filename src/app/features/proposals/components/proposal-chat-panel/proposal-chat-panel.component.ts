@@ -296,6 +296,34 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    this.loadMessages();
+  }
+
+  // ── Persistencia por propuesta en sessionStorage ──────────────────────────
+
+  private get storageKey(): string {
+    return `chat_msgs_${this.proposalId()}`;
+  }
+
+  private saveMessages(): void {
+    const serializable = this.messages()
+      .filter(m => !m.isStreaming)
+      .map(m => ({ ...m, timestamp: m.timestamp.toISOString() }));
+    sessionStorage.setItem(this.storageKey, JSON.stringify(serializable));
+  }
+
+  private loadMessages(): void {
+    try {
+      const raw = sessionStorage.getItem(this.storageKey);
+      if (!raw) return;
+      const parsed = (JSON.parse(raw) as Array<ChatPanelMessage & { timestamp: string }>)
+        .map(m => ({ ...m, timestamp: new Date(m.timestamp), isStreaming: false }));
+      this.messages.set(parsed);
+      this.shouldScroll = true;
+      this.shouldRenderMermaid = true;
+    } catch {
+      sessionStorage.removeItem(this.storageKey);
+    }
   }
 
   protected lastIsUser() {
@@ -343,6 +371,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     this.inputText = '';
     this.showSaveIteration.set(false);
     this.addMsg('user', text);
+    this.saveMessages(); // persiste el mensaje del usuario inmediatamente
 
     const agentMsg = this.addMsg('assistant', '');
     agentMsg.isStreaming = true;
@@ -358,6 +387,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
         agentMsg.isStreaming = false;
         this.messages.update(m => [...m]);
         this.notifications.error('Error al conectar con el agente');
+        this.saveMessages(); // persiste el error como estado final
       },
       complete: () => {
         agentMsg.content = this.stripInternalMarkers(agentMsg.content);
@@ -366,6 +396,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
         agentMsg.references = this.chatService.currentReferences();
         this.lastCompletedContent = agentMsg.content;
         this.messages.update(m => [...m]);
+        this.saveMessages(); // persiste la respuesta completa del agente
         this.showSaveIteration.set(true);
         this.shouldScroll = true;
         this.shouldRenderMermaid = true;
