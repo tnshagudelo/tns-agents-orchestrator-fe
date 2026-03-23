@@ -1,0 +1,221 @@
+<div class="knowledge-manager">
+
+  <!-- ── Status Bar ──────────────────────────────────────────────────────── -->
+  <mat-card class="status-card">
+    <mat-card-content>
+      <div class="status-bar">
+        <div class="status-info">
+          <div class="status-chip"
+            [class.active]="knowledgeService.collectionExists()"
+            [class.inactive]="!knowledgeService.collectionExists()">
+            <mat-icon>{{ knowledgeService.collectionExists() ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ knowledgeService.collectionExists() ? 'Índice activo' : 'Sin índice' }}
+          </div>
+
+          @if (knowledgeService.collectionExists()) {
+            <span class="meta-text">
+              <strong>{{ knowledgeService.vectorCount() | number }}</strong> vectores indexados
+            </span>
+            <span class="meta-text">
+              Colección: <code>{{ knowledgeService.collectionStatus()?.collectionName }}</code>
+            </span>
+          }
+        </div>
+
+        <div class="status-actions">
+          <button mat-stroked-button
+            (click)="knowledgeService.loadStatus()"
+            [disabled]="knowledgeService.isLoadingStatus()">
+            @if (knowledgeService.isLoadingStatus()) {
+              <mat-spinner diameter="16"></mat-spinner>
+            } @else {
+              <mat-icon>refresh</mat-icon>
+            }
+            Refrescar estado
+          </button>
+
+          @if (knowledgeService.collectionExists()) {
+            <button mat-stroked-button color="warn"
+              (click)="confirmDeleteCollection()"
+              [disabled]="knowledgeService.isLoadingStatus()">
+              <mat-icon>delete_sweep</mat-icon>
+              Reindexar todo
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (showDeleteConfirm()) {
+        <div class="delete-confirm">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>¿Eliminar toda la colección? Esta acción no se puede deshacer.</span>
+          <button mat-raised-button color="warn" (click)="deleteCollection()">Confirmar eliminación</button>
+          <button mat-button (click)="cancelDelete()">Cancelar</button>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Content Grid ────────────────────────────────────────────────────── -->
+  <div class="content-grid">
+
+    <!-- IZQUIERDA: Panel de carga (60%) -->
+    <div class="upload-panel">
+
+      <!-- Drop Zone -->
+      <div class="drop-zone"
+        [class.drag-active]="isDragActive()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="triggerFileInput()">
+        <mat-icon class="upload-icon">cloud_upload</mat-icon>
+        <p class="drop-title">Arrastra tus archivos aquí</p>
+        <p class="drop-subtitle">o haz click para seleccionar</p>
+        <p class="drop-hint">Formatos permitidos: .md, .txt · Múltiples archivos</p>
+      </div>
+      <input #fileInput type="file" accept=".md,.txt" multiple hidden (change)="onFileInput($event)" />
+
+      <!-- Lista de archivos seleccionados -->
+      @if (pendingFiles().length > 0) {
+        <mat-list class="file-list">
+          @for (uf of pendingFiles(); track uf.id) {
+            <mat-list-item>
+              <mat-icon matListItemIcon>{{ fileIcon(uf.file.name) }}</mat-icon>
+              <span matListItemTitle>{{ uf.file.name }}</span>
+              <span matListItemLine>{{ formatSize(uf.file.size) }}</span>
+              <div matListItemMeta class="file-meta">
+                <span [class]="'status-badge status-' + uf.status">{{ statusLabel(uf.status) }}</span>
+                @if (uf.status === 'pending') {
+                  <button mat-icon-button (click)="removeFile(uf.id); $event.stopPropagation()"
+                    [attr.aria-label]="'Eliminar ' + uf.file.name">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </div>
+            </mat-list-item>
+          }
+        </mat-list>
+
+        @if (knowledgeService.isIngesting()) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        }
+      }
+
+      <!-- Selector de categoría -->
+      <mat-form-field appearance="outline" class="category-field">
+        <mat-label>Categoría</mat-label>
+        <mat-select [value]="selectedCategory()" (valueChange)="selectedCategory.set($event)">
+          @for (cat of categories; track cat.value) {
+            <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Botones de acción -->
+      <div class="upload-actions">
+        <button mat-raised-button color="primary"
+          [disabled]="pendingCount() === 0 || knowledgeService.isIngesting()"
+          (click)="uploadFiles()">
+          @if (knowledgeService.isIngesting()) {
+            <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+          } @else {
+            <mat-icon>upload</mat-icon>
+          }
+          Subir e indexar {{ pendingCount() }} archivo(s)
+        </button>
+
+        @if (hasDoneFiles()) {
+          <button mat-button (click)="clearList()">
+            <mat-icon>clear_all</mat-icon>
+            Limpiar lista
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- DERECHA: Panel de búsqueda (40%) -->
+    <div class="search-panel">
+      <mat-card class="search-card">
+        <mat-card-header>
+          <mat-card-title>Probar búsqueda</mat-card-title>
+          <mat-card-subtitle>Verifica que el índice responde correctamente</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+
+          <!-- Search input -->
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              (keyup.enter)="search()"
+              placeholder="Prueba una búsqueda..." />
+            <button matSuffix mat-icon-button
+              (click)="search()"
+              [disabled]="knowledgeService.isSearching() || !searchQuery().trim()"
+              matTooltip="Buscar">
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <!-- Sugerencias -->
+          <div class="suggestions">
+            @for (s of suggestions; track s) {
+              <button mat-stroked-button class="suggestion-btn" (click)="useSuggestion(s)">{{ s }}</button>
+            }
+          </div>
+
+          <mat-divider class="results-divider"></mat-divider>
+
+          <!-- Skeleton loaders mientras busca -->
+          @if (knowledgeService.isSearching()) {
+            @for (i of [1, 2, 3]; track i) {
+              <div class="skeleton-card">
+                <div class="skeleton-line w-50"></div>
+                <div class="skeleton-line w-100"></div>
+                <div class="skeleton-line w-75"></div>
+              </div>
+            }
+          }
+
+          <!-- Resultados -->
+          @else if (knowledgeService.searchResults().length > 0) {
+            <div class="results-list">
+              @for (item of knowledgeService.searchResults(); track item.fileName + item.score) {
+                <mat-card class="result-card">
+                  <mat-card-content>
+                    <div class="result-header">
+                      <div class="result-title">
+                        <mat-icon>insert_drive_file</mat-icon>
+                        <span>{{ item.fileName }}</span>
+                      </div>
+                      <div [class]="'score-badge ' + scoreBadgeClass(item.score)">
+                        {{ item.score | number:'1.2-2' }}
+                      </div>
+                    </div>
+                    <p class="result-content">{{ truncate(item.content) }}</p>
+                    <div class="result-footer">
+                      <span class="category-chip">{{ item.category }}</span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          }
+
+          <!-- Sin resultados -->
+          @else if (searchQuery().trim()) {
+            <div class="no-results">
+              <mat-icon>search_off</mat-icon>
+              <span>No se encontraron resultados</span>
+            </div>
+          }
+
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+</div>

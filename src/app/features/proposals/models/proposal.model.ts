@@ -1,4 +1,11 @@
 export type ProposalStatus = 'draft' | 'in_review' | 'pending_approval' | 'approved' | 'rejected';
+
+export interface RagReference {
+  fileName: string;
+  excerpt: string;
+  relevance: number;   // 0.0 a 1.0
+  category: string;
+}
 export type ProposalRole = 'builder' | 'reviewer' | 'approver';
 
 export interface ProposalIteration {

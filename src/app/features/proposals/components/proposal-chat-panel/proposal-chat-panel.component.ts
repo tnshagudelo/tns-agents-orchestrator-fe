@@ -11,6 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MarkdownModule } from 'ngx-markdown';
 import { ProposalChatService } from '../../services/proposal-chat.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { RagReference } from '../../models/proposal.model';
 
 export interface ChatPanelMessage {
   id: string;
@@ -18,6 +19,7 @@ export interface ChatPanelMessage {
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
+  references?: RagReference[];
 }
 
 @Component({
@@ -51,7 +53,40 @@ export interface ChatPanelMessage {
             <div class="msg-bubble">
               @if (msg.role === 'assistant') {
                 <markdown [data]="msg.content" class="md-content"></markdown>
-                @if (msg.isStreaming) { <span class="cursor">▌</span> }
+                @if (msg.isStreaming) {
+                  <span class="cursor">▌</span>
+                  <div class="rag-indicator">
+                    <mat-icon class="rag-spin">sync</mat-icon>
+                    <span>Consultando lineamientos de arquitectura...</span>
+                  </div>
+                }
+                @if (msg.references && msg.references.length > 0) {
+                  <div class="rag-references">
+                    <button class="refs-toggle" (click)="toggleRefs(msg.id)">
+                      <mat-icon>auto_stories</mat-icon>
+                      <span>{{ isRefsVisible(msg.id) ? 'Ocultar' : 'Ver' }} lineamientos consultados</span>
+                      <span class="refs-count">{{ msg.references.length }}</span>
+                      <mat-icon class="chevron" [class.rotated]="isRefsVisible(msg.id)">expand_more</mat-icon>
+                    </button>
+                    @if (isRefsVisible(msg.id)) {
+                      <div class="refs-list">
+                        @for (ref of msg.references; track ref.fileName) {
+                          <div class="ref-item">
+                            <div class="ref-header">
+                              <mat-icon class="ref-icon">description</mat-icon>
+                              <span class="ref-filename">{{ ref.fileName }}</span>
+                              <span class="ref-score" [class]="getScoreClass(ref.relevance)">
+                                {{ (ref.relevance * 100).toFixed(0) }}% relevante
+                              </span>
+                            </div>
+                            <p class="ref-excerpt">"{{ ref.excerpt }}"</p>
+                            <span class="ref-category">{{ ref.category }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
               } @else {
                 <p>{{ msg.content }}</p>
               }
@@ -164,6 +199,73 @@ export interface ChatPanelMessage {
       padding: 8px 16px; background: #f0fdf4; border-top: 1px solid #bbf7d0;
       font-size: 0.85rem; color: #166534;
     }
+
+    /* ── RAG Indicator (durante streaming) ── */
+    .rag-indicator {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; opacity: 0.8;
+      mat-icon { font-size: 13px; width: 13px; height: 13px; animation: spin 1.5s linear infinite; }
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ── RAG References block ── */
+    .rag-references {
+      margin-top: 12px;
+      border-top: 0.5px solid rgba(0,0,0,0.12);
+      padding-top: 10px;
+    }
+
+    .refs-toggle {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer; padding: 4px 0;
+      font-size: 12px; color: rgba(0,0,0,0.5); width: 100%; text-align: left;
+      transition: color 0.15s;
+      &:hover { color: #2D1B6B; }
+      mat-icon { font-size: 15px; width: 15px; height: 15px; }
+      .refs-count {
+        background: #EEEDFE; color: #534AB7;
+        font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 500;
+      }
+      .chevron { margin-left: auto; transition: transform 0.2s; &.rotated { transform: rotate(180deg); } }
+    }
+
+    .refs-list {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .ref-item {
+      background: rgba(255,255,255,0.6); border: 0.5px solid rgba(0,0,0,0.1);
+      border-left: 3px solid #7C3AED; border-radius: 6px; padding: 8px 10px;
+    }
+
+    .ref-header {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+      .ref-icon { font-size: 13px; width: 13px; height: 13px; color: #7C3AED; }
+      .ref-filename { font-size: 11px; font-weight: 500; color: rgba(0,0,0,0.75); flex: 1; }
+      .ref-score {
+        font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500;
+        &.score-high   { background: #EAF3DE; color: #3B6D11; }
+        &.score-medium { background: #FAEEDA; color: #854F0B; }
+        &.score-low    { background: #F1EFE8; color: #5F5E5A; }
+      }
+    }
+
+    .ref-excerpt {
+      font-size: 11px; color: rgba(0,0,0,0.5); font-style: italic;
+      line-height: 1.5; margin: 4px 0;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .ref-category {
+      font-size: 10px; background: #EEEDFE; color: #534AB7;
+      padding: 1px 7px; border-radius: 10px;
+    }
   `],
 })
 export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
@@ -182,6 +284,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
   private shouldScroll = false;
   private shouldRenderMermaid = false;
   private lastCompletedContent = '';
+  private expandedRefs = signal<Set<string>>(new Set());
 
   protected showSaveIteration = signal(false);
 
@@ -257,8 +360,10 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
         this.notifications.error('Error al conectar con el agente');
       },
       complete: () => {
+        agentMsg.content = this.stripInternalMarkers(agentMsg.content);
         agentMsg.content = this.fixMermaidBlocks(agentMsg.content);
         agentMsg.isStreaming = false;
+        agentMsg.references = this.chatService.currentReferences();
         this.lastCompletedContent = agentMsg.content;
         this.messages.update(m => [...m]);
         this.showSaveIteration.set(true);
@@ -283,6 +388,14 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
   addExternalMessage(text: string): void {
     this.inputText = text;
     this.send();
+  }
+
+  private stripInternalMarkers(content: string): string {
+    return content
+      .replace(/##REFERENCES_START##[\s\S]*?##REFERENCES_END##/g, '')
+      .replace(/##ITERATION_START##/g, '')
+      .replace(/##ITERATION_END##/g, '')
+      .trim();
   }
 
   private fixMermaidBlocks(content: string): string {
@@ -315,6 +428,24 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     });
     result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
     return result.split('\n').map((l: string) => l.trimEnd()).filter((l: string) => l.trim().length > 0).join('\n');
+  }
+
+  isRefsVisible(id: string): boolean {
+    return this.expandedRefs().has(id);
+  }
+
+  toggleRefs(id: string): void {
+    this.expandedRefs.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  getScoreClass(relevance: number): string {
+    if (relevance >= 0.85) return 'score-high';
+    if (relevance >= 0.65) return 'score-medium';
+    return 'score-low';
   }
 
   private addMsg(role: 'user' | 'assistant', content: string): ChatPanelMessage {
