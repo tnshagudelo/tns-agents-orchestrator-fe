@@ -187,10 +187,7 @@ export class ProposalsService extends BaseApiService {
       status: this._normalizeStatus(raw.status),
       currentIteration: raw.currentIteration
         ?? (raw.iterations?.length ? raw.iterations[raw.iterations.length - 1].version : 0),
-      iterations: (raw.iterations ?? []).map((i: any) => ({
-        ...i,
-        createdAt: new Date(i.createdAt),
-      })),
+      iterations: (raw.iterations ?? []).map((i: any) => this._normalizeIteration(i)),
       approvalFlow: (raw.approvalFlow ?? []).map((s: any) => ({
         ...s,
         role: s.role?.toLowerCase() as ProposalRole,
@@ -200,6 +197,23 @@ export class ProposalsService extends BaseApiService {
       comments: raw.comments ?? [],
       createdAt: new Date(raw.createdAt),
       updatedAt: new Date(raw.updatedAt),
+    };
+  }
+
+  private _normalizeIteration(i: any): ProposalIteration {
+    const riskMap: Record<string, ProposalIteration['riskLevel']> = {
+      '0': 'low', '1': 'medium', '2': 'high',
+      low: 'low', medium: 'medium', high: 'high',
+    };
+    return {
+      version:       i.version ?? 0,
+      content:       i.content ?? i.Content ?? '',
+      components:    i.components ?? i.Components ?? [],
+      teamSize:      i.teamSize ?? i.TeamSize ?? 0,
+      durationWeeks: i.durationWeeks ?? i.DurationWeeks ?? 0,
+      budgetUsd:     i.budgetUsd ?? i.BudgetUsd ?? 0,
+      riskLevel:     riskMap[(i.riskLevel ?? i.RiskLevel ?? 'medium').toString().toLowerCase()] ?? 'medium',
+      createdAt:     new Date(i.createdAt ?? i.CreatedAt),
     };
   }
 

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
-import { RagReference } from '../models/proposal.model';
+import { ProposalMetrics, RagReference } from '../models/proposal.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProposalChatService {
@@ -12,12 +12,21 @@ export class ProposalChatService {
   private readonly _streamingContent = signal('');
   private readonly _isStreaming = signal(false);
   private readonly _currentReferences = signal<RagReference[]>([]);
+  private readonly _currentMetrics = signal<ProposalMetrics | null>(null);
 
   readonly streamingContent = this._streamingContent.asReadonly();
   readonly isStreaming = this._isStreaming.asReadonly();
   readonly currentReferences = this._currentReferences.asReadonly();
+  readonly currentMetrics = this._currentMetrics.asReadonly();
+
+  private static readonly METRICS_BLOCK_RE = /```json:metrics\s*\n\s*\{[\s\S]*?\}\s*\n\s*```/g;
 
   constructor(private readonly auth: AuthService) {}
+
+  /** Elimina el bloque ```json:metrics {...}``` del markdown */
+  static stripMetricsBlock(content: string): string {
+    return content.replace(ProposalChatService.METRICS_BLOCK_RE, '').trimEnd();
+  }
 
   sendMessage(proposalId: string, projectName: string, message: string): Observable<string> {
     if (!this.sessions.has(proposalId)) {
@@ -29,6 +38,7 @@ export class ProposalChatService {
     this._streamingContent.set('');
     this._isStreaming.set(true);
     this._currentReferences.set([]);
+    this._currentMetrics.set(null);
     this.currentAbortController = new AbortController();
 
     return new Observable(observer => {
@@ -49,10 +59,12 @@ export class ProposalChatService {
         const decoder = new TextDecoder();
         let buffer = '';
         let nextLineIsReferences = false;
+        let nextLineIsMetrics = false;
 
         const read = () => {
           reader.read().then(({ done, value }) => {
             if (done) {
+              this._cleanupStreamContent();
               this._isStreaming.set(false);
               observer.complete();
               return;
@@ -75,6 +87,12 @@ export class ProposalChatService {
                 continue;
               }
 
+              // Marca que la siguiente línea data: contiene métricas extraídas
+              if (line.startsWith('event: metrics')) {
+                nextLineIsMetrics = true;
+                continue;
+              }
+
               // Parsear referencias RAG
               if (line.startsWith('data: ') && nextLineIsReferences) {
                 nextLineIsReferences = false;
@@ -87,13 +105,29 @@ export class ProposalChatService {
                 continue;
               }
 
-              // Resetear flag si la línea no es data:
+              // Parsear métricas extraídas por el LLM
+              if (line.startsWith('data: ') && nextLineIsMetrics) {
+                nextLineIsMetrics = false;
+                try {
+                  const metrics: ProposalMetrics = JSON.parse(line.slice(6));
+                  this._currentMetrics.set(metrics);
+                } catch (e) {
+                  console.warn('[ProposalChatService] Error parsing metrics', e);
+                }
+                continue;
+              }
+
+              // Resetear flags si la línea no es data:
               if (nextLineIsReferences) {
                 nextLineIsReferences = false;
+              }
+              if (nextLineIsMetrics) {
+                nextLineIsMetrics = false;
               }
 
               // Fin del stream
               if (line.includes('stream_complete')) {
+                this._cleanupStreamContent();
                 this._isStreaming.set(false);
                 observer.complete();
                 continue;
@@ -120,6 +154,25 @@ export class ProposalChatService {
         observer.error(err);
       });
     });
+  }
+
+  /** Al terminar el stream, extrae métricas del markdown (si no vinieron por evento SSE) y limpia el bloque */
+  private _cleanupStreamContent(): void {
+    const raw = this._streamingContent();
+    // Si no recibimos métricas por evento SSE, intentar extraerlas del markdown
+    if (!this._currentMetrics()) {
+      const match = raw.match(/```json:metrics\s*\n\s*(\{[\s\S]*?\})\s*\n\s*```/);
+      if (match) {
+        try {
+          this._currentMetrics.set(JSON.parse(match[1]));
+        } catch { /* ignore parse errors */ }
+      }
+    }
+    // Siempre limpiar el bloque del contenido visible
+    const cleaned = ProposalChatService.stripMetricsBlock(raw);
+    if (cleaned !== raw) {
+      this._streamingContent.set(cleaned);
+    }
   }
 
   stopStream(): void {

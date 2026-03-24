@@ -16,6 +16,7 @@ import { ProposalChatPanelComponent } from '../../components/proposal-chat-panel
 import { CommentThreadComponent } from '../../components/comment-thread/comment-thread.component';
 import { ApprovalFlowComponent } from '../../components/approval-flow/approval-flow.component';
 import { ProposalIteration } from '../../models/proposal.model';
+import { ProposalChatService } from '../../services/proposal-chat.service';
 import { CURRENT_USER } from '../../models/mock-users.const';
 import mermaid from 'mermaid';
 
@@ -374,6 +375,7 @@ export class ProposalWorkpadComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly proposalsService = inject(ProposalsService);
+  private readonly chatService = inject(ProposalChatService);
   private readonly notifications = inject(NotificationService);
 
   workpadMode = signal<'chat' | 'edit'>('chat');
@@ -469,15 +471,16 @@ export class ProposalWorkpadComponent implements OnInit {
   onSaveIteration(content: string): void {
     const p = this.proposal();
     if (!p) return;
+    const metrics = this.chatService.currentMetrics();
     const iter = this.currentIterationData();
     const riskLevelMap: Record<string, number> = { low: 0, medium: 1, high: 2 };
     const payload = {
       content,
-      components: iter?.components ?? [],
-      teamSize: iter?.teamSize ?? 0,
-      durationWeeks: iter?.durationWeeks ?? 0,
-      budgetUsd: iter?.budgetUsd ?? 0,
-      riskLevel: (riskLevelMap[iter?.riskLevel ?? 'medium'] ?? 1) as unknown as 'low' | 'medium' | 'high',
+      components: metrics?.components ?? iter?.components ?? [],
+      teamSize: metrics?.teamSize ?? iter?.teamSize ?? 0,
+      durationWeeks: metrics?.durationWeeks ?? iter?.durationWeeks ?? 0,
+      budgetUsd: metrics?.budgetUsd ?? iter?.budgetUsd ?? 0,
+      riskLevel: (riskLevelMap[(metrics?.riskLevel ?? iter?.riskLevel ?? 'medium')] ?? 1) as unknown as 'low' | 'medium' | 'high',
     };
     this.proposalsService.updateIteration(p.id, payload).subscribe({
       next: updated => {

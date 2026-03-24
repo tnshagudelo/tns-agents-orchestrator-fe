@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, inject, input, output, signal, ViewChild, ElementRef, AfterViewChecked, OnInit, effect } from '@angular/core';
 import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -294,9 +294,20 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     'Agrega módulo de reportes',
   ];
 
+  constructor() {
+    // Reaccionar al cambio de proposalId: resetear y cargar mensajes del nuevo id
+    effect(() => {
+      this.proposalId(); // track dependency
+      this.messages.set([]);
+      this.lastCompletedContent = '';
+      this.showSaveIteration.set(false);
+      this.inputText = '';
+      this.loadMessages();
+    });
+  }
+
   ngOnInit(): void {
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-    this.loadMessages();
   }
 
   // ── Persistencia por propuesta en sessionStorage ──────────────────────────
@@ -391,6 +402,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
       },
       complete: () => {
         agentMsg.content = this.stripInternalMarkers(agentMsg.content);
+        agentMsg.content = ProposalChatService.stripMetricsBlock(agentMsg.content);
         agentMsg.content = this.fixMermaidBlocks(agentMsg.content);
         agentMsg.isStreaming = false;
         agentMsg.references = this.chatService.currentReferences();
