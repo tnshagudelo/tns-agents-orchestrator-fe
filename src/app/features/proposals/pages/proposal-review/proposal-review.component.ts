@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +20,7 @@ import { ProposalDiffComponent } from '../../components/proposal-diff/proposal-d
 import { CommentThreadComponent } from '../../components/comment-thread/comment-thread.component';
 import { ProposalChatPanelComponent } from '../../components/proposal-chat-panel/proposal-chat-panel.component';
 import { ProposalApprovalStep, ProposalRole } from '../../models/proposal.model';
+import { MarkdownModule } from 'ngx-markdown';
 
 interface ChecklistItem {
   id: string;
@@ -35,6 +37,7 @@ interface ChecklistItem {
     MatTabsModule, MatTooltipModule, MatProgressBarModule, MatCheckboxModule,
     MatFormFieldModule, MatInputModule, MatDividerModule,
     ProposalDiffComponent, CommentThreadComponent, ProposalChatPanelComponent,
+    MarkdownModule,
   ],
   template: `
     <div class="review-layout">
@@ -82,19 +85,41 @@ interface ChecklistItem {
               }
             </div>
 
-            <!-- Diff -->
+            <!-- Proposal content / Diff toggle -->
             <mat-card class="diff-card">
               <mat-card-header>
-                <mat-card-title>
-                  Cambios en v{{ selectedIteration() }}
-                  @if (previousIteration()) {
-                    <span class="diff-subtitle">vs v{{ previousIteration()!.version }}</span>
-                  }
+                <mat-card-title class="diff-card-header">
+                  <div class="view-toggle">
+                    <button class="toggle-btn" [class.toggle-btn--active]="reviewViewMode() === 'proposal'"
+                      (click)="reviewViewMode.set('proposal')">
+                      <mat-icon>description</mat-icon> Propuesta
+                    </button>
+                    <button class="toggle-btn" [class.toggle-btn--active]="reviewViewMode() === 'changes'"
+                      (click)="reviewViewMode.set('changes')">
+                      <mat-icon>compare_arrows</mat-icon> Cambios
+                      @if (previousIteration()) {
+                        <span class="diff-subtitle">vs v{{ previousIteration()!.version }}</span>
+                      }
+                    </button>
+                  </div>
                 </mat-card-title>
               </mat-card-header>
               <mat-card-content>
                 @if (currentIterationData(); as cur) {
-                  <app-proposal-diff [current]="cur" [previous]="previousIteration()" />
+                  @if (reviewViewMode() === 'proposal') {
+                    <div class="proposal-content" #proposalContent>
+                      @if (cur.content) {
+                        <markdown [data]="cur.content" class="md-content"></markdown>
+                      } @else {
+                        <div class="no-content">
+                          <mat-icon>article</mat-icon>
+                          <span>Esta iteración aún no tiene contenido.</span>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <app-proposal-diff [current]="cur" [previous]="previousIteration()" />
+                  }
                 }
               </mat-card-content>
             </mat-card>
@@ -251,8 +276,8 @@ interface ChecklistItem {
       display: flex; align-items: center; gap: 4px; padding: 4px 12px;
       border-radius: 16px; font-size: 0.8rem; background: #f3f4f6; color: rgba(0,0,0,0.4);
       mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
-      &-done   { background: #dcfce7; color: #3B6D11; }
-      &-active { background: #2D1B6B; color: white; }
+      &.stage-done   { background: #dcfce7; color: #3B6D11; }
+      &.stage-active { background: #2D1B6B; color: white; }
     }
     .stage-arrow mat-icon { font-size: 1rem; width: 1rem; height: 1rem; color: rgba(0,0,0,0.3); }
 
@@ -269,7 +294,50 @@ interface ChecklistItem {
       &:hover { border-color: #2D1B6B; }
       &--active { background: #2D1B6B; color: white; border-color: #2D1B6B; }
     }
-    .diff-subtitle { font-size: 0.78rem; color: rgba(0,0,0,0.4); margin-left: 8px; font-weight: 400; }
+    .diff-subtitle { font-size: 0.72rem; color: rgba(0,0,0,0.4); margin-left: 4px; font-weight: 400; }
+
+    .diff-card-header { width: 100%; }
+    .view-toggle {
+      display: flex; gap: 4px; background: #f3f4f6; border-radius: 8px; padding: 3px;
+    }
+    .toggle-btn {
+      display: flex; align-items: center; gap: 4px; padding: 5px 14px;
+      border-radius: 6px; border: none; background: transparent;
+      font-size: 0.8rem; cursor: pointer; color: rgba(0,0,0,0.5); transition: all 0.2s;
+      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+      &:hover { color: rgba(0,0,0,0.7); }
+      &--active { background: white; color: #2D1B6B; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    }
+
+    .proposal-content {
+      padding: 8px 0;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .proposal-content ::ng-deep {
+      h1, h2, h3, h4 { margin-top: 16px; margin-bottom: 8px; color: #1a1a2e; }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.15rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+      h3 { font-size: 1rem; }
+      p { font-size: 0.88rem; line-height: 1.6; color: rgba(0,0,0,0.75); }
+      ul, ol { padding-left: 20px; font-size: 0.88rem; }
+      li { margin-bottom: 4px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 12px 0; }
+      th { background: #f3f4f6; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #e5e7eb; }
+      td { padding: 8px 10px; border: 1px solid #e5e7eb; }
+      tr:nth-child(even) td { background: #fafafa; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; }
+      pre { background: #1e1e2e; color: #cdd6f4; padding: 14px; border-radius: 8px; overflow-x: auto;
+        code { background: none; padding: 0; color: inherit; }
+      }
+      blockquote { border-left: 3px solid #2D1B6B; margin: 12px 0; padding: 8px 16px; background: #f8f7ff; color: rgba(0,0,0,0.7); }
+    }
+
+    .no-content {
+      display: flex; align-items: center; gap: 8px; padding: 24px;
+      color: rgba(0,0,0,0.4); font-size: 0.85rem;
+      mat-icon { font-size: 1.2rem; width: 1.2rem; height: 1.2rem; }
+    }
 
     /* Right panel */
     .panel-right { width: 300px; flex-shrink: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; border-left: 1px solid #e5e7eb; background: #fafafa; }
@@ -317,12 +385,14 @@ interface ChecklistItem {
 })
 export class ProposalReviewComponent implements OnInit {
   @ViewChild('agentPanel') agentPanel?: ProposalChatPanelComponent;
+  @ViewChild('proposalContent') proposalContentRef?: ElementRef<HTMLElement>;
 
   private readonly route = inject(ActivatedRoute);
   protected readonly proposalsService = inject(ProposalsService);
   private readonly notifications = inject(NotificationService);
 
   selectedIteration = signal(1);
+  reviewViewMode = signal<'proposal' | 'changes'>('proposal');
   agentPanelOpen = signal(false);
   showNote = signal(false);
   pendingDecision = signal<'changes_requested' | 'rejected' | null>(null);
@@ -354,12 +424,41 @@ export class ProposalReviewComponent implements OnInit {
   readonly checkedCount = computed(() => this.checklist().filter(c => c.checked).length);
   readonly checklistProgress = computed(() => (this.checkedCount() / this.checklist().length) * 100);
 
+  constructor() {
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+    effect(() => {
+      // Track dependencies to re-run on changes
+      this.currentIterationData();
+      this.reviewViewMode();
+
+      // Defer to next tick so the DOM is updated
+      setTimeout(() => this.renderMermaidDivs(), 100);
+    });
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.proposalsService.getById(id).subscribe({
       next: p => this.selectedIteration.set(p.currentIteration),
       error: () => this.notifications.error('Error al cargar la propuesta'),
     });
+  }
+
+  private renderMermaidDivs(): void {
+    const container = this.proposalContentRef?.nativeElement;
+    if (!container) return;
+    const divs = Array.from(
+      container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
+    );
+    if (divs.length === 0) return;
+    divs.forEach(el => {
+      const decoded = el.textContent ?? '';
+      el.textContent = decoded;
+      el.removeAttribute('data-processed');
+      el.setAttribute('data-mermaid-processed', 'true');
+    });
+    mermaid.run({ nodes: divs }).catch(() => {/* suppress parse errors */});
   }
 
   updateChecklist(): void {
