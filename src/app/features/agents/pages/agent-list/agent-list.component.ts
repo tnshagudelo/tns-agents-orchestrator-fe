@@ -26,36 +26,36 @@ import { Agent, AgentStatus } from '../../../../shared/models';
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h1>Agents</h1>
+        <h1>Agentes</h1>
         <button mat-raised-button color="primary" (click)="createAgent()">
-          <mat-icon>add</mat-icon> New Agent
+          <mat-icon>add</mat-icon> Nuevo Agente
         </button>
       </div>
 
       <div class="filters">
         <mat-form-field appearance="outline">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="searchTerm" placeholder="Search agents..." />
+          <mat-label>Buscar</mat-label>
+          <input matInput [(ngModel)]="searchTerm" placeholder="Buscar agentes..." />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
+          <mat-label>Estado</mat-label>
           <mat-select [(ngModel)]="statusFilter">
-            <mat-option value="">All</mat-option>
-            <mat-option value="idle">Idle</mat-option>
-            <mat-option value="running">Running</mat-option>
-            <mat-option value="paused">Paused</mat-option>
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="idle">Inactivo</mat-option>
+            <mat-option value="running">En ejecución</mat-option>
+            <mat-option value="paused">Pausado</mat-option>
             <mat-option value="error">Error</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
 
       @if (agentService.isLoading()) {
-        <div class="loading-state">Loading agents...</div>
+        <div class="loading-state">Cargando agentes...</div>
       } @else if (filteredAgents.length === 0) {
         <div class="empty-state">
           <mat-icon>smart_toy</mat-icon>
-          <p>No agents found. Create your first agent!</p>
+          <p>No se encontraron agentes. ¡Crea el primero!</p>
         </div>
       } @else {
         <div class="agents-grid">

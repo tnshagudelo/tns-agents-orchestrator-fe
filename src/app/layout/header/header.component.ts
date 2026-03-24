@@ -29,7 +29,7 @@ import { NotificationService } from '../../core/services/notification.service';
 
       <mat-menu #notifMenu="matMenu">
         @if (notificationService.notifications().length === 0) {
-          <div class="empty-notifications">No new notifications</div>
+          <div class="empty-notifications">Sin notificaciones nuevas</div>
         } @else {
           @for (n of notificationService.notifications(); track n.id) {
             <button mat-menu-item (click)="notificationService.dismiss(n.id)">
@@ -51,10 +51,10 @@ import { NotificationService } from '../../core/services/notification.service';
           <div class="user-info">{{ user.username }}</div>
         }
         <button mat-menu-item routerLink="/settings">
-          <mat-icon>settings</mat-icon> Settings
+          <mat-icon>settings</mat-icon> Configuración
         </button>
         <button mat-menu-item (click)="authService.logout()">
-          <mat-icon>logout</mat-icon> Logout
+          <mat-icon>logout</mat-icon> Cerrar sesión
         </button>
       </mat-menu>
     </mat-toolbar>

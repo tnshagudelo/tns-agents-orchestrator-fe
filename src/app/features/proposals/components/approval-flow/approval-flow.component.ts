@@ -75,6 +75,6 @@ export class ApprovalFlowComponent {
   }
 
   roleLabel(role: string): string {
-    return { builder: 'Builder', reviewer: 'Reviewer', approver: 'Approver' }[role] ?? role;
+    return { builder: 'Autor', reviewer: 'Revisor', approver: 'Aprobador' }[role] ?? role;
   }
 }

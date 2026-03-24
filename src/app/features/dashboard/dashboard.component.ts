@@ -13,43 +13,43 @@ import { MonitoringService } from '../monitoring/services/monitoring.service';
   imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule],
   template: `
     <div class="page-container">
-      <h1>Dashboard</h1>
-      <p class="subtitle">Welcome to the Agents Orchestrator</p>
+      <h1>Panel</h1>
+      <p class="subtitle">Bienvenido al Orquestador de Agentes</p>
 
       <div class="kpi-grid">
         <mat-card class="kpi-card kpi-card--agents" routerLink="/agents">
           <mat-icon>smart_toy</mat-icon>
           <span class="kpi-value">{{ agentService.agents().length }}</span>
-          <span class="kpi-label">Total Agents</span>
-          <span class="kpi-sub">{{ agentService.activeAgents().length }} running</span>
+          <span class="kpi-label">Total de Agentes</span>
+          <span class="kpi-sub">{{ agentService.activeAgents().length }} en ejecución</span>
         </mat-card>
 
         <mat-card class="kpi-card kpi-card--pipelines" routerLink="/orchestration">
           <mat-icon>account_tree</mat-icon>
           <span class="kpi-value">{{ orchestrationService.pipelines().length }}</span>
           <span class="kpi-label">Pipelines</span>
-          <span class="kpi-sub">{{ orchestrationService.activeRuns().length }} active runs</span>
+          <span class="kpi-sub">{{ orchestrationService.activeRuns().length }} ejecuciones activas</span>
         </mat-card>
 
         <mat-card class="kpi-card kpi-card--logs" routerLink="/monitoring">
           <mat-icon>monitor_heart</mat-icon>
           <span class="kpi-value">{{ monitoringService.logs().length }}</span>
-          <span class="kpi-label">Log Entries</span>
-          <span class="kpi-sub">Last 24 hours</span>
+          <span class="kpi-label">Registros</span>
+          <span class="kpi-sub">Últimas 24 horas</span>
         </mat-card>
       </div>
 
       <div class="quick-actions">
-        <h2>Quick Actions</h2>
+        <h2>Acciones rápidas</h2>
         <div class="action-buttons">
           <button mat-raised-button color="primary" routerLink="/agents/create">
-            <mat-icon>add</mat-icon> New Agent
+            <mat-icon>add</mat-icon> Nuevo Agente
           </button>
           <button mat-stroked-button routerLink="/orchestration">
-            <mat-icon>account_tree</mat-icon> View Pipelines
+            <mat-icon>account_tree</mat-icon> Ver Pipelines
           </button>
           <button mat-stroked-button routerLink="/monitoring">
-            <mat-icon>monitor_heart</mat-icon> Open Monitoring
+            <mat-icon>monitor_heart</mat-icon> Abrir Monitoreo
           </button>
         </div>
       </div>

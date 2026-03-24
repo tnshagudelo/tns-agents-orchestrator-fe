@@ -53,15 +53,15 @@ interface ChecklistItem {
         </div>
         <div class="stage-pills">
           <div class="stage-pill stage-done">
-            <mat-icon>check_circle</mat-icon> Build
+            <mat-icon>check_circle</mat-icon> Construcción
           </div>
           <div class="stage-arrow"><mat-icon>arrow_forward</mat-icon></div>
           <div class="stage-pill" [class.stage-active]="proposal()?.status === 'in_review'">
-            <mat-icon>rate_review</mat-icon> Review
+            <mat-icon>rate_review</mat-icon> Revisión
           </div>
           <div class="stage-arrow"><mat-icon>arrow_forward</mat-icon></div>
           <div class="stage-pill" [class.stage-active]="proposal()?.status === 'pending_approval'">
-            <mat-icon>verified</mat-icon> Approve
+            <mat-icon>verified</mat-icon> Aprobación
           </div>
         </div>
       </div>

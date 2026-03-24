@@ -49,7 +49,7 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Reviewer *</mat-label>
+          <mat-label>Revisor *</mat-label>
           <mat-select formControlName="reviewerId">
             @for (u of reviewerOptions; track u.id) {
               <mat-option [value]="u.id">{{ u.name }}</mat-option>
@@ -59,7 +59,7 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Approver *</mat-label>
+          <mat-label>Aprobador *</mat-label>
           <mat-select formControlName="approverId">
             @for (u of approverOptions; track u.id) {
               <mat-option [value]="u.id">{{ u.name }}</mat-option>
@@ -69,7 +69,7 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Tags</mat-label>
+          <mat-label>Etiquetas</mat-label>
           <mat-chip-grid #chipGrid>
             @for (tag of tags; track tag) {
               <mat-chip (removed)="removeTag(tag)">
@@ -84,7 +84,7 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
             (matChipInputTokenEnd)="addTag($event)" />
         </mat-form-field>
 
-        <p class="creator-info">Creando como: {{ currentUser.name }} (builder)</p>
+        <p class="creator-info">Creando como: {{ currentUser.name }} (autor)</p>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">

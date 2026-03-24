@@ -19,7 +19,7 @@ interface NavItem {
     <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
       <div class="sidebar-logo">
         @if (!collapsed()) {
-          <span class="logo-text">Agents Orchestrator</span>
+          <span class="logo-text">Orquestador de Agentes</span>
         } @else {
           <mat-icon>hub</mat-icon>
         }
@@ -46,7 +46,7 @@ interface NavItem {
         <a mat-list-item routerLink="/settings" routerLinkActive="active-link">
           <mat-icon matListItemIcon>settings</mat-icon>
           @if (!collapsed()) {
-            <span matListItemTitle>Settings</span>
+            <span matListItemTitle>Configuración</span>
           }
         </a>
       </mat-nav-list>
@@ -98,13 +98,13 @@ export class SidebarComponent {
   collapsed = input(false);
 
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Agents', icon: 'smart_toy', route: '/agents' },
-    { label: 'Orchestration', icon: 'account_tree', route: '/orchestration' },
-    { label: 'Monitoring', icon: 'monitor_heart', route: '/monitoring' },
-    { label: 'PM Agent', icon: 'hub', route: '/projectmanageragent' },
-    { label: 'Proposals', icon: 'description', route: '/proposals' },
-    { label: 'Sessions', icon: 'history', route: '/sessions' },
-    { label: 'Knowledge', icon: 'psychology', route: '/knowledge' },
+    { label: 'Panel', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Agentes', icon: 'smart_toy', route: '/agents' },
+    { label: 'Orquestación', icon: 'account_tree', route: '/orchestration' },
+    { label: 'Monitoreo', icon: 'monitor_heart', route: '/monitoring' },
+    { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
+    { label: 'Propuestas', icon: 'description', route: '/proposals' },
+    { label: 'Sesiones', icon: 'history', route: '/sessions' },
+    { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
   ];
 }

@@ -24,25 +24,25 @@ import { AuthService } from '../../../../core/auth/auth.service';
       <mat-card class="login-card">
         <mat-card-header>
           <mat-icon class="login-icon">hub</mat-icon>
-          <mat-card-title>Agents Orchestrator</mat-card-title>
-          <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
+          <mat-card-title>Orquestador de Agentes</mat-card-title>
+          <mat-card-subtitle>Inicia sesión para continuar</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="form" (ngSubmit)="submit()">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Username</mat-label>
+              <mat-label>Usuario</mat-label>
               <input matInput formControlName="username" autocomplete="username" />
               <mat-icon matSuffix>person</mat-icon>
             </mat-form-field>
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Password</mat-label>
+              <mat-label>Contraseña</mat-label>
               <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" />
               <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
                 <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
             </mat-form-field>
             <button mat-raised-button color="primary" type="submit" class="full-width login-btn" [disabled]="form.invalid">
-              Sign In
+              Ingresar
             </button>
           </form>
         </mat-card-content>

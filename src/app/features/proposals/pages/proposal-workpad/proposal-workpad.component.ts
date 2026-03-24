@@ -16,6 +16,7 @@ import { ProposalChatPanelComponent } from '../../components/proposal-chat-panel
 import { CommentThreadComponent } from '../../components/comment-thread/comment-thread.component';
 import { ApprovalFlowComponent } from '../../components/approval-flow/approval-flow.component';
 import { ProposalIteration } from '../../models/proposal.model';
+import { CURRENT_USER } from '../../models/mock-users.const';
 import mermaid from 'mermaid';
 
 @Component({
@@ -59,7 +60,7 @@ import mermaid from 'mermaid';
           <div class="iteration-tracker">
             @for (iter of p.iterations; track iter.version) {
               <button class="iter-btn" [class.iter-btn--active]="selectedIteration() === iter.version"
-                (click)="selectedIteration.set(iter.version)">
+                (click)="selectIteration(iter.version)">
                 v{{ iter.version }}
               </button>
             }
@@ -98,6 +99,22 @@ import mermaid from 'mermaid';
             <button mat-raised-button color="primary" class="submit-btn" (click)="submitForReview()">
               <mat-icon>send</mat-icon> Enviar a revisión
             </button>
+
+            <div class="delete-zone">
+              @if (!confirmingDelete()) {
+                <button class="delete-btn" (click)="confirmingDelete.set(true)">
+                  <mat-icon>delete_outline</mat-icon> Eliminar borrador
+                </button>
+              } @else {
+                <div class="delete-confirm">
+                  <span class="delete-confirm-text">¿Eliminar permanentemente?</span>
+                  <div class="delete-confirm-actions">
+                    <button class="delete-confirm-yes" (click)="deleteProposal()">Sí, eliminar</button>
+                    <button class="delete-confirm-no" (click)="confirmingDelete.set(false)">Cancelar</button>
+                  </div>
+                </div>
+              }
+            </div>
           }
         } @else {
           <div class="loading-left">
@@ -262,6 +279,32 @@ import mermaid from 'mermaid';
 
     .submit-btn { width: 100%; }
 
+    .delete-zone { margin-top: 4px; }
+    .delete-btn {
+      width: 100%; background: none; border: 1px dashed #e5a5a5;
+      border-radius: 6px; padding: 7px 12px; cursor: pointer;
+      color: #A32D2D; font-size: 0.8rem; display: flex; align-items: center;
+      justify-content: center; gap: 6px; transition: background 0.15s, border-color 0.15s;
+      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+      &:hover { background: #fff0f0; border-color: #A32D2D; }
+    }
+    .delete-confirm {
+      background: #fff0f0; border: 1px solid #fca5a5; border-radius: 6px;
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .delete-confirm-text { font-size: 0.8rem; font-weight: 600; color: #A32D2D; }
+    .delete-confirm-actions { display: flex; gap: 6px; }
+    .delete-confirm-yes {
+      flex: 1; background: #A32D2D; color: white; border: none; border-radius: 5px;
+      padding: 5px 0; font-size: 0.78rem; cursor: pointer; font-weight: 600;
+      &:hover { background: #8b2020; }
+    }
+    .delete-confirm-no {
+      flex: 1; background: white; color: #6b7280; border: 1px solid #d1d5db;
+      border-radius: 5px; padding: 5px 0; font-size: 0.78rem; cursor: pointer;
+      &:hover { background: #f9fafb; }
+    }
+
     .loading-left { display: flex; justify-content: center; padding: 32px; }
     .spin { animation: spin 1.5s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -338,6 +381,7 @@ export class ProposalWorkpadComponent implements OnInit {
   rightCollapsed = signal(false);
   editingProject = signal(false);
   editingProposal = signal(false);
+  confirmingDelete = signal(false);
   editProjectName = '';
   editProposalName = '';
   editContentStr = '';
@@ -363,6 +407,12 @@ export class ProposalWorkpadComponent implements OnInit {
       },
       error: () => this.notifications.error('Error al cargar la propuesta'),
     });
+  }
+
+  selectIteration(version: number): void {
+    this.selectedIteration.set(version);
+    const iter = this.proposal()?.iterations.find(i => i.version === version);
+    if (iter) this.editContentStr = iter.content;
   }
 
   toggleMode(): void {
@@ -392,6 +442,21 @@ export class ProposalWorkpadComponent implements OnInit {
     this.editingProposal.set(false);
   }
 
+  deleteProposal(): void {
+    const id = this.proposal()?.id;
+    if (!id) return;
+    this.proposalsService.deleteProposal(id).subscribe({
+      next: () => {
+        this.notifications.success('Propuesta eliminada');
+        this.router.navigate(['/proposals']);
+      },
+      error: () => {
+        this.confirmingDelete.set(false);
+        this.notifications.error('Error al eliminar la propuesta');
+      },
+    });
+  }
+
   submitForReview(): void {
     const id = this.proposal()?.id;
     if (!id) return;
@@ -417,6 +482,7 @@ export class ProposalWorkpadComponent implements OnInit {
     this.proposalsService.updateIteration(p.id, payload).subscribe({
       next: updated => {
         this.selectedIteration.set(updated.currentIteration);
+        this.editContentStr = content;
         this.notifications.success('Iteración guardada');
       },
       error: () => this.notifications.error('Error al guardar iteración'),
@@ -431,8 +497,8 @@ export class ProposalWorkpadComponent implements OnInit {
     const p = this.proposal();
     if (!p) return;
     this.proposalsService.addComment(p.id, {
-      authorId: '1',
-      authorName: 'Me',
+      authorId: CURRENT_USER.id,
+      authorName: CURRENT_USER.name,
       authorRole: 'builder',
       body,
       iterationVersion: this.selectedIteration(),

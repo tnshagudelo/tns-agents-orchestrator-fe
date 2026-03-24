@@ -54,9 +54,33 @@ export class ProposalsService extends BaseApiService {
   }
 
   updateIteration(id: string, iteration: Omit<ProposalIteration, 'version' | 'createdAt'>): Observable<Proposal> {
+    // Optimistic: agrega la nueva iteración localmente de inmediato
+    const snapshot = this._selectedProposal();
+    if (snapshot?.id === id) {
+      const newVersion = (snapshot.iterations[snapshot.iterations.length - 1]?.version ?? 0) + 1;
+      const optimisticIteration: ProposalIteration = {
+        ...iteration,
+        riskLevel: iteration.riskLevel,
+        version: newVersion,
+        createdAt: new Date(),
+      };
+      this._syncLocal({
+        ...snapshot,
+        iterations: [...snapshot.iterations, optimisticIteration],
+        currentIteration: newVersion,
+        updatedAt: new Date(),
+      });
+    }
+
     return this.post<any>(`/proposals/${id}/iterations`, iteration).pipe(
-      map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+      map(raw => raw?.id && raw?.iterations ? this._normalize(raw) : ({
+        ...(this._selectedProposal()!),
+      })),
+      tap(p => this._syncLocal(p)),
+      catchError(err => {
+        if (snapshot) this._syncLocal(snapshot);
+        return throwError(() => err);
+      })
     );
   }
 
@@ -95,7 +119,13 @@ export class ProposalsService extends BaseApiService {
     );
   }
 
-  addComment(id: string, comment: Omit<ProposalComment, 'id' | 'createdAt'>): Observable<Proposal> {
+  deleteProposal(id: string): Observable<void> {
+    return this.delete<void>(`/proposals/${id}`).pipe(
+      tap(() => this._proposals.update(list => list.filter(p => p.id !== id)))
+    );
+  }
+
+  addComment(id: string, comment: Omit<ProposalComment, 'id' | 'createdAt'>): Observable<void> {
     const roleIntMap: Record<ProposalRole, number> = { builder: 0, reviewer: 1, approver: 2 };
     const payload = {
       authorId: comment.authorId,
@@ -104,9 +134,31 @@ export class ProposalsService extends BaseApiService {
       body: comment.body,
       iterationVersion: comment.iterationVersion,
     };
+
+    // Optimistic: agrega el comentario localmente de inmediato
+    const optimistic: ProposalComment = {
+      ...comment,
+      id: `tmp-${crypto.randomUUID()}`,
+      createdAt: new Date(),
+    };
+    const snapshot = this._selectedProposal();
+    if (snapshot?.id === id) {
+      this._syncLocal({ ...snapshot, comments: [...snapshot.comments, optimistic] });
+    }
+
     return this.post<any>(`/proposals/${id}/comments`, payload).pipe(
-      map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+      tap(raw => {
+        // Si el backend retorna la propuesta completa, sincronizamos; si no, dejamos el optimistic
+        if (raw?.id && raw?.iterations) {
+          this._syncLocal(this._normalize(raw));
+        }
+      }),
+      map(() => undefined),
+      catchError(err => {
+        // Revertir optimistic si falla
+        if (snapshot) this._syncLocal(snapshot);
+        return throwError(() => err);
+      })
     );
   }
 
