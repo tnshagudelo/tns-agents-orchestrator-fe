@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { BaseApiService } from '../../../core/services/base-api.service';
 import { CreateProposalRequest, Proposal, ProposalApprovalStep, ProposalComment, ProposalIteration, ProposalRole, ProposalStatus } from '../models/proposal.model';
 import { CURRENT_USER } from '../models/mock-users.const';
@@ -67,10 +67,31 @@ export class ProposalsService extends BaseApiService {
     );
   }
 
+  private static readonly _statusIntMap: Record<ProposalStatus, number> = {
+    draft:            0,
+    in_review:        1,
+    pending_approval: 2,
+    approved:         3,
+    rejected:         4,
+  };
+
   updateStatus(id: string, status: ProposalStatus): Observable<Proposal> {
-    return this.patch<any>(`/proposals/${id}`, { status }).pipe(
+    // Optimistic: apply new status to local signal immediately
+    const previous = this._proposals().find(p => p.id === id) ?? null;
+    if (previous) {
+      this._syncLocal({ ...previous, status });
+    }
+
+    return this.patch<any>(`/proposals/${id}`, { status: ProposalsService._statusIntMap[status] }).pipe(
       map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+      tap(p => this._syncLocal(p)),
+      catchError(err => {
+        // Revert optimistic update on failure
+        if (previous) {
+          this._syncLocal(previous);
+        }
+        return throwError(() => err);
+      })
     );
   }
 

@@ -16,7 +16,7 @@ import { CreateProposalRequest } from '../../models/proposal.model';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
-import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDrag, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ProposalsService } from '../../services/proposals.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Proposal, ProposalStatus } from '../../models/proposal.model';
@@ -197,35 +197,47 @@ interface KanbanColumn {
         </div>
       </div>
 
-      <!-- Status filter chips -->
+      <!-- Status filter pills -->
       <div class="status-filters">
-        <mat-chip-set>
-          <mat-chip (click)="toggleStatus(null)" [class.chip-active]="!activeStatus()">Todas</mat-chip>
-          @for (s of allStatuses; track s.value) {
-            <mat-chip (click)="toggleStatus(s.value)" [class.chip-active]="activeStatus() === s.value" [class]="'chip-' + s.value">
-              {{ s.label }}
-            </mat-chip>
-          }
-        </mat-chip-set>
+        <button class="filter-pill" [class.active]="!activeStatus()" (click)="toggleStatus(null)">
+          Todas
+        </button>
+        @for (s of allStatuses; track s.value) {
+          <button class="filter-pill pill-{{ s.value }}"
+            [class.active]="activeStatus() === s.value"
+            (click)="toggleStatus(s.value)">
+            <span class="pill-dot"></span>
+            {{ s.label }}
+          </button>
+        }
       </div>
 
       <!-- Kanban view -->
       @if (viewMode() === 'kanban') {
         <div class="kanban-board">
           @for (col of kanbanColumns; track col.id) {
-            <div class="kanban-column">
+            <div class="kanban-column"
+              [class.col-drop-valid]="draggingProposal() && isValidTarget(col.status)"
+              [class.col-drop-blocked]="draggingProposal() && !isValidTarget(col.status)">
               <div class="col-header" [style.border-top-color]="col.color">
                 <span>{{ col.label }}</span>
                 <span class="col-count">{{ kanbanCounts()[col.status] }}</span>
+                @if (draggingProposal() && !isValidTarget(col.status)) {
+                  <mat-icon class="col-blocked-icon" matTooltip="Transición no permitida">block</mat-icon>
+                }
               </div>
               <div class="col-body"
                 cdkDropList
                 [id]="col.id"
                 [cdkDropListData]="col.cards"
                 [cdkDropListConnectedTo]="dropListIds"
+                [cdkDropListEnterPredicate]="dropPredicates[col.status]"
                 (cdkDropListDropped)="onDrop($event, col.status)">
                 @for (p of col.cards; track p.id) {
-                  <div cdkDrag class="drag-item">
+                  <div cdkDrag class="drag-item"
+                    [cdkDragData]="p"
+                    (cdkDragStarted)="draggingProposal.set(p)"
+                    (cdkDragEnded)="draggingProposal.set(null)">
                     <app-proposal-card [proposal]="p" (action)="onCardAction($event)" />
                     <div *cdkDragPlaceholder class="drag-placeholder"></div>
                   </div>
@@ -306,34 +318,112 @@ interface KanbanColumn {
     .page-container { padding: 24px; display: flex; flex-direction: column; gap: 16px; height: calc(100vh - 64px); box-sizing: border-box; }
 
     .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; flex-shrink: 0;
-      h1 { margin: 0; font-size: 1.75rem; font-weight: 600; }
+      h1 { margin: 0; font-size: 1.6rem; font-weight: 700; color: #1a1a2e; letter-spacing: -0.3px; }
     }
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .search-field { width: 220px; }
-    .view-toggle { display: flex; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;
-      button { border-radius: 0; &.active { background: #2D1B6B; color: white; }
+    .view-toggle {
+      display: flex;
+      border: 1.5px solid #e2d9f3;
+      border-radius: 8px;
+      overflow: hidden;
+      button {
+        border-radius: 0;
+        color: #4a3b7c;
+        &.active { background: #2D1B6B; color: white; }
+        &:hover:not(.active) { background: #f0edf7; }
       }
     }
 
-    .status-filters { flex-shrink: 0;
-      mat-chip { cursor: pointer; }
-      .chip-active { background: #2D1B6B !important; --mdc-chip-label-text-color: white; }
-      .chip-draft            { --mdc-chip-label-text-color: #888780; }
-      .chip-in_review        { --mdc-chip-label-text-color: #BA7517; }
-      .chip-pending_approval { --mdc-chip-label-text-color: #185FA5; }
-      .chip-approved         { --mdc-chip-label-text-color: #3B6D11; }
-      .chip-rejected         { --mdc-chip-label-text-color: #A32D2D; }
+    /* ── Filter pills ──────────────────────────────────────────────────────── */
+    .status-filters {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
     }
 
-    /* Kanban */
-    .kanban-board { display: flex; gap: 16px; flex: 1; overflow-x: auto; min-height: 0; }
-    .kanban-column { display: flex; flex-direction: column; min-width: 260px; flex: 1; background: #f8f9fa; border-radius: 8px; overflow: hidden; }
-    .col-header {
-      padding: 12px 16px; font-weight: 600; font-size: 0.85rem; background: white;
-      border-top: 3px solid; display: flex; justify-content: space-between; align-items: center;
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1.5px solid #e2d9f3;
+      background: white;
+      color: #4a3b7c;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+      line-height: 1.4;
+
+      &:hover { background: #f0edf7; border-color: #c4b5e8; }
+
+      &.active {
+        background: #2D1B6B;
+        color: white;
+        border-color: #2D1B6B;
+        box-shadow: 0 2px 6px rgba(45, 27, 107, 0.35);
+        .pill-dot { background: rgba(255,255,255,0.7); }
+      }
     }
-    .col-count { background: #e5e7eb; border-radius: 12px; padding: 2px 8px; font-size: 0.75rem; }
+
+    .pill-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* Status-specific dot + border tint when NOT active */
+    .pill-draft            { .pill-dot { background: #888780; opacity: 1; } }
+    .pill-in_review        { border-color: #f6d28d; .pill-dot { background: #BA7517; opacity: 1; } }
+    .pill-pending_approval { border-color: #bfdbfe; .pill-dot { background: #185FA5; opacity: 1; } }
+    .pill-approved         { border-color: #bbf7d0; .pill-dot { background: #3B6D11; opacity: 1; } }
+    .pill-rejected         { border-color: #fecaca; .pill-dot { background: #A32D2D; opacity: 1; } }
+
+    /* Status-specific active backgrounds */
+    .pill-draft.active            { background: #525150; border-color: #525150; }
+    .pill-in_review.active        { background: #BA7517; border-color: #BA7517; }
+    .pill-pending_approval.active { background: #185FA5; border-color: #185FA5; }
+    .pill-approved.active         { background: #3B6D11; border-color: #3B6D11; }
+    .pill-rejected.active         { background: #A32D2D; border-color: #A32D2D; }
+
+    /* Kanban */
+    .kanban-board { display: flex; gap: 12px; flex: 1; overflow-x: auto; min-height: 0; }
+    .kanban-column { display: flex; flex-direction: column; min-width: 260px; flex: 1; background: #f4f2fb; border-radius: 10px; overflow: hidden; }
+    .col-header {
+      padding: 11px 16px; font-weight: 600; font-size: 0.82rem; text-transform: uppercase;
+      letter-spacing: 0.4px; background: white; color: #1a1a2e;
+      border-top: 3px solid; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 1px 0 #e8e4f3;
+    }
+    .col-count {
+      background: #ede9f8; color: #4a3b7c; border-radius: 12px;
+      padding: 2px 9px; font-size: 0.75rem; font-weight: 700;
+    }
     .col-body { flex: 1; padding: 8px; overflow-y: auto; min-height: 80px; }
+
+    /* Drag & drop: feedback de transición válida / bloqueada */
+    .col-drop-valid {
+      .col-header { border-top-width: 4px; }
+      outline: 2px solid #6d4fcf;
+      outline-offset: -2px;
+      transition: outline 0.15s;
+    }
+    .col-drop-blocked {
+      opacity: 0.42;
+      filter: grayscale(0.35);
+      transition: opacity 0.15s, filter 0.15s;
+      pointer-events: none;
+    }
+    .col-blocked-icon {
+      font-size: 1rem; width: 1rem; height: 1rem;
+      color: #A32D2D; opacity: 0.7;
+    }
 
     .drag-item { margin-bottom: 4px; }
     .drag-placeholder { min-height: 80px; background: #e8eaf6; border: 2px dashed #9fa8da; border-radius: 8px; margin-bottom: 4px; }
@@ -374,9 +464,34 @@ export class ProposalsDashboardComponent implements OnInit {
   viewMode = signal<'kanban' | 'list'>('kanban');
   filterText = signal('');
   activeStatus = signal<ProposalStatus | null>(null);
+  draggingProposal = signal<Proposal | null>(null);
 
   readonly tableColumns = ['name', 'status', 'version', 'approvalFlow', 'updatedAt', 'actions'];
   readonly dropListIds = ['col-draft', 'col-in_review', 'col-pending_approval', 'col-final'];
+
+  // ── Workflow: transiciones permitidas en el kanban ────────────────────────
+  readonly allowedTransitions: Record<ProposalStatus, ProposalStatus[]> = {
+    draft:            ['in_review'],
+    in_review:        ['draft', 'pending_approval'],
+    pending_approval: ['in_review', 'approved'],
+    approved:         [],   // terminal
+    rejected:         [],   // terminal
+  };
+
+  // Predicados precomputados por columna para cdkDropListEnterPredicate
+  readonly dropPredicates: Record<ProposalStatus, (drag: CdkDrag<Proposal>) => boolean> =
+    (['draft', 'in_review', 'pending_approval', 'approved', 'rejected'] as ProposalStatus[])
+      .reduce((acc, status) => {
+        acc[status] = (drag: CdkDrag<Proposal>) =>
+          this.allowedTransitions[drag.data?.status]?.includes(status) ?? false;
+        return acc;
+      }, {} as Record<ProposalStatus, (drag: CdkDrag<Proposal>) => boolean>);
+
+  isValidTarget(targetStatus: ProposalStatus): boolean {
+    const d = this.draggingProposal();
+    if (!d || d.status === targetStatus) return false;
+    return this.allowedTransitions[d.status].includes(targetStatus);
+  }
 
   readonly allStatuses = [
     { value: 'draft' as ProposalStatus, label: 'Borrador' },
@@ -450,6 +565,13 @@ export class ProposalsDashboardComponent implements OnInit {
     if (event.previousContainer === event.container) return;
 
     const proposal = event.previousContainer.data[event.previousIndex];
+
+    // Defensa: rechazar si la transición no está permitida (no debería llegar aquí gracias al predicate)
+    if (!this.allowedTransitions[proposal.status].includes(targetStatus)) {
+      this.notifications.error(`No se puede mover de "${this.statusLabel(proposal.status)}" a "${this.statusLabel(targetStatus)}"`);
+      return;
+    }
+
     transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
 
     this.proposalsService.updateStatus(proposal.id, targetStatus).subscribe({
