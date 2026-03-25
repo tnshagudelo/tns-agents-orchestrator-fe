@@ -117,7 +117,6 @@ export class ProposalDiffComponent {
     return [
       { label: 'Equipo', oldFormatted: `${prev.teamSize} personas`, newFormatted: `${cur.teamSize} personas`, changed: prev.teamSize !== cur.teamSize },
       { label: 'Duración', oldFormatted: `${prev.durationWeeks} sem`, newFormatted: `${cur.durationWeeks} sem`, changed: prev.durationWeeks !== cur.durationWeeks },
-      { label: 'Presupuesto', oldFormatted: `$${prev.budgetUsd.toLocaleString()}`, newFormatted: `$${cur.budgetUsd.toLocaleString()}`, changed: prev.budgetUsd !== cur.budgetUsd },
       { label: 'Riesgo', oldFormatted: prev.riskLevel, newFormatted: cur.riskLevel, changed: prev.riskLevel !== cur.riskLevel },
     ];
   });

@@ -92,10 +92,6 @@ import mermaid from 'mermaid';
                 <span>{{ iter.durationWeeks }} semanas</span>
               </div>
               <div class="metric-item">
-                <mat-icon>attach_money</mat-icon>
-                <span>{{ '$' + iter.budgetUsd.toLocaleString() }}</span>
-              </div>
-              <div class="metric-item">
                 <mat-icon [style.color]="riskColor(iter.riskLevel)">warning</mat-icon>
                 <mat-chip class="risk-chip risk-{{ iter.riskLevel }}" disableRipple>{{ iter.riskLevel }}</mat-chip>
               </div>
@@ -645,7 +641,6 @@ export class ProposalWorkpadComponent implements OnInit {
       components: metrics?.components ?? iter?.components ?? [],
       teamSize: metrics?.teamSize ?? iter?.teamSize ?? 0,
       durationWeeks: metrics?.durationWeeks ?? iter?.durationWeeks ?? 0,
-      budgetUsd: metrics?.budgetUsd ?? iter?.budgetUsd ?? 0,
       riskLevel: (riskLevelMap[(metrics?.riskLevel ?? iter?.riskLevel ?? 'medium')] ?? 1) as unknown as 'low' | 'medium' | 'high',
     };
     this.proposalsService.updateIteration(p.id, payload).subscribe({

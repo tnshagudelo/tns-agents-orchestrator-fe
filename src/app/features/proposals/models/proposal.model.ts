@@ -12,7 +12,6 @@ export interface ProposalMetrics {
   components: string[];
   teamSize: number;
   durationWeeks: number;
-  budgetUsd: number;
   riskLevel: 'low' | 'medium' | 'high';
 }
 
@@ -22,7 +21,6 @@ export interface ProposalIteration {
   components: string[];
   teamSize: number;
   durationWeeks: number;
-  budgetUsd: number;
   riskLevel: 'low' | 'medium' | 'high';
   createdAt: Date;
 }

@@ -218,7 +218,6 @@ export class ProposalsService extends BaseApiService {
       components:    i.components ?? i.Components ?? [],
       teamSize:      i.teamSize ?? i.TeamSize ?? 0,
       durationWeeks: i.durationWeeks ?? i.DurationWeeks ?? 0,
-      budgetUsd:     i.budgetUsd ?? i.BudgetUsd ?? 0,
       riskLevel:     riskMap[(i.riskLevel ?? i.RiskLevel ?? 'medium').toString().toLowerCase()] ?? 'medium',
       createdAt:     new Date(i.createdAt ?? i.CreatedAt),
     };

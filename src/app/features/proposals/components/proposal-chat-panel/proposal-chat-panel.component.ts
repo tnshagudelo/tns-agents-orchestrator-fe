@@ -290,7 +290,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
 
   readonly suggestions = [
     'Ajusta el equipo para un plazo más corto',
-    'Reduce el presupuesto un 20%',
+    'Evalúa el nivel de riesgo del proyecto',
     'Agrega módulo de reportes',
   ];
 
@@ -469,7 +469,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     keywords.forEach(kw => {
       result = result.replace(new RegExp(`(?<!\\n)(${kw})`, 'g'), '\n$1');
     });
-    result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
+    result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^\n]+)/g, '\n    $1');
     return result.split('\n').map((l: string) => l.trimEnd()).filter((l: string) => l.trim().length > 0).join('\n');
   }
 

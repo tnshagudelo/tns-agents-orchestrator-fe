@@ -5,7 +5,8 @@
       "Bash(node -e \"const src=require\\(''fs''\\).readFileSync\\(''./node_modules/ngx-markdown/fesm2022/ngx-markdown.mjs'',''utf8''\\); const idx=src.indexOf\\(''mermaid''\\); console.log\\(src.substring\\(idx-100, idx+300\\)\\);\")",
       "Bash(node -e \"const src=require\\(''fs''\\).readFileSync\\(''./node_modules/ngx-markdown/fesm2022/ngx-markdown.mjs'',''utf8''\\); const idx=src.indexOf\\(''mermaid.init''\\); console.log\\(src.substring\\(idx-50, idx+200\\)\\); const idx2=src.indexOf\\(''mermaid.run''\\); console.log\\(''---run---''\\); console.log\\(src.substring\\(idx2-50, idx2+200\\)\\);\")",
       "Bash(node -e \"const p=require\\(''./node_modules/marked/package.json''\\); console.log\\(''marked:'', p.version\\);\")",
-      "Bash(npx ng:*)"
+      "Bash(npx ng:*)",
+      "Bash(find /c/tns/ia/tns-agents-orchestrator-fe/src/app -type f -name *util* -o -name *helper* -o -name *calculator*)"
     ]
   }
 }

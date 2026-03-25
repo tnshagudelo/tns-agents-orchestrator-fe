@@ -570,7 +570,7 @@ export class ProposalReviewComponent implements OnInit {
     { id: '2', label: 'Equipo justificado para el alcance', checked: false },
     { id: '3', label: 'Riesgos documentados', checked: false },
     { id: '4', label: 'Consideraciones de seguridad incluidas', checked: false },
-    { id: '5', label: 'Presupuesto razonable y desglosado', checked: false },
+    { id: '5', label: 'Estimación de personas y semanas coherente', checked: false },
   ]);
 
   readonly checkedCount = computed(() => this.checklist().filter(c => c.checked).length);
@@ -696,7 +696,6 @@ export class ProposalReviewComponent implements OnInit {
       components: iter?.components ?? [],
       teamSize: iter?.teamSize ?? 0,
       durationWeeks: iter?.durationWeeks ?? 0,
-      budgetUsd: iter?.budgetUsd ?? 0,
       riskLevel: iter?.riskLevel ?? 'medium',
     }).subscribe({ error: () => this.notifications.error('Error al guardar iteración') });
   }
