@@ -1,9 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { BaseApiService } from '../../../core/services/base-api.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { CreateProposalRequest, Proposal, ProposalApprovalStep, ProposalComment, ProposalIteration, ProposalRole, ProposalStatus } from '../models/proposal.model';
-import { CURRENT_USER } from '../models/mock-users.const';
 
 @Injectable({ providedIn: 'root' })
 export class ProposalsService extends BaseApiService {
@@ -11,9 +11,16 @@ export class ProposalsService extends BaseApiService {
   private readonly _selectedProposal = signal<Proposal | null>(null);
   private readonly _isLoading = signal(false);
 
+  private readonly auth = inject(AuthService);
+
   readonly proposals = this._proposals.asReadonly();
   readonly selectedProposal = this._selectedProposal.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
+
+  private get _currentUser() {
+    const u = this.auth.currentUser();
+    return { id: u?.id ?? '', name: u?.username ?? '' };
+  }
 
   constructor(http: HttpClient) {
     super(http);
@@ -44,8 +51,8 @@ export class ProposalsService extends BaseApiService {
   create(data: Omit<CreateProposalRequest, 'createdByUserId' | 'createdByUserName'>): Observable<Proposal> {
     const payload: CreateProposalRequest = {
       ...data,
-      createdByUserId: CURRENT_USER.id,
-      createdByUserName: CURRENT_USER.name,
+      createdByUserId: this._currentUser.id,
+      createdByUserName: this._currentUser.name,
     };
     return this.post<any>('/proposals', payload).pipe(
       map(p => this._normalize(p)),
@@ -85,7 +92,7 @@ export class ProposalsService extends BaseApiService {
   }
 
   submitForReview(id: string): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/submit`, { userId: CURRENT_USER.id }).pipe(
+    return this.post<any>(`/proposals/${id}/submit`, { userId: this._currentUser.id }).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
@@ -169,7 +176,7 @@ export class ProposalsService extends BaseApiService {
       changes_requested:  'RequestChanges',
     };
     const payload = {
-      userId: CURRENT_USER.id,
+      userId: this._currentUser.id,
       decision: decisionMap[status] ?? 'Approve',
       note: note ?? null,
     };

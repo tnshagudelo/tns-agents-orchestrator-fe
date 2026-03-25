@@ -17,7 +17,7 @@ import { CommentThreadComponent } from '../../components/comment-thread/comment-
 import { ApprovalFlowComponent } from '../../components/approval-flow/approval-flow.component';
 import { ProposalIteration } from '../../models/proposal.model';
 import { ProposalChatService } from '../../services/proposal-chat.service';
-import { CURRENT_USER } from '../../models/mock-users.const';
+import { AuthService } from '../../../../core/auth/auth.service';
 import mermaid from 'mermaid';
 
 @Component({
@@ -376,6 +376,7 @@ export class ProposalWorkpadComponent implements OnInit {
   private readonly router = inject(Router);
   protected readonly proposalsService = inject(ProposalsService);
   private readonly chatService = inject(ProposalChatService);
+  private readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
 
   workpadMode = signal<'chat' | 'edit'>('chat');
@@ -500,9 +501,9 @@ export class ProposalWorkpadComponent implements OnInit {
     const p = this.proposal();
     if (!p) return;
     this.proposalsService.addComment(p.id, {
-      authorId: CURRENT_USER.id,
-      authorName: CURRENT_USER.name,
-      authorRole: 'builder',
+      authorId: this.auth.currentUser()?.id ?? '',
+      authorName: this.auth.currentUser()?.username ?? '',
+      authorRole: this.auth.currentUser()?.proposalRole ?? 'builder',
       body,
       iterationVersion: this.selectedIteration(),
     }).subscribe({

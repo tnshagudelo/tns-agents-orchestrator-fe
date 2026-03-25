@@ -20,6 +20,7 @@ import { ProposalDiffComponent } from '../../components/proposal-diff/proposal-d
 import { CommentThreadComponent } from '../../components/comment-thread/comment-thread.component';
 import { ProposalChatPanelComponent } from '../../components/proposal-chat-panel/proposal-chat-panel.component';
 import { ProposalApprovalStep, ProposalRole } from '../../models/proposal.model';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { MarkdownModule } from 'ngx-markdown';
 
 interface ChecklistItem {
@@ -389,6 +390,7 @@ export class ProposalReviewComponent implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
   protected readonly proposalsService = inject(ProposalsService);
+  private readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
 
   selectedIteration = signal(1);
@@ -468,7 +470,7 @@ export class ProposalReviewComponent implements OnInit {
   decide(status: ProposalApprovalStep['status']): void {
     const p = this.proposal();
     if (!p) return;
-    const role: ProposalRole = p.status === 'in_review' ? 'reviewer' : 'approver';
+    const role: ProposalRole = this.auth.currentUser()?.proposalRole as ProposalRole ?? 'reviewer';
     this.proposalsService.decide(p.id, role, status).subscribe({
       next: () => this.notifications.success(`Decisión registrada: ${status}`),
       error: () => this.notifications.error('Error al registrar decisión'),
@@ -495,7 +497,7 @@ export class ProposalReviewComponent implements OnInit {
     const p = this.proposal();
     const decision = this.pendingDecision();
     if (!p || !decision) return;
-    const role: ProposalRole = p.status === 'in_review' ? 'reviewer' : 'approver';
+    const role: ProposalRole = this.auth.currentUser()?.proposalRole as ProposalRole ?? 'reviewer';
     this.proposalsService.decide(p.id, role, decision, this.decisionNote).subscribe({
       next: () => {
         this.cancelDecision();
@@ -514,9 +516,9 @@ export class ProposalReviewComponent implements OnInit {
     const p = this.proposal();
     if (!p) return;
     this.proposalsService.addComment(p.id, {
-      authorId: '1',
-      authorName: 'Me',
-      authorRole: 'reviewer',
+      authorId: this.auth.currentUser()?.id ?? '',
+      authorName: this.auth.currentUser()?.username ?? '',
+      authorRole: this.auth.currentUser()?.proposalRole ?? 'reviewer',
       body,
       iterationVersion: this.selectedIteration(),
     }).subscribe({

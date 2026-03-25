@@ -48,7 +48,10 @@ import { NotificationService } from '../../core/services/notification.service';
 
       <mat-menu #userMenu="matMenu">
         @if (authService.currentUser(); as user) {
-          <div class="user-info">{{ user.username }}</div>
+          <div class="user-info">
+            <span class="user-info-name">{{ user.username }}</span>
+            <span class="user-info-role">{{ roleLabel(user.proposalRole) }}</span>
+          </div>
         }
         <button mat-menu-item routerLink="/settings">
           <mat-icon>settings</mat-icon> Configuración
@@ -68,11 +71,20 @@ import { NotificationService } from '../../core/services/notification.service';
     }
     .spacer { flex: 1; }
     .empty-notifications { padding: 16px 24px; color: rgba(0,0,0,0.5); }
-    .user-info { padding: 8px 16px; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .user-info {
+      padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .user-info-name { font-weight: 600; font-size: 0.9rem; }
+    .user-info-role { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
   `],
 })
 export class HeaderComponent {
   toggleSidebar = output();
   protected readonly authService = inject(AuthService);
   protected readonly notificationService = inject(NotificationService);
+
+  roleLabel(role: string): string {
+    return { builder: 'Constructor', reviewer: 'Revisor', approver: 'Aprobador/a' }[role] ?? role;
+  }
 }

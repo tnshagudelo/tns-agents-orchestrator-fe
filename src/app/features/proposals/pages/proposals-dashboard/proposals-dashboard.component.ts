@@ -11,7 +11,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { CURRENT_USER, MOCK_USERS } from '../../models/mock-users.const';
+import { MOCK_USERS, getMockUserByRole } from '../../models/mock-users.const';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { CreateProposalRequest } from '../../models/proposal.model';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -101,12 +102,13 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
 })
 export class NewProposalDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<NewProposalDialogComponent>);
+  private readonly auth = inject(AuthService);
 
-  readonly currentUser = CURRENT_USER;
+  readonly currentUser = { id: this.auth.currentUser()?.id ?? '', name: this.auth.currentUser()?.username ?? '' };
   readonly separatorKeys = [ENTER, COMMA] as const;
   tags: string[] = [];
 
-  readonly reviewerOptions = MOCK_USERS.filter(u => u.id !== CURRENT_USER.id);
+  readonly reviewerOptions = MOCK_USERS.filter(u => u.id !== this.currentUser.id);
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -117,7 +119,7 @@ export class NewProposalDialogComponent {
 
   get approverOptions() {
     const reviewerId = this.form.get('reviewerId')?.value;
-    return MOCK_USERS.filter(u => u.id !== CURRENT_USER.id && u.id !== reviewerId);
+    return MOCK_USERS.filter(u => u.id !== this.currentUser.id && u.id !== reviewerId);
   }
 
   addTag(event: MatChipInputEvent): void {
