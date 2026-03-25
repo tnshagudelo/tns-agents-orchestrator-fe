@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,9 +15,10 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ProposalChatPanelComponent } from '../../components/proposal-chat-panel/proposal-chat-panel.component';
 import { CommentThreadComponent } from '../../components/comment-thread/comment-thread.component';
 import { ApprovalFlowComponent } from '../../components/approval-flow/approval-flow.component';
-import { ProposalIteration } from '../../models/proposal.model';
+import { ProposalIteration, ProposalApprovalStep } from '../../models/proposal.model';
 import { ProposalChatService } from '../../services/proposal-chat.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { MarkdownModule } from 'ngx-markdown';
 import mermaid from 'mermaid';
 
 @Component({
@@ -28,6 +29,7 @@ import mermaid from 'mermaid';
     MatButtonModule, MatIconModule, MatCardModule, MatChipsModule,
     MatTabsModule, MatTooltipModule, MatProgressBarModule, MatDividerModule,
     ProposalChatPanelComponent, CommentThreadComponent, ApprovalFlowComponent,
+    MarkdownModule,
   ],
   template: `
     <div class="workpad-layout">
@@ -43,15 +45,19 @@ import mermaid from 'mermaid';
 
         @if (proposal(); as p) {
           <div class="project-info">
-            @if (editingProject()) {
+            @if (!isTerminal() && editingProject()) {
               <input class="inline-input" [(ngModel)]="editProjectName" (blur)="saveProjectName()" (keydown.enter)="saveProjectName()" autofocus />
-            } @else {
+            } @else if (!isTerminal()) {
               <span class="project-name" (click)="startEditProject()">{{ p.projectName }} <mat-icon class="edit-icon">edit</mat-icon></span>
-            }
-            @if (editingProposal()) {
-              <input class="inline-input inline-input--large" [(ngModel)]="editProposalName" (blur)="saveProposalName()" (keydown.enter)="saveProposalName()" autofocus />
             } @else {
+              <span class="project-name project-name--readonly">{{ p.projectName }}</span>
+            }
+            @if (!isTerminal() && editingProposal()) {
+              <input class="inline-input inline-input--large" [(ngModel)]="editProposalName" (blur)="saveProposalName()" (keydown.enter)="saveProposalName()" autofocus />
+            } @else if (!isTerminal()) {
               <span class="proposal-title" (click)="startEditProposal()">{{ p.name }} <mat-icon class="edit-icon">edit</mat-icon></span>
+            } @else {
+              <span class="proposal-title proposal-title--readonly">{{ p.name }}</span>
             }
           </div>
 
@@ -67,10 +73,11 @@ import mermaid from 'mermaid';
             }
           </div>
 
-          <mat-divider />
-
-          <div class="section-label">Flujo de aprobación</div>
-          <app-approval-flow [steps]="p.approvalFlow" />
+          @if (!isTerminal()) {
+            <mat-divider />
+            <div class="section-label">Flujo de aprobación</div>
+            <app-approval-flow [steps]="p.approvalFlow" />
+          }
 
           @if (currentIterationData(); as iter) {
             <mat-divider />
@@ -95,7 +102,54 @@ import mermaid from 'mermaid';
             </div>
           }
 
-          @if (p.status === 'draft') {
+          @if (isTerminal()) {
+            <mat-divider />
+            <div class="resolution-banner resolution-{{ p.status }}">
+              <mat-icon>{{ p.status === 'approved' ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span>{{ p.status === 'approved' ? 'Aprobada' : 'Rechazada' }}</span>
+            </div>
+
+            <!-- Timeline del flujo -->
+            <div class="section-label">Flujo de decisiones</div>
+            <div class="flow-timeline">
+              @for (step of p.approvalFlow; track step.role) {
+                <div class="flow-step flow-{{ step.status }}">
+                  <div class="flow-icon">
+                    <mat-icon>{{ stepIcon(step.status) }}</mat-icon>
+                  </div>
+                  <div class="flow-body">
+                    <span class="flow-role">{{ roleLabel(step.role) }}</span>
+                    <span class="flow-user">{{ step.userName }}</span>
+                    @if (step.decidedAt) {
+                      <span class="flow-date">{{ step.decidedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                    }
+                    @if (step.note) {
+                      <div class="flow-note">{{ step.note }}</div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (auth.currentUser()?.proposalRole === 'approver') {
+              <mat-divider />
+              <div class="delete-zone">
+                @if (!confirmingDelete()) {
+                  <button class="delete-btn" (click)="confirmingDelete.set(true)">
+                    <mat-icon>delete_outline</mat-icon> Eliminar propuesta
+                  </button>
+                } @else {
+                  <div class="delete-confirm">
+                    <span class="delete-confirm-text">¿Eliminar permanentemente?</span>
+                    <div class="delete-confirm-actions">
+                      <button class="delete-confirm-yes" (click)="deleteProposal()">Sí, eliminar</button>
+                      <button class="delete-confirm-no" (click)="confirmingDelete.set(false)">Cancelar</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          } @else if (p.status === 'draft') {
             <mat-divider />
             <button mat-raised-button color="primary" class="submit-btn" (click)="submitForReview()">
               <mat-icon>send</mat-icon> Enviar a revisión
@@ -132,12 +186,20 @@ import mermaid from 'mermaid';
             <span class="iteration-label">
               @if (proposal(); as p) { v{{ selectedIteration() }} de {{ p.name }} }
             </span>
-            <mat-chip-set>
-              <mat-chip class="mode-chip" disableRipple>
-                <mat-icon>{{ workpadMode() === 'chat' ? 'chat' : 'edit' }}</mat-icon>
-                {{ workpadMode() === 'chat' ? 'Chat con agente' : 'Edición' }}
-              </mat-chip>
-            </mat-chip-set>
+            @if (isTerminal()) {
+              <mat-chip-set>
+                <mat-chip class="mode-chip mode-chip--readonly" disableRipple>
+                  <mat-icon>lock</mat-icon> Solo lectura
+                </mat-chip>
+              </mat-chip-set>
+            } @else {
+              <mat-chip-set>
+                <mat-chip class="mode-chip" disableRipple>
+                  <mat-icon>{{ workpadMode() === 'chat' ? 'chat' : 'edit' }}</mat-icon>
+                  {{ workpadMode() === 'chat' ? 'Chat con agente' : 'Edición' }}
+                </mat-chip>
+              </mat-chip-set>
+            }
           </div>
           <div class="header-right">
             <button mat-stroked-button (click)="copyContent()" matTooltip="Copiar contenido">
@@ -146,44 +208,62 @@ import mermaid from 'mermaid';
             <button mat-stroked-button (click)="exportMarkdown()" matTooltip="Exportar markdown">
               <mat-icon>download</mat-icon>
             </button>
-            <button mat-raised-button [color]="workpadMode() === 'chat' ? 'accent' : 'primary'"
-              (click)="toggleMode()">
-              <mat-icon>{{ workpadMode() === 'chat' ? 'edit' : 'chat' }}</mat-icon>
-              {{ workpadMode() === 'chat' ? 'Editar' : 'Chat' }}
-            </button>
+            @if (!isTerminal()) {
+              <button mat-raised-button [color]="workpadMode() === 'chat' ? 'accent' : 'primary'"
+                (click)="toggleMode()">
+                <mat-icon>{{ workpadMode() === 'chat' ? 'edit' : 'chat' }}</mat-icon>
+                {{ workpadMode() === 'chat' ? 'Editar' : 'Chat' }}
+              </button>
+            }
           </div>
         </div>
 
-        <!-- Chat mode -->
-        @if (workpadMode() === 'chat') {
-          <div class="chat-area">
-            @if (proposal(); as p) {
-              <app-proposal-chat-panel
-                #chatPanel
-                [proposalId]="p.id"
-                [projectName]="p.projectName"
-                (saveIteration)="onSaveIteration($event)" />
+        @if (isTerminal()) {
+          <!-- Readonly: markdown renderizado -->
+          <div class="readonly-area" #readonlyContent>
+            @if (currentIterationData(); as cur) {
+              @if (cur.content) {
+                <markdown [data]="cur.content" class="md-content"></markdown>
+              } @else {
+                <div class="readonly-empty">
+                  <mat-icon>article</mat-icon>
+                  <span>Esta iteración no tiene contenido.</span>
+                </div>
+              }
             }
           </div>
-        }
-
-        <!-- Edit mode -->
-        @if (workpadMode() === 'edit') {
-          <div class="edit-area">
-            <div class="edit-toolbar">
-              <button mat-stroked-button (click)="insertMd('## ')">H2</button>
-              <button mat-stroked-button (click)="insertMd('### ')">H3</button>
-              <button mat-stroked-button (click)="insertMd('**', '**')"><b>Bold</b></button>
-              <button mat-stroked-button (click)="insertMd('\`', '\`')">Code</button>
-              <button mat-stroked-button (click)="insertMd('| Col1 | Col2 |\n|------|------|\n| val  | val  |\n')">Table</button>
-              <span class="toolbar-spacer"></span>
-              <button mat-raised-button color="primary" (click)="saveEditAsIteration()" [disabled]="!editContent().trim()">
-                <mat-icon>save</mat-icon> Guardar como iteración
-              </button>
+        } @else {
+          <!-- Chat mode -->
+          @if (workpadMode() === 'chat') {
+            <div class="chat-area">
+              @if (proposal(); as p) {
+                <app-proposal-chat-panel
+                  #chatPanel
+                  [proposalId]="p.id"
+                  [projectName]="p.projectName"
+                  (saveIteration)="onSaveIteration($event)" />
+              }
             </div>
-            <textarea class="edit-canvas" [(ngModel)]="editContentStr"
-              placeholder="Escribe la arquitectura en markdown..."></textarea>
-          </div>
+          }
+
+          <!-- Edit mode -->
+          @if (workpadMode() === 'edit') {
+            <div class="edit-area">
+              <div class="edit-toolbar">
+                <button mat-stroked-button (click)="insertMd('## ')">H2</button>
+                <button mat-stroked-button (click)="insertMd('### ')">H3</button>
+                <button mat-stroked-button (click)="insertMd('**', '**')"><b>Bold</b></button>
+                <button mat-stroked-button (click)="insertMd('\`', '\`')">Code</button>
+                <button mat-stroked-button (click)="insertMd('| Col1 | Col2 |\n|------|------|\n| val  | val  |\n')">Table</button>
+                <span class="toolbar-spacer"></span>
+                <button mat-raised-button color="primary" (click)="saveEditAsIteration()" [disabled]="!editContent().trim()">
+                  <mat-icon>save</mat-icon> Guardar como iteración
+                </button>
+              </div>
+              <textarea class="edit-canvas" [(ngModel)]="editContentStr"
+                placeholder="Escribe la arquitectura en markdown..."></textarea>
+            </div>
+          }
         }
       </main>
 
@@ -278,6 +358,44 @@ import mermaid from 'mermaid';
       &-high   { --mdc-chip-label-text-color: #A32D2D; background: #fee2e2 !important; }
     }
 
+    .project-name--readonly, .proposal-title--readonly { cursor: default; }
+    .project-name--readonly:hover .edit-icon, .proposal-title--readonly:hover .edit-icon { opacity: 0; }
+
+    .resolution-banner {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      mat-icon { font-size: 1.2rem; width: 1.2rem; height: 1.2rem; }
+    }
+    .resolution-approved { background: #dcfce7; color: #3B6D11; }
+    .resolution-rejected { background: #fee2e2; color: #A32D2D; }
+
+    .flow-timeline { display: flex; flex-direction: column; gap: 0; }
+    .flow-step {
+      display: flex; gap: 10px; position: relative; padding-bottom: 14px;
+      &:last-child { padding-bottom: 0; }
+      &:not(:last-child) .flow-icon::after {
+        content: ''; position: absolute; left: 11px; top: 26px; bottom: 0;
+        width: 2px; background: #e5e7eb;
+      }
+    }
+    .flow-icon {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #f3f4f6; color: #9ca3af;
+      mat-icon { font-size: 0.85rem; width: 0.85rem; height: 0.85rem; }
+    }
+    .flow-approved .flow-icon  { background: #dcfce7; color: #3B6D11; }
+    .flow-rejected .flow-icon  { background: #fee2e2; color: #A32D2D; }
+    .flow-changes_requested .flow-icon { background: #fef3c7; color: #BA7517; }
+    .flow-body { display: flex; flex-direction: column; gap: 1px; }
+    .flow-role { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: rgba(0,0,0,0.4); }
+    .flow-user { font-size: 0.8rem; font-weight: 600; }
+    .flow-date { font-size: 0.68rem; color: rgba(0,0,0,0.35); }
+    .flow-note {
+      margin-top: 4px; padding: 6px 8px; background: #f8f9fa; border-radius: 4px;
+      border-left: 2px solid #e5e7eb; font-size: 0.75rem; color: rgba(0,0,0,0.55); font-style: italic;
+    }
+
     .submit-btn { width: 100%; }
 
     .delete-zone { margin-top: 4px; }
@@ -322,6 +440,38 @@ import mermaid from 'mermaid';
     .iteration-label { font-size: 0.9rem; font-weight: 600; color: rgba(0,0,0,0.7); }
     .mode-chip { --mdc-chip-label-text-color: #2D1B6B; background: #ede9fe !important;
       mat-icon { font-size: 0.9rem; width: 0.9rem; height: 0.9rem; margin-right: 4px; }
+    }
+
+    .mode-chip--readonly {
+      --mdc-chip-label-text-color: rgba(0,0,0,0.45) !important;
+      background: #f3f4f6 !important;
+    }
+
+    .readonly-area {
+      flex: 1; overflow-y: auto; padding: 28px 40px;
+    }
+    .readonly-area ::ng-deep {
+      h1, h2, h3, h4 { margin-top: 16px; margin-bottom: 8px; color: #1a1a2e; }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.15rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+      h3 { font-size: 1rem; }
+      p { font-size: 0.88rem; line-height: 1.6; color: rgba(0,0,0,0.75); }
+      ul, ol { padding-left: 20px; font-size: 0.88rem; }
+      li { margin-bottom: 4px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 12px 0; }
+      th { background: #f3f4f6; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #e5e7eb; }
+      td { padding: 8px 10px; border: 1px solid #e5e7eb; }
+      tr:nth-child(even) td { background: #fafafa; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; }
+      pre { background: #1e1e2e; color: #cdd6f4; padding: 14px; border-radius: 8px; overflow-x: auto;
+        code { background: none; padding: 0; color: inherit; }
+      }
+      blockquote { border-left: 3px solid #2D1B6B; margin: 12px 0; padding: 8px 16px; background: #f8f7ff; color: rgba(0,0,0,0.7); }
+    }
+    .readonly-empty {
+      display: flex; align-items: center; gap: 8px; padding: 40px;
+      color: rgba(0,0,0,0.4); font-size: 0.88rem;
+      mat-icon { font-size: 1.3rem; width: 1.3rem; height: 1.3rem; }
     }
 
     .chat-area { flex: 1; overflow: hidden; min-height: 0; }
@@ -371,12 +521,13 @@ import mermaid from 'mermaid';
 })
 export class ProposalWorkpadComponent implements OnInit {
   @ViewChild('chatPanel') chatPanel?: ProposalChatPanelComponent;
+  @ViewChild('readonlyContent') readonlyContentRef?: ElementRef<HTMLElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly proposalsService = inject(ProposalsService);
   private readonly chatService = inject(ProposalChatService);
-  private readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
 
   workpadMode = signal<'chat' | 'edit'>('chat');
@@ -391,6 +542,11 @@ export class ProposalWorkpadComponent implements OnInit {
 
   readonly proposal = this.proposalsService.selectedProposal;
 
+  readonly isTerminal = computed(() => {
+    const s = this.proposal()?.status;
+    return s === 'approved' || s === 'rejected';
+  });
+
   readonly currentIterationData = computed(() => {
     const p = this.proposal();
     if (!p) return null;
@@ -399,8 +555,17 @@ export class ProposalWorkpadComponent implements OnInit {
 
   readonly editContent = computed(() => this.editContentStr);
 
-  ngOnInit(): void {
+  constructor() {
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+    effect(() => {
+      this.currentIterationData();
+      this.isTerminal();
+      setTimeout(() => this.renderMermaidDivs(), 100);
+    });
+  }
+
+  ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.proposalsService.getById(id).subscribe({
       next: p => {
@@ -453,9 +618,9 @@ export class ProposalWorkpadComponent implements OnInit {
         this.notifications.success('Propuesta eliminada');
         this.router.navigate(['/proposals']);
       },
-      error: () => {
+      error: (err) => {
         this.confirmingDelete.set(false);
-        this.notifications.error('Error al eliminar la propuesta');
+        this.notifications.error(err?.error?.error ?? 'Error al eliminar la propuesta');
       },
     });
   }
@@ -534,7 +699,31 @@ export class ProposalWorkpadComponent implements OnInit {
     this.editContentStr += before + after;
   }
 
+  private renderMermaidDivs(): void {
+    const container = this.readonlyContentRef?.nativeElement;
+    if (!container) return;
+    const divs = Array.from(
+      container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
+    );
+    if (divs.length === 0) return;
+    divs.forEach(el => {
+      const decoded = el.textContent ?? '';
+      el.textContent = decoded;
+      el.removeAttribute('data-processed');
+      el.setAttribute('data-mermaid-processed', 'true');
+    });
+    mermaid.run({ nodes: divs }).catch(() => {});
+  }
+
   riskColor(level: string): string {
     return { low: '#3B6D11', medium: '#BA7517', high: '#A32D2D' }[level] ?? '#888';
+  }
+
+  stepIcon(status: string): string {
+    return { pending: 'radio_button_unchecked', approved: 'check_circle', rejected: 'cancel', changes_requested: 'rate_review' }[status] ?? 'help';
+  }
+
+  roleLabel(role: string): string {
+    return { builder: 'Constructor', reviewer: 'Revisor', approver: 'Aprobador' }[role] ?? role;
   }
 }

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -145,7 +145,7 @@ interface ChecklistItem {
         <div class="panel-right">
 
           @if (proposal(); as p) {
-            <!-- Metadata -->
+            <!-- Metadata (siempre visible) -->
             <mat-card class="meta-card">
               <mat-card-content>
                 <div class="meta-row">
@@ -170,75 +170,133 @@ interface ChecklistItem {
               </mat-card-content>
             </mat-card>
 
-            <!-- Checklist -->
-            <mat-card class="checklist-card">
-              <mat-card-header>
-                <mat-card-title>Checklist de revisión</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <mat-progress-bar mode="determinate" [value]="checklistProgress()" class="checklist-bar" />
-                <span class="checklist-label">{{ checkedCount() }}/{{ checklist().length }}</span>
+            @if (isTerminal()) {
+              <!-- ── Resumen de resolución (estados terminales) ── -->
+              <mat-card class="resolution-card resolution-{{ p.status }}">
+                <mat-card-content>
+                  <div class="resolution-badge">
+                    <mat-icon>{{ p.status === 'approved' ? 'check_circle' : 'cancel' }}</mat-icon>
+                    <span>{{ p.status === 'approved' ? 'Propuesta aprobada' : 'Propuesta rechazada' }}</span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
 
-                <div class="checklist-items">
-                  @for (item of checklist(); track item.id) {
-                    <mat-checkbox [(ngModel)]="item.checked" (change)="updateChecklist()">
-                      {{ item.label }}
-                    </mat-checkbox>
-                  }
-                </div>
-              </mat-card-content>
-            </mat-card>
+              <!-- Línea de tiempo del flujo -->
+              <mat-card class="timeline-card">
+                <mat-card-header>
+                  <mat-card-title>Flujo de aprobación</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="timeline">
+                    @for (step of p.approvalFlow; track step.role) {
+                      <div class="timeline-step" [class]="'tl-' + step.status">
+                        <div class="tl-icon">
+                          <mat-icon>{{ stepIcon(step.status) }}</mat-icon>
+                        </div>
+                        <div class="tl-body">
+                          <span class="tl-role">{{ roleLabel(step.role) }}</span>
+                          <span class="tl-user">{{ step.userName }}</span>
+                          <span class="tl-status">{{ approvalStatusLabel(step.status) }}</span>
+                          @if (step.decidedAt) {
+                            <span class="tl-date">{{ step.decidedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                          }
+                          @if (step.note) {
+                            <div class="tl-note">
+                              <mat-icon>format_quote</mat-icon>
+                              <span>{{ step.note }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
 
-            <!-- Decision -->
-            <mat-card class="decision-card">
-              <mat-card-header>
-                <mat-card-title>Decisión</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="decision-buttons">
-                  <button mat-raised-button color="primary" class="decision-btn decision-approve"
-                    (click)="decide('approved')">
-                    <mat-icon>check_circle</mat-icon>
-                    {{ p.status === 'in_review' ? 'Aprobar y avanzar' : 'Aprobación final' }}
-                  </button>
-                  <button mat-stroked-button class="decision-btn decision-changes"
-                    (click)="requestChanges()">
-                    <mat-icon>rate_review</mat-icon>
-                    Solicitar cambios
-                  </button>
-                  <button mat-stroked-button color="warn" class="decision-btn decision-reject"
-                    (click)="requestReject()">
-                    <mat-icon>cancel</mat-icon>
-                    Rechazar
-                  </button>
-                </div>
+              <button mat-stroked-button class="back-btn" routerLink="/proposals">
+                <mat-icon>arrow_back</mat-icon> Volver al tablero
+              </button>
 
-                @if (showNote()) {
-                  <div class="note-area">
-                    <mat-form-field appearance="outline" class="note-field">
-                      <mat-label>Nota (requerida)</mat-label>
-                      <textarea matInput [(ngModel)]="decisionNote" rows="3"
-                        placeholder="Explica los cambios requeridos o motivo del rechazo...">
-                      </textarea>
-                    </mat-form-field>
-                    <div class="note-actions">
-                      <button mat-button (click)="cancelDecision()">Cancelar</button>
-                      <button mat-raised-button [color]="pendingDecision() === 'rejected' ? 'warn' : 'accent'"
-                        (click)="confirmDecision()" [disabled]="!decisionNote.trim()">
-                        Confirmar
+            } @else {
+              <!-- ── Flujo activo (in_review / pending_approval) ── -->
+
+              <!-- Checklist -->
+              <mat-card class="checklist-card">
+                <mat-card-header>
+                  <mat-card-title>Checklist de revisión</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <mat-progress-bar mode="determinate" [value]="checklistProgress()" class="checklist-bar" />
+                  <span class="checklist-label">{{ checkedCount() }}/{{ checklist().length }}</span>
+
+                  <div class="checklist-items">
+                    @for (item of checklist(); track item.id) {
+                      <mat-checkbox [(ngModel)]="item.checked" (change)="updateChecklist()">
+                        {{ item.label }}
+                      </mat-checkbox>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Decision -->
+              <mat-card class="decision-card">
+                <mat-card-header>
+                  <mat-card-title>Decisión</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  @if (canDecide()) {
+                    <div class="decision-buttons">
+                      <button mat-raised-button color="primary" class="decision-btn decision-approve"
+                        (click)="decide('approved')">
+                        <mat-icon>check_circle</mat-icon>
+                        {{ p.status === 'in_review' ? 'Aprobar y avanzar' : 'Aprobación final' }}
+                      </button>
+                      <button mat-stroked-button class="decision-btn decision-changes"
+                        (click)="requestChanges()">
+                        <mat-icon>rate_review</mat-icon>
+                        Solicitar cambios
+                      </button>
+                      <button mat-stroked-button color="warn" class="decision-btn decision-reject"
+                        (click)="requestReject()">
+                        <mat-icon>cancel</mat-icon>
+                        Rechazar
                       </button>
                     </div>
-                  </div>
-                }
-              </mat-card-content>
-            </mat-card>
+
+                    @if (showNote()) {
+                      <div class="note-area">
+                        <mat-form-field appearance="outline" class="note-field">
+                          <mat-label>Nota (requerida)</mat-label>
+                          <textarea matInput [(ngModel)]="decisionNote" rows="3"
+                            placeholder="Explica los cambios requeridos o motivo del rechazo...">
+                          </textarea>
+                        </mat-form-field>
+                        <div class="note-actions">
+                          <button mat-button (click)="cancelDecision()">Cancelar</button>
+                          <button mat-raised-button [color]="pendingDecision() === 'rejected' ? 'warn' : 'accent'"
+                            (click)="confirmDecision()" [disabled]="!decisionNote.trim()">
+                            Confirmar
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  } @else {
+                    <div class="decision-hint">
+                      <mat-icon>info</mat-icon>
+                      <span>{{ decisionHint() }}</span>
+                    </div>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
           }
         </div>
 
       </div>
 
-      <!-- ── AGENT SLIDE-IN PANEL ── -->
-      @if (agentPanelOpen()) {
+      <!-- ── AGENT SLIDE-IN PANEL (solo en flujo activo) ── -->
+      @if (agentPanelOpen() && !isTerminal()) {
         <div class="agent-overlay" (click)="agentPanelOpen.set(false)"></div>
         <div class="agent-slidein">
           <div class="slidein-header">
@@ -368,6 +426,64 @@ interface ChecklistItem {
     .note-field { width: 100%; }
     .note-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
+    .decision-hint {
+      display: flex; align-items: center; gap: 10px; padding: 16px;
+      background: #f8f9fa; border-radius: 8px; color: rgba(0,0,0,0.5); font-size: 0.84rem;
+      mat-icon { font-size: 1.2rem; width: 1.2rem; height: 1.2rem; color: rgba(0,0,0,0.35); flex-shrink: 0; }
+    }
+
+    /* ── Resolution (terminal states) ── */
+    .resolution-card {
+      border: none; border-radius: 12px !important; overflow: hidden;
+    }
+    .resolution-card mat-card-content { padding: 0 !important; }
+    .resolution-badge {
+      display: flex; align-items: center; gap: 10px; padding: 18px 20px;
+      font-size: 0.95rem; font-weight: 700;
+      mat-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
+    }
+    .resolution-approved .resolution-badge { background: #dcfce7; color: #3B6D11; }
+    .resolution-rejected .resolution-badge { background: #fee2e2; color: #A32D2D; }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-step {
+      display: flex; gap: 12px; position: relative; padding-bottom: 20px;
+      &:last-child { padding-bottom: 0; }
+      &:not(:last-child) .tl-icon::after {
+        content: ''; position: absolute; left: 15px; top: 32px; bottom: 0;
+        width: 2px; background: #e5e7eb;
+      }
+    }
+    .tl-icon {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #f3f4f6; color: #9ca3af;
+      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+    }
+    .tl-approved .tl-icon  { background: #dcfce7; color: #3B6D11; }
+    .tl-rejected .tl-icon  { background: #fee2e2; color: #A32D2D; }
+    .tl-changes_requested .tl-icon { background: #fef3c7; color: #BA7517; }
+
+    .tl-body {
+      display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;
+    }
+    .tl-role { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; color: rgba(0,0,0,0.4); }
+    .tl-user { font-size: 0.85rem; font-weight: 600; color: rgba(0,0,0,0.8); }
+    .tl-status { font-size: 0.78rem; color: rgba(0,0,0,0.55); }
+    .tl-date { font-size: 0.7rem; color: rgba(0,0,0,0.35); }
+    .tl-note {
+      display: flex; gap: 6px; margin-top: 6px; padding: 8px 10px;
+      background: #f8f9fa; border-radius: 6px; border-left: 3px solid #e5e7eb;
+      font-size: 0.8rem; color: rgba(0,0,0,0.6); font-style: italic;
+      mat-icon { font-size: 0.9rem; width: 0.9rem; height: 0.9rem; color: rgba(0,0,0,0.3); flex-shrink: 0; margin-top: 1px; }
+    }
+
+    .back-btn {
+      width: 100%; justify-content: center; gap: 6px; border-color: rgba(0,0,0,0.15);
+      mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+    }
+
     /* Agent slide-in */
     .agent-overlay {
       position: absolute; inset: 0; background: rgba(0,0,0,0.3); z-index: 10;
@@ -389,6 +505,7 @@ export class ProposalReviewComponent implements OnInit {
   @ViewChild('proposalContent') proposalContentRef?: ElementRef<HTMLElement>;
 
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly proposalsService = inject(ProposalsService);
   private readonly auth = inject(AuthService);
   private readonly notifications = inject(NotificationService);
@@ -401,6 +518,39 @@ export class ProposalReviewComponent implements OnInit {
   decisionNote = '';
 
   readonly proposal = this.proposalsService.selectedProposal;
+
+  readonly isTerminal = computed(() => {
+    const s = this.proposal()?.status;
+    return s === 'approved' || s === 'rejected';
+  });
+
+  /** Paso del approval flow que resolvió la propuesta (el que tiene status approved/rejected) */
+  readonly resolutionSteps = computed(() => {
+    const p = this.proposal();
+    if (!p) return [];
+    return p.approvalFlow.filter(s => s.status !== 'pending');
+  });
+
+  /** El usuario puede decidir solo si su rol corresponde al estado actual */
+  readonly canDecide = computed(() => {
+    const p = this.proposal();
+    const role = this.auth.currentUser()?.proposalRole;
+    if (!p || !role) return false;
+    if (p.status === 'in_review' && role === 'reviewer') return true;
+    if (p.status === 'pending_approval' && role === 'approver') return true;
+    return false;
+  });
+
+  readonly decisionHint = computed(() => {
+    const p = this.proposal();
+    const role = this.auth.currentUser()?.proposalRole;
+    if (!p) return '';
+    if (p.status === 'in_review' && role !== 'reviewer') return 'Solo el revisor puede tomar decisiones en este estado.';
+    if (p.status === 'pending_approval' && role !== 'approver') return 'Solo el aprobador puede tomar decisiones en este estado.';
+    if (p.status === 'approved') return 'Esta propuesta ya fue aprobada.';
+    if (p.status === 'rejected') return 'Esta propuesta fue rechazada.';
+    return '';
+  });
 
   readonly currentIterationData = computed(() => {
     const p = this.proposal();
@@ -472,8 +622,13 @@ export class ProposalReviewComponent implements OnInit {
     if (!p) return;
     const role: ProposalRole = this.auth.currentUser()?.proposalRole as ProposalRole ?? 'reviewer';
     this.proposalsService.decide(p.id, role, status).subscribe({
-      next: () => this.notifications.success(`Decisión registrada: ${status}`),
-      error: () => this.notifications.error('Error al registrar decisión'),
+      next: () => {
+        const labels: Record<string, string> = { approved: 'Aprobada', rejected: 'Rechazada', changes_requested: 'Cambios solicitados', pending: 'Pendiente' };
+        const label = labels[status] ?? status;
+        this.notifications.success(`Decisión registrada: ${label}`);
+        this.navigateBackAfterDecision();
+      },
+      error: (err) => this.notifications.error(err?.error?.error ?? 'Error al registrar decisión'),
     });
   }
 
@@ -500,11 +655,17 @@ export class ProposalReviewComponent implements OnInit {
     const role: ProposalRole = this.auth.currentUser()?.proposalRole as ProposalRole ?? 'reviewer';
     this.proposalsService.decide(p.id, role, decision, this.decisionNote).subscribe({
       next: () => {
+        const label = { changes_requested: 'Cambios solicitados', rejected: 'Rechazada' }[decision] ?? decision;
         this.cancelDecision();
-        this.notifications.success('Decisión registrada');
+        this.notifications.success(`Decisión registrada: ${label}`);
+        this.navigateBackAfterDecision();
       },
-      error: () => this.notifications.error('Error al registrar decisión'),
+      error: (err) => this.notifications.error(err?.error?.error ?? 'Error al registrar decisión'),
     });
+  }
+
+  private navigateBackAfterDecision(): void {
+    setTimeout(() => this.router.navigate(['/proposals']), 1200);
   }
 
   openAgentPanel(text: string): void {
@@ -542,5 +703,17 @@ export class ProposalReviewComponent implements OnInit {
 
   statusLabel(status: string): string {
     return { draft: 'Borrador', in_review: 'En revisión', pending_approval: 'Aprobación', approved: 'Aprobado', rejected: 'Rechazado' }[status] ?? status;
+  }
+
+  stepIcon(status: string): string {
+    return { pending: 'radio_button_unchecked', approved: 'check_circle', rejected: 'cancel', changes_requested: 'rate_review' }[status] ?? 'help';
+  }
+
+  roleLabel(role: string): string {
+    return { builder: 'Constructor', reviewer: 'Revisor', approver: 'Aprobador' }[role] ?? role;
+  }
+
+  approvalStatusLabel(status: string): string {
+    return { pending: 'Pendiente', approved: 'Aprobado', rejected: 'Rechazado', changes_requested: 'Cambios solicitados' }[status] ?? status;
   }
 }
