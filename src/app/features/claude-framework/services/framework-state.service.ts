@@ -1,12 +1,12 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { ProjectMode, TechId } from '../models/framework.types';
+import { ProjectMode, TabId, TechId } from '../models/framework.types';
 import { getSteps } from '../data/steps.data';
 
 @Injectable({ providedIn: 'root' })
 export class FrameworkStateService {
   readonly mode = signal<ProjectMode | null>(null);
   readonly techId = signal<TechId | null>(null);
-  readonly activeTab = signal<'steps' | 'prompts' | 'claudemd' | 'conventions'>('steps');
+  readonly activeTab = signal<TabId>('steps');
   readonly checkedSteps = signal<Record<string, boolean>>({});
 
   readonly progress = computed(() => {

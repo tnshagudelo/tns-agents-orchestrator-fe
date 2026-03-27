@@ -33,7 +33,9 @@ import { getPrompts } from '../../data/prompts.data';
       background: #f5f5f5;
       border-bottom: 1px solid rgba(0,0,0,0.08);
     }
+    .prompt-meta { display: flex; flex-direction: column; gap: 2px; }
     .prompt-label { font-weight: 600; font-size: 0.9rem; }
+    .prompt-when { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
 
     .prompt-text {
       margin: 0; padding: 16px;

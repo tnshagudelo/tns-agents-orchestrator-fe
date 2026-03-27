@@ -60,19 +60,19 @@ export class ModeSelectorComponent {
     {
       mode: 'new',
       title: 'Proyecto Nuevo',
-      description: 'Crea un proyecto desde cero con scaffold, convenciones y CI/CD configurado por Claude Code.',
+      description: 'Configura CLAUDE.md y system_spec/ desde cero para que el agente trabaje con contexto completo desde el primer commit.',
       icon: 'add_circle_outline',
     },
     {
       mode: 'existing',
       title: 'Proyecto Existente',
-      description: 'Agrega features, corrige bugs o refactoriza un proyecto que ya existe con la ayuda de Claude Code.',
+      description: 'Ya tienes un proyecto? Documenta su contexto en specs para que el agente entienda la arquitectura y genere codigo alineado.',
       icon: 'edit_note',
     },
     {
       mode: 'migration',
       title: 'Migracion',
-      description: 'Migra versiones, frameworks o librerias con contract tests y validacion paso a paso.',
+      description: 'Prepara el contexto para una migracion: specs temporales, orden de modulos y actualizacion post-migracion.',
       icon: 'swap_horiz',
     },
   ];

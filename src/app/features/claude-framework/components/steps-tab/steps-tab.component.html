@@ -12,7 +12,7 @@
 @if (state.progress() === 100) {
   <div class="success-banner">
     <mat-icon>check_circle</mat-icon>
-    <span>Todos los pasos completados. Tu proyecto esta listo.</span>
+    <span>Contexto configurado. Tu agente esta listo para trabajar con informacion estructurada.</span>
     <button mat-stroked-button (click)="state.resetProgress()">Reiniciar</button>
   </div>
 }
@@ -28,9 +28,15 @@
         <div class="step-header">
           <span class="step-number">{{ i + 1 }}</span>
           <span class="step-title">{{ step.title }}</span>
-          <span class="step-tag" [class]="'tag--' + step.tag">{{ step.tag === 'transversal' ? 'General' : 'Especifico' }}</span>
+          <span class="step-tag" [class]="'tag--' + step.tag">{{ tagLabel(step.tag) }}</span>
         </div>
         <p class="step-desc">{{ step.description }}</p>
+        @if (step.tip) {
+          <div class="step-tip">
+            <mat-icon>lightbulb</mat-icon>
+            <span>{{ step.tip }}</span>
+          </div>
+        }
         @if (step.command) {
           <div class="step-command">
             <code>{{ step.command }}</code>

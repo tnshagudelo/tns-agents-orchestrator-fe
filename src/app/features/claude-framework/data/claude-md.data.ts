@@ -10,54 +10,49 @@ export function generateClaudeMd(techId: TechId): string {
     .join('\n');
 
   const conventionsSection = tech.conventions
-    .map(c => `- ${c}`)
+    .map((c, i) => `${i + 1}. ${c}`)
     .join('\n');
 
   const restrictionsSection = tech.restrictions
     .map(r => `- ${r}`)
     .join('\n');
 
-  return `# CLAUDE.md — ${tech.name}
+  return `# CLAUDE.md
 
-## Stack tecnologico
+> Este archivo es la fuente de verdad rapida del proyecto.
+> El agente lo lee automaticamente al iniciar cada sesion.
+> Mantenlo conciso — los detalles van en system_spec/.
+
+## Stack
 ${tech.stack}
 
-## Comandos del proyecto
+## Comandos
 ${commandsSection}
 
-## Convenciones de codigo
+## Convenciones
 ${conventionsSection}
 
 ## Restricciones
 ${restrictionsSection}
 
-## Estructura de carpetas
-\`\`\`
-[Completa con la estructura real de tu proyecto]
-src/
-├── app/              # Codigo fuente principal
-├── tests/            # Tests unitarios y de integracion
-├── config/           # Configuracion del proyecto
-└── docs/             # Documentacion interna
-\`\`\`
+## Context Engineering
+- Las specs de dominio estan en \`system_spec/\`
+- Lee \`system_spec/index.md\` para saber que spec consultar segun la tarea
+- NO cargues todas las specs — solo las relevantes para la tarea actual
+- Si una tarea modifica la arquitectura, actualiza la spec afectada
 
-## Flujo de trabajo con Claude Code
-1. **Lee antes de escribir**: Siempre analiza el codigo existente antes de modificar
-2. **Tests primero**: Escribe o verifica tests antes de implementar cambios
-3. **Cambios minimos**: Haz el cambio mas pequeno posible que resuelva el problema
-4. **Valida siempre**: Ejecuta \`${tech.commands['test']}\` y \`${tech.commands['build']}\` despues de cada cambio
-5. **Commits atomicos**: Un commit por cambio logico, mensajes descriptivos
+## Flujo de trabajo
+1. Lee este archivo y \`system_spec/index.md\` antes de cualquier tarea
+2. Consulta solo las specs relevantes para lo que vas a hacer
+3. Implementa siguiendo las convenciones de arriba
+4. Valida con \`${tech.commands['test']}\` y \`${tech.commands['build']}\`
+5. Si el cambio afecta la arquitectura, actualiza las specs
 
-## Zonas de riesgo
-- [Modulo critico 1 — describe por que es riesgoso]
-- [Modulo critico 2 — describe las dependencias sensibles]
-- [Integracion externa — API/servicio que puede fallar]
-
-## Variables de entorno requeridas
-\`\`\`
-[VARIABLE_1]=valor_de_ejemplo
-[VARIABLE_2]=valor_de_ejemplo
-[DATABASE_URL]=postgresql://user:pass@localhost:5432/dbname
-\`\`\`
+## Actualizacion de este archivo
+Actualiza CLAUDE.md cuando:
+- Cambien las versiones del stack
+- Se agreguen o modifiquen comandos
+- Se establezcan nuevas convenciones
+- Se descubran restricciones nuevas
 `;
 }

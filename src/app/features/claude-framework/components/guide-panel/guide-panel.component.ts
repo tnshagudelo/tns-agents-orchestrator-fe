@@ -6,19 +6,22 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FrameworkStateService } from '../../services/framework-state.service';
 import { getTechnology } from '../../data/technologies.data';
+import { TabId } from '../../models/framework.types';
 import { StepsTabComponent } from '../steps-tab/steps-tab.component';
 import { PromptsTabComponent } from '../prompts-tab/prompts-tab.component';
 import { ClaudeMdTabComponent } from '../claude-md-tab/claude-md-tab.component';
+import { SpecsTabComponent } from '../specs-tab/specs-tab.component';
 import { ConventionsTabComponent } from '../conventions-tab/conventions-tab.component';
 
-const TAB_MAP = ['steps', 'prompts', 'claudemd', 'conventions'] as const;
+const TAB_MAP: TabId[] = ['steps', 'prompts', 'claudemd', 'specs', 'conventions'];
 
 @Component({
   selector: 'app-guide-panel',
   standalone: true,
   imports: [
     MatIconModule, MatButtonModule, MatChipsModule, MatTabsModule,
-    StepsTabComponent, PromptsTabComponent, ClaudeMdTabComponent, ConventionsTabComponent,
+    StepsTabComponent, PromptsTabComponent, ClaudeMdTabComponent,
+    SpecsTabComponent, ConventionsTabComponent,
   ],
   templateUrl: './guide-panel.component.html',
   styles: [`

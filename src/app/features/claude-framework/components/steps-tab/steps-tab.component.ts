@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FrameworkStateService } from '../../services/framework-state.service';
 import { ClipboardService } from '../../services/clipboard.service';
 import { getSteps } from '../../data/steps.data';
+import { StepTag } from '../../models/framework.types';
 
 @Component({
   selector: 'app-steps-tab',
@@ -61,11 +62,19 @@ import { getSteps } from '../../data/steps.data';
     .step-title { font-weight: 600; font-size: 0.9rem; }
     .step-tag {
       font-size: 0.65rem; padding: 1px 8px; border-radius: 10px; font-weight: 500;
-      &.tag--transversal { background: #e8eaf6; color: #3f51b5; }
-      &.tag--tech-specific { background: #fef3c7; color: #92400e; }
+      &.tag--context { background: #e8eaf6; color: #3f51b5; }
+      &.tag--spec { background: #fef3c7; color: #92400e; }
+      &.tag--validate { background: #dcfce7; color: #166534; }
     }
     .step-desc {
       margin: 6px 0 0; font-size: 0.82rem; color: rgba(0,0,0,0.55); line-height: 1.5;
+    }
+    .step-tip {
+      display: flex; align-items: flex-start; gap: 6px; margin-top: 8px;
+      padding: 8px 12px; border-radius: 6px;
+      background: #fffbeb; border: 1px solid #fef3c7;
+      font-size: 0.78rem; color: #92400e; line-height: 1.5;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: #d97706; }
     }
     .step-command {
       display: flex; align-items: center; gap: 8px; margin-top: 8px;
@@ -94,5 +103,14 @@ export class StepsTabComponent {
 
   copy(text: string, id: string): void {
     this.clipboard.copy(text, id);
+  }
+
+  tagLabel(tag: StepTag): string {
+    const labels: Record<StepTag, string> = {
+      context: 'Contexto',
+      spec: 'Spec',
+      validate: 'Validar',
+    };
+    return labels[tag];
   }
 }

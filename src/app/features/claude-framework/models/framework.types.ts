@@ -3,7 +3,9 @@ export type ProjectMode = 'new' | 'existing' | 'migration';
 export type TechId = 'angular' | 'react' | 'vue' | 'nestjs'
                    | 'express' | 'nextjs' | 'fastapi' | 'django';
 
-export type StepTag = 'transversal' | 'tech-specific';
+export type StepTag = 'context' | 'spec' | 'validate';
+
+export type TabId = 'steps' | 'prompts' | 'claudemd' | 'specs' | 'conventions';
 
 export interface Technology {
   id: TechId;
@@ -22,6 +24,7 @@ export interface Step {
   id: string;
   title: string;
   description: string;
+  tip?: string;
   command?: string;
   tag: StepTag;
 }
@@ -30,6 +33,13 @@ export interface PromptTemplate {
   id: string;
   label: string;
   text: string;
+  when: string;
+}
+
+export interface SpecFile {
+  name: string;
+  purpose: string;
+  example: string;
 }
 
 export interface ModeOption {
@@ -42,6 +52,6 @@ export interface ModeOption {
 export interface FrameworkState {
   mode: ProjectMode | null;
   techId: TechId | null;
-  activeTab: 'steps' | 'prompts' | 'claudemd' | 'conventions';
+  activeTab: TabId;
   checkedSteps: Record<string, boolean>;
 }
