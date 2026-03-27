@@ -1,0 +1,99 @@
+<div class="chat-panel">
+  <div class="messages" #messagesContainer>
+    @if (messages().length === 0) {
+      <div class="empty-chat">
+        <mat-icon>psychology</mat-icon>
+        <span>Describe lo que necesitas refinar en esta propuesta.</span>
+        <div class="quick-chips">
+          @for (s of suggestions; track s) {
+            <button mat-stroked-button class="quick-chip" (click)="useSuggestion(s)">{{ s }}</button>
+          }
+        </div>
+      </div>
+    }
+
+    @for (msg of messages(); track msg.id) {
+      <div class="message" [class.message-user]="msg.role === 'user'" [class.message-agent]="msg.role === 'assistant'">
+        <div class="msg-avatar">
+          <mat-icon>{{ msg.role === 'user' ? 'person' : 'psychology' }}</mat-icon>
+        </div>
+        <div class="msg-bubble">
+          @if (msg.role === 'assistant') {
+            <markdown [data]="msg.content" class="md-content"></markdown>
+            @if (msg.isStreaming) {
+              <span class="cursor">▌</span>
+              <div class="rag-indicator">
+                <mat-icon class="rag-spin">sync</mat-icon>
+                <span>Consultando lineamientos de arquitectura...</span>
+              </div>
+            }
+            @if (msg.references && msg.references.length > 0) {
+              <div class="rag-references">
+                <button class="refs-toggle" (click)="toggleRefs(msg.id)">
+                  <mat-icon>auto_stories</mat-icon>
+                  <span>{{ isRefsVisible(msg.id) ? 'Ocultar' : 'Ver' }} lineamientos consultados</span>
+                  <span class="refs-count">{{ msg.references.length }}</span>
+                  <mat-icon class="chevron" [class.rotated]="isRefsVisible(msg.id)">expand_more</mat-icon>
+                </button>
+                @if (isRefsVisible(msg.id)) {
+                  <div class="refs-list">
+                    @for (ref of msg.references; track ref.fileName) {
+                      <div class="ref-item">
+                        <div class="ref-header">
+                          <mat-icon class="ref-icon">description</mat-icon>
+                          <span class="ref-filename">{{ ref.fileName }}</span>
+                          <span class="ref-score" [class]="getScoreClass(ref.relevance)">
+                            {{ (ref.relevance * 100).toFixed(0) }}% relevante
+                          </span>
+                        </div>
+                        <p class="ref-excerpt">"{{ ref.excerpt }}"</p>
+                        <span class="ref-category">{{ ref.category }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <p>{{ msg.content }}</p>
+          }
+          <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    }
+
+    @if (chatService.isStreaming() && lastIsUser()) {
+      <div class="message message-agent">
+        <div class="msg-avatar"><mat-icon>psychology</mat-icon></div>
+        <div class="msg-bubble thinking">
+          <mat-progress-spinner diameter="14" mode="indeterminate"></mat-progress-spinner>
+          <span>Analizando...</span>
+        </div>
+      </div>
+    }
+
+    <div #messagesEnd></div>
+  </div>
+
+  <div class="input-area">
+    <mat-form-field appearance="outline" class="input-field">
+      <textarea matInput [(ngModel)]="inputText" [disabled]="chatService.isStreaming()"
+        (keydown)="onKey($event)" rows="2"
+        placeholder="Refina la propuesta o haz una pregunta...">
+      </textarea>
+    </mat-form-field>
+    <button mat-fab color="primary" class="send-btn"
+      (click)="send()" [disabled]="chatService.isStreaming() || !inputText.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+
+  @if (showSaveIteration()) {
+    <div class="save-bar">
+      <span>Respuesta completa.</span>
+      <button mat-raised-button color="accent" (click)="saveAsIteration()">
+        <mat-icon>save</mat-icon> Guardar como iteración
+      </button>
+    </div>
+  }
+</div>

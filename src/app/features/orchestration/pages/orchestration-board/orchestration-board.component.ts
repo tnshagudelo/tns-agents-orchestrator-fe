@@ -13,70 +13,7 @@ import { Pipeline } from '../../../../shared/models';
   selector: 'app-orchestration-board',
   standalone: true,
   imports: [MatButtonModule, MatIconModule, MatCardModule, MatChipsModule, StatusBadgeComponent],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Orchestration</h1>
-        <button mat-raised-button color="primary" (click)="createPipeline()">
-          <mat-icon>add</mat-icon> New Pipeline
-        </button>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-card">
-          <span class="stat-value">{{ orchestrationService.pipelines().length }}</span>
-          <span class="stat-label">Total Pipelines</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ orchestrationService.activeRuns().length }}</span>
-          <span class="stat-label">Active Runs</span>
-        </div>
-      </div>
-
-      @if (orchestrationService.isLoading()) {
-        <div class="loading-state">Loading pipelines...</div>
-      } @else if (orchestrationService.pipelines().length === 0) {
-        <div class="empty-state">
-          <mat-icon>account_tree</mat-icon>
-          <p>No pipelines yet. Create your first orchestration pipeline!</p>
-          <button mat-raised-button color="primary" (click)="createPipeline()">
-            Create Pipeline
-          </button>
-        </div>
-      } @else {
-        <div class="pipeline-grid">
-          @for (pipeline of orchestrationService.pipelines(); track pipeline.id) {
-            <mat-card class="pipeline-card">
-              <mat-card-header>
-                <mat-card-title>{{ pipeline.name }}</mat-card-title>
-                <app-status-badge [status]="pipeline.status" />
-              </mat-card-header>
-              <mat-card-content>
-                <p>{{ pipeline.description }}</p>
-                <div class="pipeline-meta">
-                  <mat-chip-set>
-                    <mat-chip>{{ pipeline.nodes.length }} nodes</mat-chip>
-                    <mat-chip>{{ pipeline.edges.length }} connections</mat-chip>
-                  </mat-chip-set>
-                </div>
-              </mat-card-content>
-              <mat-card-actions>
-                <button mat-icon-button (click)="viewPipeline(pipeline)">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button color="primary" (click)="runPipeline(pipeline.id)">
-                  <mat-icon>play_arrow</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="deletePipeline(pipeline.id)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </mat-card-actions>
-            </mat-card>
-          }
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './orchestration-board.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }

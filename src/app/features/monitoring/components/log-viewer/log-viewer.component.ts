@@ -7,24 +7,7 @@ import { LogEntry } from '../../../../shared/models';
   selector: 'app-log-viewer',
   standalone: true,
   imports: [DatePipe, MatIconModule],
-  template: `
-    <div class="log-viewer">
-      @if (logs().length === 0) {
-        <div class="log-empty">No logs available</div>
-      } @else {
-        @for (entry of logs(); track entry.id) {
-          <div class="log-entry" [class]="'log-entry--' + entry.level">
-            <span class="log-time">{{ entry.timestamp | date:'HH:mm:ss' }}</span>
-            <span class="log-level">{{ entry.level.toUpperCase() }}</span>
-            <span class="log-message">{{ entry.message }}</span>
-            @if (entry.agentId) {
-              <span class="log-agent">agent:{{ entry.agentId }}</span>
-            }
-          </div>
-        }
-      }
-    </div>
-  `,
+  templateUrl: './log-viewer.component.html',
   styles: [`
     .log-viewer {
       background: #1e1e1e;

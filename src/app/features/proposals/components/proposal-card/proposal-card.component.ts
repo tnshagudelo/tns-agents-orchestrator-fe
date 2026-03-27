@@ -17,52 +17,7 @@ export interface ProposalCardAction {
   selector: 'app-proposal-card',
   standalone: true,
   imports: [DatePipe, MatCardModule, MatChipsModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressBarModule],
-  template: `
-    <mat-card class="proposal-card">
-      <mat-card-content>
-        <div class="card-header">
-          <div class="card-titles">
-            <span class="proposal-name">{{ proposal().name }}</span>
-            <span class="project-name">{{ proposal().projectName }}</span>
-          </div>
-          <mat-chip class="status-chip status-{{ proposal().status }}" disableRipple>
-            <mat-icon>{{ statusIcon() }}</mat-icon>
-            {{ statusLabel() }}
-          </mat-chip>
-        </div>
-
-        @if (proposal().tags.length) {
-          <div class="tags">
-            @for (tag of proposal().tags; track tag) {
-              <mat-chip class="tag-chip" disableRipple>{{ tag }}</mat-chip>
-            }
-          </div>
-        }
-
-        <div class="approval-progress">
-          <mat-progress-bar mode="determinate" [value]="approvalProgress()" />
-          <span class="progress-label">{{ approvedSteps() }}/{{ proposal().approvalFlow.length }} aprobaciones</span>
-        </div>
-
-        <div class="card-footer">
-          <div class="avatars">
-            @for (step of proposal().approvalFlow; track step.role) {
-              <div class="avatar" [class]="'avatar-' + step.status" [matTooltip]="step.userName + ' (' + step.role + ')'">
-                {{ step.userName.charAt(0).toUpperCase() }}
-              </div>
-            }
-          </div>
-          <div class="footer-right">
-            <span class="card-date">v{{ proposal().currentIteration }} · {{ proposal().updatedAt | date:'dd/MM/yy' }}</span>
-            <button mat-stroked-button class="action-btn" (click)="onAction()">
-              <mat-icon>{{ actionIcon() }}</mat-icon>
-              {{ actionLabel() }}
-            </button>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  `,
+  templateUrl: './proposal-card.component.html',
   styles: [`
     .proposal-card {
       margin-bottom: 4px;

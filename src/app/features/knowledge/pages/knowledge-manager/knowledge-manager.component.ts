@@ -1,5 +1,5 @@
 import {
-  Component, inject, OnInit, signal, computed, ViewChild, ElementRef,
+  Component, inject, OnInit, signal, computed, viewChild, ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
@@ -32,7 +32,7 @@ import { UploadedFile } from '../../models/knowledge.model';
   ],
 })
 export class KnowledgeManagerComponent implements OnInit {
-  @ViewChild('fileInput') private fileInput!: ElementRef<HTMLInputElement>;
+  private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   protected readonly knowledgeService = inject(KnowledgeService);
   private  readonly notifications     = inject(NotificationService);
@@ -101,7 +101,7 @@ export class KnowledgeManagerComponent implements OnInit {
   }
 
   triggerFileInput(): void {
-    this.fileInput.nativeElement.click();
+    this.fileInput()?.nativeElement.click();
   }
 
   // ── Gestión de archivos ───────────────────────────────────────────────────

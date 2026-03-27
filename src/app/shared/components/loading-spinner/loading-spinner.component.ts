@@ -6,13 +6,7 @@ import { LoadingService } from '../../../core/interceptors/loading.interceptor';
   selector: 'app-loading-spinner',
   standalone: true,
   imports: [MatProgressSpinnerModule],
-  template: `
-    @if (loadingService.isLoading()) {
-      <div class="loading-overlay">
-        <mat-spinner diameter="48" />
-      </div>
-    }
-  `,
+  templateUrl: './loading-spinner.component.html',
   styles: [`
     .loading-overlay {
       position: fixed;

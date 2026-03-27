@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, viewChild, ElementRef, effect } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
@@ -40,288 +40,12 @@ interface ChecklistItem {
     ProposalDiffComponent, CommentThreadComponent, ProposalChatPanelComponent,
     MarkdownModule,
   ],
-  template: `
-    <div class="review-layout">
-
-      <!-- Topbar -->
-      <div class="topbar">
-        <button mat-icon-button routerLink="/proposals" matTooltip="Volver">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="topbar-title">
-          @if (proposal(); as p) {
-            <span class="p-project">{{ p.projectName }}</span>
-            <mat-icon class="sep">chevron_right</mat-icon>
-            <span class="p-name">{{ p.name }}</span>
-          }
-        </div>
-        <div class="stage-pills">
-          <div class="stage-pill stage-done">
-            <mat-icon>check_circle</mat-icon> Construcción
-          </div>
-          <div class="stage-arrow"><mat-icon>arrow_forward</mat-icon></div>
-          <div class="stage-pill" [class.stage-active]="proposal()?.status === 'in_review'">
-            <mat-icon>rate_review</mat-icon> Revisión
-          </div>
-          <div class="stage-arrow"><mat-icon>arrow_forward</mat-icon></div>
-          <div class="stage-pill" [class.stage-active]="proposal()?.status === 'pending_approval'">
-            <mat-icon>verified</mat-icon> Aprobación
-          </div>
-        </div>
-      </div>
-
-      <div class="review-body">
-
-        <!-- ── PANEL IZQUIERDO ── -->
-        <div class="panel-left">
-
-          <!-- Iteration tabs -->
-          @if (proposal(); as p) {
-            <div class="iter-tabs">
-              @for (iter of p.iterations; track iter.version) {
-                <button class="iter-tab" [class.iter-tab--active]="selectedIteration() === iter.version"
-                  (click)="selectedIteration.set(iter.version)">
-                  v{{ iter.version }}
-                </button>
-              }
-            </div>
-
-            <!-- Proposal content / Diff toggle -->
-            <mat-card class="diff-card">
-              <mat-card-header>
-                <mat-card-title class="diff-card-header">
-                  <div class="view-toggle">
-                    <button class="toggle-btn" [class.toggle-btn--active]="reviewViewMode() === 'proposal'"
-                      (click)="reviewViewMode.set('proposal')">
-                      <mat-icon>description</mat-icon> Propuesta
-                    </button>
-                    <button class="toggle-btn" [class.toggle-btn--active]="reviewViewMode() === 'changes'"
-                      (click)="reviewViewMode.set('changes')">
-                      <mat-icon>compare_arrows</mat-icon> Cambios
-                      @if (previousIteration()) {
-                        <span class="diff-subtitle">vs v{{ previousIteration()!.version }}</span>
-                      }
-                    </button>
-                  </div>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                @if (currentIterationData(); as cur) {
-                  @if (reviewViewMode() === 'proposal') {
-                    <div class="proposal-content" #proposalContent>
-                      @if (cur.content) {
-                        <markdown [data]="cur.content" class="md-content"></markdown>
-                      } @else {
-                        <div class="no-content">
-                          <mat-icon>article</mat-icon>
-                          <span>Esta iteración aún no tiene contenido.</span>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <app-proposal-diff [current]="cur" [previous]="previousIteration()" />
-                  }
-                }
-              </mat-card-content>
-            </mat-card>
-
-            <!-- Comments for this iteration -->
-            <mat-card class="comments-card">
-              <mat-card-header>
-                <mat-card-title>Comentarios v{{ selectedIteration() }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <app-comment-thread
-                  [comments]="p.comments"
-                  [filterIteration]="selectedIteration()"
-                  (addComment)="onAddComment($event)"
-                  (askAgent)="openAgentPanel($event)" />
-              </mat-card-content>
-            </mat-card>
-          }
-        </div>
-
-        <!-- ── PANEL DERECHO ── -->
-        <div class="panel-right">
-
-          @if (proposal(); as p) {
-            <!-- Metadata (siempre visible) -->
-            <mat-card class="meta-card">
-              <mat-card-content>
-                <div class="meta-row">
-                  <mat-icon>label</mat-icon>
-                  <span class="status-chip status-{{ p.status }}">{{ statusLabel(p.status) }}</span>
-                </div>
-                <div class="meta-row">
-                  <mat-icon>history</mat-icon>
-                  <span>v{{ p.currentIteration }} · {{ p.iterations.length }} iteraciones</span>
-                </div>
-                <div class="meta-row">
-                  <mat-icon>calendar_today</mat-icon>
-                  <span>{{ p.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                </div>
-                @if (p.tags.length) {
-                  <div class="meta-tags">
-                    @for (tag of p.tags; track tag) {
-                      <mat-chip class="tag-chip" disableRipple>{{ tag }}</mat-chip>
-                    }
-                  </div>
-                }
-              </mat-card-content>
-            </mat-card>
-
-            @if (isTerminal()) {
-              <!-- ── Resumen de resolución (estados terminales) ── -->
-              <mat-card class="resolution-card resolution-{{ p.status }}">
-                <mat-card-content>
-                  <div class="resolution-badge">
-                    <mat-icon>{{ p.status === 'approved' ? 'check_circle' : 'cancel' }}</mat-icon>
-                    <span>{{ p.status === 'approved' ? 'Propuesta aprobada' : 'Propuesta rechazada' }}</span>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <!-- Línea de tiempo del flujo -->
-              <mat-card class="timeline-card">
-                <mat-card-header>
-                  <mat-card-title>Flujo de aprobación</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="timeline">
-                    @for (step of p.approvalFlow; track step.role) {
-                      <div class="timeline-step" [class]="'tl-' + step.status">
-                        <div class="tl-icon">
-                          <mat-icon>{{ stepIcon(step.status) }}</mat-icon>
-                        </div>
-                        <div class="tl-body">
-                          <span class="tl-role">{{ roleLabel(step.role) }}</span>
-                          <span class="tl-user">{{ step.userName }}</span>
-                          <span class="tl-status">{{ approvalStatusLabel(step.status) }}</span>
-                          @if (step.decidedAt) {
-                            <span class="tl-date">{{ step.decidedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                          }
-                          @if (step.note) {
-                            <div class="tl-note">
-                              <mat-icon>format_quote</mat-icon>
-                              <span>{{ step.note }}</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <button mat-stroked-button class="back-btn" routerLink="/proposals">
-                <mat-icon>arrow_back</mat-icon> Volver al tablero
-              </button>
-
-            } @else {
-              <!-- ── Flujo activo (in_review / pending_approval) ── -->
-
-              <!-- Checklist -->
-              <mat-card class="checklist-card">
-                <mat-card-header>
-                  <mat-card-title>Checklist de revisión</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <mat-progress-bar mode="determinate" [value]="checklistProgress()" class="checklist-bar" />
-                  <span class="checklist-label">{{ checkedCount() }}/{{ checklist().length }}</span>
-
-                  <div class="checklist-items">
-                    @for (item of checklist(); track item.id) {
-                      <mat-checkbox [(ngModel)]="item.checked" (change)="updateChecklist()">
-                        {{ item.label }}
-                      </mat-checkbox>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <!-- Decision -->
-              <mat-card class="decision-card">
-                <mat-card-header>
-                  <mat-card-title>Decisión</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  @if (canDecide()) {
-                    <div class="decision-buttons">
-                      <button mat-raised-button color="primary" class="decision-btn decision-approve"
-                        (click)="decide('approved')">
-                        <mat-icon>check_circle</mat-icon>
-                        {{ p.status === 'in_review' ? 'Aprobar y avanzar' : 'Aprobación final' }}
-                      </button>
-                      <button mat-stroked-button class="decision-btn decision-changes"
-                        (click)="requestChanges()">
-                        <mat-icon>rate_review</mat-icon>
-                        Solicitar cambios
-                      </button>
-                      <button mat-stroked-button color="warn" class="decision-btn decision-reject"
-                        (click)="requestReject()">
-                        <mat-icon>cancel</mat-icon>
-                        Rechazar
-                      </button>
-                    </div>
-
-                    @if (showNote()) {
-                      <div class="note-area">
-                        <mat-form-field appearance="outline" class="note-field">
-                          <mat-label>Nota (requerida)</mat-label>
-                          <textarea matInput [(ngModel)]="decisionNote" rows="3"
-                            placeholder="Explica los cambios requeridos o motivo del rechazo...">
-                          </textarea>
-                        </mat-form-field>
-                        <div class="note-actions">
-                          <button mat-button (click)="cancelDecision()">Cancelar</button>
-                          <button mat-raised-button [color]="pendingDecision() === 'rejected' ? 'warn' : 'accent'"
-                            (click)="confirmDecision()" [disabled]="!decisionNote.trim()">
-                            Confirmar
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  } @else {
-                    <div class="decision-hint">
-                      <mat-icon>info</mat-icon>
-                      <span>{{ decisionHint() }}</span>
-                    </div>
-                  }
-                </mat-card-content>
-              </mat-card>
-            }
-          }
-        </div>
-
-      </div>
-
-      <!-- ── AGENT SLIDE-IN PANEL (solo en flujo activo) ── -->
-      @if (agentPanelOpen() && !isTerminal()) {
-        <div class="agent-overlay" (click)="agentPanelOpen.set(false)"></div>
-        <div class="agent-slidein">
-          <div class="slidein-header">
-            <span>Chat con agente</span>
-            <button mat-icon-button (click)="agentPanelOpen.set(false)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          @if (proposal(); as p) {
-            <app-proposal-chat-panel
-              #agentPanel
-              [proposalId]="p.id"
-              [projectName]="p.projectName"
-              (saveIteration)="onSaveIteration($event)" />
-          }
-        </div>
-      }
-
-    </div>
-  `,
+  templateUrl: './proposal-review.component.html',
   styleUrl: './proposal-review.component.scss',
 })
 export class ProposalReviewComponent implements OnInit {
-  @ViewChild('agentPanel') agentPanel?: ProposalChatPanelComponent;
-  @ViewChild('proposalContent') proposalContentRef?: ElementRef<HTMLElement>;
+  readonly agentPanel = viewChild<ProposalChatPanelComponent>('agentPanel');
+  readonly proposalContentRef = viewChild<ElementRef<HTMLElement>>('proposalContent');
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -417,7 +141,7 @@ export class ProposalReviewComponent implements OnInit {
   }
 
   private renderMermaidDivs(): void {
-    const container = this.proposalContentRef?.nativeElement;
+    const container = this.proposalContentRef()?.nativeElement;
     if (!container) return;
     const divs = Array.from(
       container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
@@ -489,7 +213,7 @@ export class ProposalReviewComponent implements OnInit {
 
   openAgentPanel(text: string): void {
     this.agentPanelOpen.set(true);
-    setTimeout(() => this.agentPanel?.addExternalMessage(text), 150);
+    setTimeout(() => this.agentPanel()?.addExternalMessage(text), 150);
   }
 
   onAddComment(body: string): void {

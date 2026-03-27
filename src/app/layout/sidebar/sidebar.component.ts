@@ -15,43 +15,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterLink, RouterLinkActive, MatListModule, MatIconModule, MatDividerModule, MatTooltipModule],
-  template: `
-    <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
-      <div class="sidebar-logo">
-        @if (!collapsed()) {
-          <span class="logo-text">Orquestador de Agentes</span>
-        } @else {
-          <mat-icon>hub</mat-icon>
-        }
-      </div>
-
-      <mat-nav-list>
-        @for (item of navItems; track item.route) {
-          <a mat-list-item
-            [routerLink]="item.route"
-            routerLinkActive="active-link"
-            [matTooltip]="collapsed() ? item.label : ''"
-            matTooltipPosition="right">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            @if (!collapsed()) {
-              <span matListItemTitle>{{ item.label }}</span>
-            }
-          </a>
-        }
-      </mat-nav-list>
-
-      <mat-divider />
-
-      <mat-nav-list class="bottom-nav">
-        <a mat-list-item routerLink="/settings" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>settings</mat-icon>
-          @if (!collapsed()) {
-            <span matListItemTitle>Configuración</span>
-          }
-        </a>
-      </mat-nav-list>
-    </aside>
-  `,
+  templateUrl: './sidebar.component.html',
   styles: [`
     .sidebar {
       display: flex;

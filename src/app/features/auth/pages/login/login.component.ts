@@ -11,33 +11,7 @@ import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const
   selector: 'app-login',
   standalone: true,
   imports: [MatButtonModule, MatCardModule, MatIconModule],
-  template: `
-    <div class="login-container">
-      <div class="login-content">
-        <div class="login-header">
-          <img src="tns-logo.svg?v=2" alt="TNS Agents" class="login-logo" />
-          <p>Selecciona tu perfil para continuar</p>
-        </div>
-
-        <div class="user-cards">
-          @for (user of users; track user.id) {
-            <button class="user-card" (click)="loginAs(user)">
-              <div class="user-avatar" [class]="'avatar-' + user.proposalRole">
-                <mat-icon>{{ user.icon }}</mat-icon>
-              </div>
-              <div class="user-info">
-                <span class="user-name">{{ user.name }}</span>
-                <span class="user-role">{{ user.roleLabel }}</span>
-              </div>
-              <mat-icon class="arrow">arrow_forward</mat-icon>
-            </button>
-          }
-        </div>
-
-        <p class="login-hint">Ambiente de desarrollo — autenticación simulada</p>
-      </div>
-    </div>
-  `,
+  templateUrl: './login.component.html',
   styles: [`
     .login-container {
       display: flex; align-items: center; justify-content: center;

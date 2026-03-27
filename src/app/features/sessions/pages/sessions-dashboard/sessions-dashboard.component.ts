@@ -25,70 +25,7 @@ import { SessionTableComponent } from '../../components/session-table/session-ta
     MatPaginatorModule,
     SessionTableComponent,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Sesiones de Agentes</h1>
-        <div class="header-actions">
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Filtrar por ID de Agente</mat-label>
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]="agentFilter" placeholder="ID del agente..." (keyup.enter)="applyFilter()" />
-          </mat-form-field>
-          <button mat-stroked-button (click)="clearFilter()" [disabled]="!agentFilter">
-            <mat-icon>clear</mat-icon> Limpiar
-          </button>
-          <button mat-raised-button color="primary" (click)="refresh()">
-            <mat-icon>refresh</mat-icon> Actualizar
-          </button>
-        </div>
-      </div>
-
-      <div class="stats-grid">
-        <mat-card class="stat-card">
-          <mat-icon color="primary">history</mat-icon>
-          <span class="stat-value">{{ sessionsService.total() | number }}</span>
-          <span class="stat-label">Total de sesiones</span>
-        </mat-card>
-        <mat-card class="stat-card">
-          <mat-icon style="color:#1565c0">play_circle</mat-icon>
-          <span class="stat-value">{{ activeSessions() }}</span>
-          <span class="stat-label">Activas</span>
-        </mat-card>
-        <mat-card class="stat-card">
-          <mat-icon style="color:#2e7d32">check_circle</mat-icon>
-          <span class="stat-value">{{ completedSessions() }}</span>
-          <span class="stat-label">Completadas</span>
-        </mat-card>
-        <mat-card class="stat-card">
-          <mat-icon color="warn">error</mat-icon>
-          <span class="stat-value">{{ errorSessions() }}</span>
-          <span class="stat-label">Errores</span>
-        </mat-card>
-      </div>
-
-      <mat-card class="table-card">
-        <mat-card-header>
-          <mat-card-title>Historial de sesiones</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          @if (sessionsService.isLoading()) {
-            <div class="loading-row">
-              <mat-icon class="spin">sync</mat-icon> Cargando sesiones...
-            </div>
-          } @else {
-            <app-session-table [sessions]="sessionsService.sessions()" />
-            <mat-paginator
-              [length]="sessionsService.total()"
-              [pageSize]="pageSize"
-              [pageSizeOptions]="[10, 20, 50]"
-              (page)="onPage($event)"
-              showFirstLastButtons />
-          }
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
+  templateUrl: './sessions-dashboard.component.html',
   styles: [`
     .page-container { padding: 24px; }
 

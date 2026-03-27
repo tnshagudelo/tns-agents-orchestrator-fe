@@ -7,55 +7,7 @@ import { ProposalIteration } from '../../models/proposal.model';
   selector: 'app-proposal-diff',
   standalone: true,
   imports: [MatChipsModule, MatIconModule],
-  template: `
-    <div class="diff-container">
-      @if (!previous()) {
-        <div class="no-diff">
-          <mat-icon>info</mat-icon>
-          <span>Esta es la versión inicial — no hay versión anterior para comparar.</span>
-        </div>
-      } @else {
-        <div class="diff-section">
-          <h4>Componentes</h4>
-          <div class="components-diff">
-            @for (c of addedComponents(); track c) {
-              <mat-chip class="chip-added" disableRipple>
-                <mat-icon>add</mat-icon>{{ c }}
-              </mat-chip>
-            }
-            @for (c of removedComponents(); track c) {
-              <mat-chip class="chip-removed" disableRipple>
-                <mat-icon>remove</mat-icon>{{ c }}
-              </mat-chip>
-            }
-            @for (c of unchangedComponents(); track c) {
-              <mat-chip class="chip-unchanged" disableRipple>{{ c }}</mat-chip>
-            }
-          </div>
-        </div>
-
-        <div class="diff-section">
-          <h4>Métricas</h4>
-          <div class="metrics-diff">
-            @for (m of metricChanges(); track m.label) {
-              <div class="metric-row">
-                <span class="metric-label">{{ m.label }}</span>
-                <div class="metric-values">
-                  @if (m.changed) {
-                    <span class="old-value">{{ m.oldFormatted }}</span>
-                    <mat-icon class="arrow">arrow_forward</mat-icon>
-                    <span class="new-value">{{ m.newFormatted }}</span>
-                  } @else {
-                    <span class="same-value">{{ m.newFormatted }}</span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './proposal-diff.component.html',
   styles: [`
     .diff-container { padding: 4px 0; }
 

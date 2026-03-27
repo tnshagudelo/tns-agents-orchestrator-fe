@@ -10,7 +10,8 @@
       "Bash(find /c/tns/ia/tns-agents-orchestrator-fe -type f -name *projectmanager* -o -name *project-manager*)",
       "Bash(find /c/tns/ia/tns-agents-orchestrator-fe/src/app/features/agents -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
       "Bash(grep -r \"ProjectManagerAgent\\\\|projectmanager\" /c/tns/ia/tns-agents-orchestrator-fe/src/app --include=*.ts)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(node:*)"
     ]
   }
 }

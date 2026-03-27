@@ -7,21 +7,7 @@ import { NotificationService } from '../../../core/services/notification.service
   selector: 'app-notification-toast',
   standalone: true,
   imports: [MatIconModule, MatButtonModule],
-  template: `
-    <div class="toast-container">
-      @for (n of notificationService.notifications(); track n.id) {
-        <div class="toast" [class]="'toast--' + n.type">
-          <mat-icon class="toast-icon">
-            {{ iconForType(n.type) }}
-          </mat-icon>
-          <span class="toast-message">{{ n.message }}</span>
-          <button mat-icon-button class="toast-close" (click)="notificationService.dismiss(n.id)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './notification-toast.component.html',
   styles: [`
     .toast-container {
       position: fixed;

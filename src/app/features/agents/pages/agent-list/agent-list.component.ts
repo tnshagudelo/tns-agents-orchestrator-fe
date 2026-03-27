@@ -23,56 +23,7 @@ import { Agent, AgentStatus } from '../../../../shared/models';
     FormsModule,
     AgentCardComponent,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Agentes</h1>
-        <button mat-raised-button color="primary" (click)="createAgent()">
-          <mat-icon>add</mat-icon> Nuevo Agente
-        </button>
-      </div>
-
-      <div class="filters">
-        <mat-form-field appearance="outline">
-          <mat-label>Buscar</mat-label>
-          <input matInput [(ngModel)]="searchTerm" placeholder="Buscar agentes..." />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Estado</mat-label>
-          <mat-select [(ngModel)]="statusFilter">
-            <mat-option value="">Todos</mat-option>
-            <mat-option value="idle">Inactivo</mat-option>
-            <mat-option value="running">En ejecución</mat-option>
-            <mat-option value="paused">Pausado</mat-option>
-            <mat-option value="error">Error</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      @if (agentService.isLoading()) {
-        <div class="loading-state">Cargando agentes...</div>
-      } @else if (filteredAgents.length === 0) {
-        <div class="empty-state">
-          <mat-icon>smart_toy</mat-icon>
-          <p>No se encontraron agentes. ¡Crea el primero!</p>
-        </div>
-      } @else {
-        <div class="agents-grid">
-          @for (agent of filteredAgents; track agent.id) {
-            <app-agent-card
-              [agent]="agent"
-              (view)="viewAgent($event)"
-              (start)="startAgent($event)"
-              (stop)="stopAgent($event)"
-              (edit)="editAgent($event)"
-              (delete)="deleteAgent($event)"
-            />
-          }
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './agent-list.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }

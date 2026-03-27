@@ -11,43 +11,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
   selector: 'app-agent-card',
   standalone: true,
   imports: [UpperCasePipe, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule, StatusBadgeComponent],
-  template: `
-    <mat-card class="agent-card" [class.agent-card--running]="agent().status === 'running'">
-      <mat-card-header>
-        <mat-card-title>{{ agent().name }}</mat-card-title>
-        <mat-card-subtitle>{{ agent().type | uppercase }}</mat-card-subtitle>
-        <app-status-badge [status]="agent().status" />
-      </mat-card-header>
-      <mat-card-content>
-        <p class="agent-description">{{ agent().description }}</p>
-        @if (agent().model) {
-          <span class="agent-model">
-            <mat-icon inline>model_training</mat-icon> {{ agent().model }}
-          </span>
-        }
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-icon-button matTooltip="View details" (click)="view.emit(agent())">
-          <mat-icon>visibility</mat-icon>
-        </button>
-        @if (agent().status !== 'running') {
-          <button mat-icon-button color="primary" matTooltip="Start agent" (click)="start.emit(agent().id)">
-            <mat-icon>play_arrow</mat-icon>
-          </button>
-        } @else {
-          <button mat-icon-button color="warn" matTooltip="Stop agent" (click)="stop.emit(agent().id)">
-            <mat-icon>stop</mat-icon>
-          </button>
-        }
-        <button mat-icon-button matTooltip="Edit agent" (click)="edit.emit(agent())">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" matTooltip="Delete agent" (click)="delete.emit(agent().id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  `,
+  templateUrl: './agent-card.component.html',
   styles: [`
     .agent-card {
       margin: 8px;

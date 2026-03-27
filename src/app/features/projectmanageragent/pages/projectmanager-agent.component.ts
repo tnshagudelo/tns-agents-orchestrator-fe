@@ -5,12 +5,12 @@ import {
   computed,
   OnInit,
   OnDestroy,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewChecked, }
 from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
@@ -28,7 +28,7 @@ import mermaid from 'mermaid';
   selector: 'app-project-manager-agent',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     FormsModule,
     MatButtonModule,
     MatIconModule,
@@ -40,170 +40,14 @@ import mermaid from 'mermaid';
     MatProgressSpinnerModule,
     MarkdownModule,
   ],
-  template: `
-    <div class="page-container">
-
-      <!-- Header -->
-      <div class="page-header">
-        <div class="header-left">
-          <mat-icon class="agent-icon">psychology</mat-icon>
-          <div>
-            <h1>Project Manager Agent</h1>
-            <span class="subtitle">Estimación inteligente de proyectos</span>
-          </div>
-        </div>
-        <div class="header-actions">
-          <mat-chip-set>
-            <mat-chip [class]="isLoading() ? 'chip-thinking' : 'chip-ready'">
-              <mat-icon matChipAvatar>{{ isLoading() ? 'hourglass_top' : 'check_circle' }}</mat-icon>
-              {{ isLoading() ? 'Analizando...' : 'Listo' }}
-            </mat-chip>
-          </mat-chip-set>
-          <button
-            mat-stroked-button
-            (click)="resetChat()"
-            [disabled]="isLoading()"
-            matTooltip="Iniciar nueva estimación">
-            <mat-icon>add</mat-icon> Nueva estimación
-          </button>
-        </div>
-      </div>
-
-      <!-- Chat container -->
-      <mat-card class="chat-card">
-        <mat-card-content class="chat-content">
-
-          <!-- Messages -->
-          <div class="messages-container" #messagesContainer>
-
-            <!-- Empty state -->
-            @if (messages().length === 0) {
-              <div class="empty-state">
-                <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
-                <h3>¿En qué proyecto trabajamos hoy?</h3>
-                <p>Describe tu proyecto y te ayudo a estimar equipo, fases y cronograma.</p>
-                <div class="suggestions">
-                  <button
-                    mat-stroked-button
-                    *ngFor="let s of suggestions"
-                    (click)="useSuggestion(s)">
-                    {{ s }}
-                  </button>
-                </div>
-              </div>
-            }
-
-            <!-- Message list -->
-            @for (msg of messages(); track msg.id) {
-              <div [class]="'message message--' + msg.role">
-
-                <!-- Avatar -->
-                <div class="message-avatar">
-                  <mat-icon>{{ msg.role === 'user' ? 'person' : 'psychology' }}</mat-icon>
-                </div>
-
-                <!-- Bubble -->
-                <div class="message-bubble">
-                  @if (msg.role === 'assistant') {
-                    <!-- Markdown para respuestas del agente — renderiza tablas y listas -->
-                    <markdown [data]="msg.content" class="markdown-content"></markdown>
-                    @if (msg.isStreaming) {
-                      <span class="cursor">▌</span>
-                      <div class="rag-indicator">
-                        <mat-icon class="rag-spin">sync</mat-icon>
-                        <span>Consultando base de conocimiento...</span>
-                      </div>
-                    }
-                    @if (msg.references && msg.references.length > 0) {
-                      <div class="rag-references">
-                        <button class="refs-toggle" (click)="toggleRefs(msg.id)">
-                          <mat-icon>auto_stories</mat-icon>
-                          <span>{{ isRefsVisible(msg.id) ? 'Ocultar' : 'Ver' }} referencias consultadas</span>
-                          <span class="refs-count">{{ msg.references.length }}</span>
-                          <mat-icon class="chevron" [class.rotated]="isRefsVisible(msg.id)">expand_more</mat-icon>
-                        </button>
-                        @if (isRefsVisible(msg.id)) {
-                          <div class="refs-list">
-                            @for (ref of msg.references; track ref.fileName) {
-                              <div class="ref-item">
-                                <div class="ref-header">
-                                  <mat-icon class="ref-icon">description</mat-icon>
-                                  <span class="ref-filename">{{ ref.fileName }}</span>
-                                  <span class="ref-score" [class]="getScoreClass(ref.relevance)">
-                                    {{ (ref.relevance * 100).toFixed(0) }}% relevante
-                                  </span>
-                                </div>
-                                <p class="ref-excerpt">"{{ ref.excerpt }}"</p>
-                                <span class="ref-category">{{ ref.category }}</span>
-                              </div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    }
-                  } @else {
-                    <p class="user-text">{{ msg.content }}</p>
-                  }
-                  <span class="message-time">{{ msg.timestamp | date:'HH:mm' }}</span>
-                </div>
-
-              </div>
-            }
-
-            <!-- Typing indicator -->
-            @if (isLoading() && lastMessageIsUser()) {
-              <div class="message message--assistant">
-                <div class="message-avatar">
-                  <mat-icon>psychology</mat-icon>
-                </div>
-                <div class="message-bubble typing-bubble">
-                  <mat-progress-spinner diameter="16" mode="indeterminate"></mat-progress-spinner>
-                  <span class="typing-text">Analizando tu solicitud...</span>
-                </div>
-              </div>
-            }
-
-            <div #messagesEnd></div>
-          </div>
-
-          <!-- Input -->
-          <div class="input-container">
-            <mat-form-field appearance="outline" class="input-field">
-              <mat-label>Describe tu proyecto o responde la pregunta del agente</mat-label>
-              <textarea
-                matInput
-                [(ngModel)]="inputText"
-                [disabled]="isLoading()"
-                (keydown)="onKeydown($event)"
-                rows="2"
-                placeholder="Ej: Necesito un sistema de facturación para 500 usuarios...">
-              </textarea>
-              <mat-hint>Enter para enviar · Shift+Enter para nueva línea</mat-hint>
-            </mat-form-field>
-
-            <button
-              mat-fab
-              color="primary"
-              (click)="send()"
-              [disabled]="isLoading() || !inputText.trim()"
-              matTooltip="Enviar mensaje"
-              class="send-button">
-              <mat-icon>send</mat-icon>
-            </button>
-          </div>
-
-        </mat-card-content>
-      </mat-card>
-
-    </div>
-  `,
+  templateUrl: './projectmanager-agent.component.html',
   styleUrl: './projectmanager-agent.component.scss',
 })
 
 export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterViewChecked {
 
-   @ViewChild('messagesEnd') private messagesEnd!: ElementRef;
-   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  private readonly messagesEnd = viewChild<ElementRef>('messagesEnd');
+  private readonly messagesContainer = viewChild<ElementRef>('messagesContainer');
 
   protected readonly chatService     = inject(AgentChatService);
   private readonly notifications     = inject(NotificationService);
@@ -243,7 +87,7 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
   }
 
   private renderMermaidDivs(): void {
-    const container: HTMLElement = this.messagesContainer?.nativeElement;
+    const container: HTMLElement | undefined = this.messagesContainer()?.nativeElement;
     if (!container) return;
     const divs = Array.from(
       container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
@@ -408,7 +252,7 @@ private formatMermaidBlock(block: string): string {
 
   private scrollToBottom(): void {
     try {
-      this.messagesEnd?.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      this.messagesEnd()?.nativeElement.scrollIntoView({ behavior: 'smooth' });
     } catch {}
   }
 }

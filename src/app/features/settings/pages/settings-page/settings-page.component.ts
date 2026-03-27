@@ -22,69 +22,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatCardModule,
     MatDividerModule,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Settings</h1>
-      </div>
-
-      <div class="settings-grid">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>API Configuration</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="apiForm" (ngSubmit)="saveApiSettings()">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>API Base URL</mat-label>
-                <input matInput formControlName="apiUrl" />
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>WebSocket URL</mat-label>
-                <input matInput formControlName="wsUrl" />
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>API Timeout (ms)</mat-label>
-                <input matInput type="number" formControlName="timeout" />
-              </mat-form-field>
-              <button mat-raised-button color="primary" type="submit">
-                Save API Settings
-              </button>
-            </form>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Preferences</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="prefForm" (ngSubmit)="savePreferences()">
-              <div class="toggle-row">
-                <label>Dark Mode</label>
-                <mat-slide-toggle formControlName="darkMode" />
-              </div>
-              <mat-divider />
-              <div class="toggle-row">
-                <label>Desktop Notifications</label>
-                <mat-slide-toggle formControlName="notifications" />
-              </div>
-              <mat-divider />
-              <div class="toggle-row">
-                <label>Auto-refresh Monitoring</label>
-                <mat-slide-toggle formControlName="autoRefresh" />
-              </div>
-              <div class="pref-actions">
-                <button mat-raised-button color="primary" type="submit">
-                  Save Preferences
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </div>
-  `,
+  templateUrl: './settings-page.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header h1 { margin: 0 0 24px; font-size: 1.75rem; font-weight: 600; }

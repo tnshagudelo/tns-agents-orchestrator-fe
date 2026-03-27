@@ -1,0 +1,142 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Propuestas</h1>
+    <div class="header-actions">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [ngModel]="filterText()" (ngModelChange)="filterText.set($event)" placeholder="Nombre de propuesta..." />
+      </mat-form-field>
+
+      <div class="view-toggle">
+        <button mat-icon-button [class.active]="viewMode() === 'kanban'" (click)="viewMode.set('kanban')" matTooltip="Kanban">
+          <mat-icon>view_kanban</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')" matTooltip="Lista">
+          <mat-icon>view_list</mat-icon>
+        </button>
+      </div>
+
+      <button mat-raised-button color="primary" (click)="openNewDialog()">
+        <mat-icon>add</mat-icon> Nueva propuesta
+      </button>
+    </div>
+  </div>
+
+  <!-- Status filter pills -->
+  <div class="status-filters">
+    <button class="filter-pill" [class.active]="!activeStatus()" (click)="toggleStatus(null)">
+      Todas
+    </button>
+    @for (s of allStatuses; track s.value) {
+      <button class="filter-pill pill-{{ s.value }}"
+        [class.active]="activeStatus() === s.value"
+        (click)="toggleStatus(s.value)">
+        <span class="pill-dot"></span>
+        {{ s.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Kanban view -->
+  @if (viewMode() === 'kanban') {
+    <div class="kanban-board">
+      @for (col of kanbanColumns; track col.id) {
+        <div class="kanban-column"
+          [class.col-drop-valid]="draggingProposal() && isValidTarget(col.status)"
+          [class.col-drop-blocked]="draggingProposal() && !isValidTarget(col.status)">
+          <div class="col-header" [style.border-top-color]="col.color">
+            <span>{{ col.label }}</span>
+            <span class="col-count">{{ kanbanCounts()[col.status] }}</span>
+            @if (draggingProposal() && !isValidTarget(col.status)) {
+              <mat-icon class="col-blocked-icon" matTooltip="Transición no permitida">block</mat-icon>
+            }
+          </div>
+          <div class="col-body"
+            cdkDropList
+            [id]="col.id"
+            [cdkDropListData]="col.cards"
+            [cdkDropListConnectedTo]="dropListIds"
+            [cdkDropListEnterPredicate]="dropPredicates[col.status]"
+            (cdkDropListDropped)="onDrop($event, col.status)">
+            @for (p of col.cards; track p.id) {
+              <div cdkDrag class="drag-item"
+                [cdkDragData]="p"
+                (cdkDragStarted)="draggingProposal.set(p)"
+                (cdkDragEnded)="draggingProposal.set(null)">
+                <app-proposal-card [proposal]="p" (action)="onCardAction($event)" />
+                <div *cdkDragPlaceholder class="drag-placeholder"></div>
+              </div>
+            }
+            @if (col.cards.length === 0) {
+              <div class="empty-col">Sin propuestas</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- List view -->
+  @if (viewMode() === 'list') {
+    <mat-card>
+      <table mat-table [dataSource]="filteredProposals()" class="proposals-table">
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Propuesta</th>
+          <td mat-cell *matCellDef="let p">
+            <span class="p-name">{{ p.name }}</span>
+            <span class="p-project">{{ p.projectName }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let p">
+            <mat-chip class="status-{{ p.status }}" disableRipple>{{ statusLabel(p.status) }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="version">
+          <th mat-header-cell *matHeaderCellDef>Versión</th>
+          <td mat-cell *matCellDef="let p">v{{ p.currentIteration }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="approvalFlow">
+          <th mat-header-cell *matHeaderCellDef>Aprobaciones</th>
+          <td mat-cell *matCellDef="let p">
+            <div class="inline-avatars">
+              @for (step of p.approvalFlow; track step.role) {
+                <div class="sm-avatar avatar-{{ step.status }}" [matTooltip]="step.userName + ' · ' + step.role">
+                  {{ step.userName.charAt(0) }}
+                </div>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef>Actualizado</th>
+          <td mat-cell *matCellDef="let p">{{ p.updatedAt | date:'dd/MM/yy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button (click)="navigate(p)" matTooltip="Abrir">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: tableColumns;" class="table-row"></tr>
+      </table>
+
+      @if (filteredProposals().length === 0) {
+        <div class="table-empty">No hay propuestas. Crea la primera.</div>
+      }
+    </mat-card>
+  }
+</div>

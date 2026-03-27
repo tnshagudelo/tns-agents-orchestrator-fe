@@ -6,11 +6,7 @@ type Status = AgentStatus | PipelineStatus | string;
 @Component({
   selector: 'app-status-badge',
   standalone: true,
-  template: `
-    <span class="status-badge" [class]="'status-badge--' + status()">
-      {{ status() }}
-    </span>
-  `,
+  templateUrl: './status-badge.component.html',
   styles: [`
     .status-badge {
       display: inline-block;

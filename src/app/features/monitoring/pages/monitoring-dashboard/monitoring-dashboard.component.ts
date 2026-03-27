@@ -11,60 +11,7 @@ import { LogViewerComponent } from '../../components/log-viewer/log-viewer.compo
   selector: 'app-monitoring-dashboard',
   standalone: true,
   imports: [DecimalPipe, MatButtonModule, MatIconModule, MatCardModule, LogViewerComponent],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Monitoreo</h1>
-        <div class="header-actions">
-          <button mat-stroked-button (click)="clearLogs()">
-            <mat-icon>clear_all</mat-icon> Limpiar registros
-          </button>
-          <button mat-raised-button color="primary" (click)="refresh()">
-            <mat-icon>refresh</mat-icon> Actualizar
-          </button>
-        </div>
-      </div>
-
-      @if (monitoringService.metrics(); as metrics) {
-        <div class="metrics-grid">
-          <mat-card class="metric-card">
-            <mat-icon color="primary">smart_toy</mat-icon>
-            <span class="metric-value">{{ metrics.activeAgents }}</span>
-            <span class="metric-label">Agentes activos</span>
-          </mat-card>
-          <mat-card class="metric-card">
-            <mat-icon color="accent">account_tree</mat-icon>
-            <span class="metric-value">{{ metrics.runningPipelines }}</span>
-            <span class="metric-label">Pipelines activos</span>
-          </mat-card>
-          <mat-card class="metric-card">
-            <mat-icon color="warn">error</mat-icon>
-            <span class="metric-value">{{ metrics.errorCount }}</span>
-            <span class="metric-label">Errores</span>
-          </mat-card>
-          <mat-card class="metric-card">
-            <mat-icon style="color:#4caf50">check_circle</mat-icon>
-            <span class="metric-value">{{ metrics.successRate | number:'1.0-1' }}%</span>
-            <span class="metric-label">Tasa de éxito</span>
-          </mat-card>
-          <mat-card class="metric-card">
-            <mat-icon>speed</mat-icon>
-            <span class="metric-value">{{ metrics.avgResponseTimeMs }}ms</span>
-            <span class="metric-label">Tiempo promedio</span>
-          </mat-card>
-        </div>
-      }
-
-      <mat-card class="logs-card">
-        <mat-card-header>
-          <mat-card-title>Registros del sistema</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <app-log-viewer [logs]="monitoringService.logs()" />
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
+  templateUrl: './monitoring-dashboard.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
