@@ -106,5 +106,6 @@ export class SidebarComponent {
     { label: 'Propuestas', icon: 'description', route: '/proposals' },
     { label: 'Sesiones', icon: 'history', route: '/sessions' },
     { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
+    { label: 'Framework CC', icon: 'terminal', route: '/claude-framework' },
   ];
 }

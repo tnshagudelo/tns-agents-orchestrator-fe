@@ -1,0 +1,49 @@
+@if (tech(); as t) {
+  <!-- Convenciones -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="icon-success">check_circle</mat-icon> Convenciones
+    </h3>
+    <div class="items-list">
+      @for (conv of t.conventions; track conv) {
+        <div class="item-row item--convention">
+          <mat-icon class="icon-success">check</mat-icon>
+          <span>{{ conv }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Restricciones -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="icon-danger">block</mat-icon> Restricciones
+    </h3>
+    <div class="items-list">
+      @for (rest of t.restrictions; track rest) {
+        <div class="item-row item--restriction">
+          <mat-icon class="icon-danger">close</mat-icon>
+          <span>{{ rest }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Comandos -->
+  <div class="section">
+    <h3 class="section-title">
+      <mat-icon class="icon-info">terminal</mat-icon> Comandos
+    </h3>
+    <div class="commands-table">
+      @for (entry of commandEntries(); track entry[0]) {
+        <div class="command-row">
+          <span class="command-key">{{ entry[0] }}</span>
+          <code class="command-value">{{ entry[1] }}</code>
+          <button mat-icon-button (click)="copy(entry[1], 'cmd-' + entry[0])" matTooltip="Copiar">
+            <mat-icon>{{ clipboard.isCopied('cmd-' + entry[0]) ? 'check' : 'content_copy' }}</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

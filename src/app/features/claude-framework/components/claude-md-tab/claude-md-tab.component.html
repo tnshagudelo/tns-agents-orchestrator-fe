@@ -1,0 +1,13 @@
+<div class="claudemd-header">
+  <span class="file-label">
+    <mat-icon>description</mat-icon> CLAUDE.md
+  </span>
+  <button mat-stroked-button (click)="copyAll()">
+    <mat-icon>{{ clipboard.isCopied('claudemd-all') ? 'check' : 'content_copy' }}</mat-icon>
+    {{ clipboard.isCopied('claudemd-all') ? 'Copiado' : 'Copiar todo' }}
+  </button>
+</div>
+
+<div class="claudemd-content">
+  <markdown [data]="content()"></markdown>
+</div>

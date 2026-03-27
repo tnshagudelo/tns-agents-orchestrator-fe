@@ -1,4 +1,4 @@
-import { 
+import {
   Component,
   inject,
   signal,
@@ -7,7 +7,7 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef,
-  AfterViewChecked, } 
+  AfterViewChecked, }
 from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -109,6 +109,37 @@ import mermaid from 'mermaid';
                     <markdown [data]="msg.content" class="markdown-content"></markdown>
                     @if (msg.isStreaming) {
                       <span class="cursor">▌</span>
+                      <div class="rag-indicator">
+                        <mat-icon class="rag-spin">sync</mat-icon>
+                        <span>Consultando base de conocimiento...</span>
+                      </div>
+                    }
+                    @if (msg.references && msg.references.length > 0) {
+                      <div class="rag-references">
+                        <button class="refs-toggle" (click)="toggleRefs(msg.id)">
+                          <mat-icon>auto_stories</mat-icon>
+                          <span>{{ isRefsVisible(msg.id) ? 'Ocultar' : 'Ver' }} referencias consultadas</span>
+                          <span class="refs-count">{{ msg.references.length }}</span>
+                          <mat-icon class="chevron" [class.rotated]="isRefsVisible(msg.id)">expand_more</mat-icon>
+                        </button>
+                        @if (isRefsVisible(msg.id)) {
+                          <div class="refs-list">
+                            @for (ref of msg.references; track ref.fileName) {
+                              <div class="ref-item">
+                                <div class="ref-header">
+                                  <mat-icon class="ref-icon">description</mat-icon>
+                                  <span class="ref-filename">{{ ref.fileName }}</span>
+                                  <span class="ref-score" [class]="getScoreClass(ref.relevance)">
+                                    {{ (ref.relevance * 100).toFixed(0) }}% relevante
+                                  </span>
+                                </div>
+                                <p class="ref-excerpt">"{{ ref.excerpt }}"</p>
+                                <span class="ref-category">{{ ref.category }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
                     }
                   } @else {
                     <p class="user-text">{{ msg.content }}</p>
@@ -477,6 +508,73 @@ import mermaid from 'mermaid';
       flex-shrink: 0;
       margin-bottom: 20px;
     }
+
+    /* ── RAG Indicator (durante streaming) ── */
+    .rag-indicator {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; opacity: 0.8;
+      mat-icon { font-size: 13px; width: 13px; height: 13px; animation: spin 1.5s linear infinite; }
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ── RAG References block ── */
+    .rag-references {
+      margin-top: 12px;
+      border-top: 0.5px solid rgba(0,0,0,0.12);
+      padding-top: 10px;
+    }
+
+    .refs-toggle {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer; padding: 4px 0;
+      font-size: 12px; color: rgba(0,0,0,0.5); width: 100%; text-align: left;
+      transition: color 0.15s;
+      &:hover { color: #3f51b5; }
+      mat-icon { font-size: 15px; width: 15px; height: 15px; }
+      .refs-count {
+        background: #e8eaf6; color: #3f51b5;
+        font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 500;
+      }
+      .chevron { margin-left: auto; transition: transform 0.2s; &.rotated { transform: rotate(180deg); } }
+    }
+
+    .refs-list {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .ref-item {
+      background: rgba(255,255,255,0.6); border: 0.5px solid rgba(0,0,0,0.1);
+      border-left: 3px solid #3f51b5; border-radius: 6px; padding: 8px 10px;
+    }
+
+    .ref-header {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+      .ref-icon { font-size: 13px; width: 13px; height: 13px; color: #3f51b5; }
+      .ref-filename { font-size: 11px; font-weight: 500; color: rgba(0,0,0,0.75); flex: 1; }
+      .ref-score {
+        font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500;
+        &.score-high   { background: #EAF3DE; color: #3B6D11; }
+        &.score-medium { background: #FAEEDA; color: #854F0B; }
+        &.score-low    { background: #F1EFE8; color: #5F5E5A; }
+      }
+    }
+
+    .ref-excerpt {
+      font-size: 11px; color: rgba(0,0,0,0.5); font-style: italic;
+      line-height: 1.5; margin: 4px 0;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .ref-category {
+      font-size: 10px; background: #e8eaf6; color: #3f51b5;
+      padding: 1px 7px; border-radius: 10px;
+    }
   `],
 })
 
@@ -505,6 +603,7 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
 
   private shouldScroll = false;
   private shouldRenderMermaid = false;
+  private expandedRefs = signal<Set<string>>(new Set());
 
   ngOnInit(): void {
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
@@ -571,6 +670,7 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
       complete: () => {
         assistantMsg.content     = this.fixMermaidBlocks(assistantMsg.content);
         assistantMsg.isStreaming = false;
+        assistantMsg.references  = this.chatService.currentReferences();
         this.messages.update(msgs => [...msgs]);
         this.isLoading.set(false);
         this.shouldScroll = true;
@@ -594,6 +694,24 @@ export class ProjectManagerAgentComponent implements OnInit, OnDestroy, AfterVie
   protected resetChat(): void {
     this.messages.set([]);
     this.chatService.resetSession();
+  }
+
+  isRefsVisible(id: string): boolean {
+    return this.expandedRefs().has(id);
+  }
+
+  toggleRefs(id: string): void {
+    this.expandedRefs.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  getScoreClass(relevance: number): string {
+    if (relevance >= 0.85) return 'score-high';
+    if (relevance >= 0.65) return 'score-medium';
+    return 'score-low';
   }
 
   private fixMermaidBlocks(content: string): string {
@@ -642,7 +760,7 @@ private formatMermaidBlock(block: string): string {
   });
 
   // Cada entrada con : también va en su propia línea (tareas del gantt, pie, timeline)
-  result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
+  result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^\n]+)/g, '\n    $1');
 
   // Limpia líneas vacías y espacios
   return result

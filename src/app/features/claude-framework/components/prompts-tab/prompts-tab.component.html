@@ -1,0 +1,21 @@
+<!-- Info banner -->
+<div class="info-banner">
+  <mat-icon>info</mat-icon>
+  <span>Los textos entre <strong>[corchetes]</strong> son parametros que debes reemplazar con los datos de tu proyecto.</span>
+</div>
+
+<!-- Prompts list -->
+<div class="prompts-list">
+  @for (prompt of prompts(); track prompt.id) {
+    <mat-card class="prompt-card">
+      <div class="prompt-header">
+        <span class="prompt-label">{{ prompt.label }}</span>
+        <button mat-stroked-button (click)="copy(prompt.text, prompt.id)">
+          <mat-icon>{{ clipboard.isCopied(prompt.id) ? 'check' : 'content_copy' }}</mat-icon>
+          {{ clipboard.isCopied(prompt.id) ? 'Copiado' : 'Copiar' }}
+        </button>
+      </div>
+      <pre class="prompt-text">{{ prompt.text }}</pre>
+    </mat-card>
+  }
+</div>
