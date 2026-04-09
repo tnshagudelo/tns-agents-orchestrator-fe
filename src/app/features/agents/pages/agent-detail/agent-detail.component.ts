@@ -23,73 +23,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
     MatDividerModule,
     StatusBadgeComponent,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <button mat-icon-button (click)="back()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <h1>{{ agent()?.name ?? 'Agent Detail' }}</h1>
-        @if (agent()) {
-          <app-status-badge [status]="agent()!.status" />
-        }
-        <div class="actions">
-          <button mat-stroked-button (click)="edit()">
-            <mat-icon>edit</mat-icon> Edit
-          </button>
-          @if (agent()?.status !== 'running') {
-            <button mat-raised-button color="primary" (click)="start()">
-              <mat-icon>play_arrow</mat-icon> Start
-            </button>
-          } @else {
-            <button mat-raised-button color="warn" (click)="stop()">
-              <mat-icon>stop</mat-icon> Stop
-            </button>
-          }
-        </div>
-      </div>
-
-      @if (agent(); as a) {
-        <mat-tab-group>
-          <mat-tab label="Overview">
-            <div class="tab-content">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label>Type</label>
-                  <span>{{ a.type }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Model</label>
-                  <span>{{ a.model ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Description</label>
-                  <span>{{ a.description }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Created</label>
-                  <span>{{ a.createdAt | date:'medium' }}</span>
-                </div>
-              </div>
-              @if (a.tools?.length) {
-                <h3>Tools</h3>
-                <mat-chip-set>
-                  @for (tool of a.tools; track tool) {
-                    <mat-chip>{{ tool }}</mat-chip>
-                  }
-                </mat-chip-set>
-              }
-            </div>
-          </mat-tab>
-          <mat-tab label="Configuration">
-            <div class="tab-content">
-              <pre class="config-view">{{ a.config | json }}</pre>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      }
-    </div>
-  `,
+  templateUrl: './agent-detail.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }

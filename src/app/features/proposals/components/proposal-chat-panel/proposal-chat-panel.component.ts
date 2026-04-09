@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, inject, input, output, signal, viewChild, ElementRef, AfterViewChecked, OnInit, effect } from '@angular/core';
 import mermaid from 'mermaid';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -30,247 +30,12 @@ export interface ChatPanelMessage {
     MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule,
     MatProgressSpinnerModule, MatChipsModule, MarkdownModule,
   ],
-  template: `
-    <div class="chat-panel">
-      <div class="messages" #messagesContainer>
-        @if (messages().length === 0) {
-          <div class="empty-chat">
-            <mat-icon>psychology</mat-icon>
-            <span>Describe lo que necesitas refinar en esta propuesta.</span>
-            <div class="quick-chips">
-              @for (s of suggestions; track s) {
-                <button mat-stroked-button class="quick-chip" (click)="useSuggestion(s)">{{ s }}</button>
-              }
-            </div>
-          </div>
-        }
-
-        @for (msg of messages(); track msg.id) {
-          <div class="message" [class.message-user]="msg.role === 'user'" [class.message-agent]="msg.role === 'assistant'">
-            <div class="msg-avatar">
-              <mat-icon>{{ msg.role === 'user' ? 'person' : 'psychology' }}</mat-icon>
-            </div>
-            <div class="msg-bubble">
-              @if (msg.role === 'assistant') {
-                <markdown [data]="msg.content" class="md-content"></markdown>
-                @if (msg.isStreaming) {
-                  <span class="cursor">▌</span>
-                  <div class="rag-indicator">
-                    <mat-icon class="rag-spin">sync</mat-icon>
-                    <span>Consultando lineamientos de arquitectura...</span>
-                  </div>
-                }
-                @if (msg.references && msg.references.length > 0) {
-                  <div class="rag-references">
-                    <button class="refs-toggle" (click)="toggleRefs(msg.id)">
-                      <mat-icon>auto_stories</mat-icon>
-                      <span>{{ isRefsVisible(msg.id) ? 'Ocultar' : 'Ver' }} lineamientos consultados</span>
-                      <span class="refs-count">{{ msg.references.length }}</span>
-                      <mat-icon class="chevron" [class.rotated]="isRefsVisible(msg.id)">expand_more</mat-icon>
-                    </button>
-                    @if (isRefsVisible(msg.id)) {
-                      <div class="refs-list">
-                        @for (ref of msg.references; track ref.fileName) {
-                          <div class="ref-item">
-                            <div class="ref-header">
-                              <mat-icon class="ref-icon">description</mat-icon>
-                              <span class="ref-filename">{{ ref.fileName }}</span>
-                              <span class="ref-score" [class]="getScoreClass(ref.relevance)">
-                                {{ (ref.relevance * 100).toFixed(0) }}% relevante
-                              </span>
-                            </div>
-                            <p class="ref-excerpt">"{{ ref.excerpt }}"</p>
-                            <span class="ref-category">{{ ref.category }}</span>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              } @else {
-                <p>{{ msg.content }}</p>
-              }
-              <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
-            </div>
-          </div>
-        }
-
-        @if (chatService.isStreaming() && lastIsUser()) {
-          <div class="message message-agent">
-            <div class="msg-avatar"><mat-icon>psychology</mat-icon></div>
-            <div class="msg-bubble thinking">
-              <mat-progress-spinner diameter="14" mode="indeterminate"></mat-progress-spinner>
-              <span>Analizando...</span>
-            </div>
-          </div>
-        }
-
-        <div #messagesEnd></div>
-      </div>
-
-      <div class="input-area">
-        <mat-form-field appearance="outline" class="input-field">
-          <textarea matInput [(ngModel)]="inputText" [disabled]="chatService.isStreaming()"
-            (keydown)="onKey($event)" rows="2"
-            placeholder="Refina la propuesta o haz una pregunta...">
-          </textarea>
-        </mat-form-field>
-        <button mat-fab color="primary" class="send-btn"
-          (click)="send()" [disabled]="chatService.isStreaming() || !inputText.trim()">
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
-
-      @if (showSaveIteration()) {
-        <div class="save-bar">
-          <span>Respuesta completa.</span>
-          <button mat-raised-button color="accent" (click)="saveAsIteration()">
-            <mat-icon>save</mat-icon> Guardar como iteración
-          </button>
-        </div>
-      }
-    </div>
-  `,
-  styles: [`
-    .chat-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-
-    .messages {
-      flex: 1; overflow-y: auto; padding: 16px; display: flex;
-      flex-direction: column; gap: 12px; min-height: 0;
-    }
-
-    .empty-chat {
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      padding: 32px 16px; color: rgba(0,0,0,0.4); text-align: center;
-      mat-icon { font-size: 3rem; width: 3rem; height: 3rem; opacity: 0.3; }
-    }
-    .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-    .quick-chip { font-size: 0.75rem; }
-
-    .message { display: flex; gap: 8px; align-items: flex-start; animation: fadeIn 0.2s ease; }
-    .message-user { flex-direction: row-reverse; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .msg-avatar {
-      width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; background: #e8eaf6;
-      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
-    }
-    .message-user .msg-avatar { background: #2D1B6B; color: white; }
-
-    .msg-bubble {
-      max-width: 80%; background: #ede9fe; border: 1px solid #c4b5fd;
-      border-radius: 4px 12px 12px 12px; padding: 10px 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      p { margin: 0; font-size: 0.88rem; line-height: 1.5; }
-    }
-    .message-user .msg-bubble {
-      background: #2D1B6B; color: white; border: none;
-      border-radius: 12px 4px 12px 12px;
-      box-shadow: 0 1px 3px rgba(45,27,107,0.3);
-    }
-
-    .thinking { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: rgba(0,0,0,0.5); }
-
-    .md-content { font-size: 0.88rem; line-height: 1.6; }
-    .md-content ::ng-deep h2 { font-size: 1rem; font-weight: 600; margin: 12px 0 6px; color: #2D1B6B; }
-    .md-content ::ng-deep table { border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 8px 0; }
-    .md-content ::ng-deep th { background: #ede9fe; padding: 6px 10px; border: 1px solid #c4b5fd; }
-    .md-content ::ng-deep td { padding: 4px 10px; border: 1px solid #e5e7eb; }
-    .md-content ::ng-deep ul { padding-left: 18px; margin: 6px 0; }
-    .md-content ::ng-deep li { margin: 3px 0; font-size: 0.85rem; }
-
-    .cursor { display: inline-block; animation: blink 0.8s infinite; color: #2D1B6B; font-weight: bold; }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-
-    .msg-time { display: block; font-size: 0.65rem; color: rgba(0,0,0,0.35); margin-top: 4px; text-align: right; }
-    .message-user .msg-time { color: rgba(255,255,255,0.6); }
-
-    .input-area {
-      display: flex; align-items: flex-end; gap: 8px; padding: 12px 16px;
-      border-top: 1px solid rgba(0,0,0,0.08); flex-shrink: 0;
-    }
-    .input-field { flex: 1; }
-    .send-btn { flex-shrink: 0; margin-bottom: 16px; width: 40px; height: 40px; }
-
-    .save-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 16px; background: #f0fdf4; border-top: 1px solid #bbf7d0;
-      font-size: 0.85rem; color: #166534;
-    }
-
-    /* ── RAG Indicator (durante streaming) ── */
-    .rag-indicator {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; opacity: 0.8;
-      mat-icon { font-size: 13px; width: 13px; height: 13px; animation: spin 1.5s linear infinite; }
-    }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    /* ── RAG References block ── */
-    .rag-references {
-      margin-top: 12px;
-      border-top: 0.5px solid rgba(0,0,0,0.12);
-      padding-top: 10px;
-    }
-
-    .refs-toggle {
-      display: flex; align-items: center; gap: 6px;
-      background: none; border: none; cursor: pointer; padding: 4px 0;
-      font-size: 12px; color: rgba(0,0,0,0.5); width: 100%; text-align: left;
-      transition: color 0.15s;
-      &:hover { color: #2D1B6B; }
-      mat-icon { font-size: 15px; width: 15px; height: 15px; }
-      .refs-count {
-        background: #EEEDFE; color: #534AB7;
-        font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 500;
-      }
-      .chevron { margin-left: auto; transition: transform 0.2s; &.rotated { transform: rotate(180deg); } }
-    }
-
-    .refs-list {
-      display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
-      animation: slideDown 0.2s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .ref-item {
-      background: rgba(255,255,255,0.6); border: 0.5px solid rgba(0,0,0,0.1);
-      border-left: 3px solid #7C3AED; border-radius: 6px; padding: 8px 10px;
-    }
-
-    .ref-header {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
-      .ref-icon { font-size: 13px; width: 13px; height: 13px; color: #7C3AED; }
-      .ref-filename { font-size: 11px; font-weight: 500; color: rgba(0,0,0,0.75); flex: 1; }
-      .ref-score {
-        font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500;
-        &.score-high   { background: #EAF3DE; color: #3B6D11; }
-        &.score-medium { background: #FAEEDA; color: #854F0B; }
-        &.score-low    { background: #F1EFE8; color: #5F5E5A; }
-      }
-    }
-
-    .ref-excerpt {
-      font-size: 11px; color: rgba(0,0,0,0.5); font-style: italic;
-      line-height: 1.5; margin: 4px 0;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
-
-    .ref-category {
-      font-size: 10px; background: #EEEDFE; color: #534AB7;
-      padding: 1px 7px; border-radius: 10px;
-    }
-  `],
+  templateUrl: './proposal-chat-panel.component.html',
+  styleUrl: './proposal-chat-panel.component.scss',
 })
 export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
-  @ViewChild('messagesEnd') private messagesEnd!: ElementRef;
-  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  private readonly messagesEnd = viewChild<ElementRef>('messagesEnd');
+  private readonly messagesContainer = viewChild<ElementRef>('messagesContainer');
 
   proposalId = input.required<string>();
   projectName = input.required<string>();
@@ -290,12 +55,51 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
 
   readonly suggestions = [
     'Ajusta el equipo para un plazo más corto',
-    'Reduce el presupuesto un 20%',
+    'Evalúa el nivel de riesgo del proyecto',
     'Agrega módulo de reportes',
   ];
 
+  constructor() {
+    // Reaccionar al cambio de proposalId: resetear y cargar mensajes del nuevo id
+    effect(() => {
+      this.proposalId(); // track dependency
+      this.messages.set([]);
+      this.lastCompletedContent = '';
+      this.showSaveIteration.set(false);
+      this.inputText = '';
+      this.loadMessages();
+    });
+  }
+
   ngOnInit(): void {
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+  }
+
+  // ── Persistencia por propuesta en sessionStorage ──────────────────────────
+
+  private get storageKey(): string {
+    return `chat_msgs_${this.proposalId()}`;
+  }
+
+  private saveMessages(): void {
+    const serializable = this.messages()
+      .filter(m => !m.isStreaming)
+      .map(m => ({ ...m, timestamp: m.timestamp.toISOString() }));
+    sessionStorage.setItem(this.storageKey, JSON.stringify(serializable));
+  }
+
+  private loadMessages(): void {
+    try {
+      const raw = sessionStorage.getItem(this.storageKey);
+      if (!raw) return;
+      const parsed = (JSON.parse(raw) as Array<ChatPanelMessage & { timestamp: string }>)
+        .map(m => ({ ...m, timestamp: new Date(m.timestamp), isStreaming: false }));
+      this.messages.set(parsed);
+      this.shouldScroll = true;
+      this.shouldRenderMermaid = true;
+    } catch {
+      sessionStorage.removeItem(this.storageKey);
+    }
   }
 
   protected lastIsUser() {
@@ -305,7 +109,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
-      this.messagesEnd?.nativeElement?.scrollIntoView({ behavior: 'smooth' });
+      this.messagesEnd()?.nativeElement?.scrollIntoView({ behavior: 'smooth' });
       this.shouldScroll = false;
     }
     if (this.shouldRenderMermaid) {
@@ -315,7 +119,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
   }
 
   private renderMermaidDivs(): void {
-    const container: HTMLElement = this.messagesContainer?.nativeElement;
+    const container: HTMLElement | undefined = this.messagesContainer()?.nativeElement;
     if (!container) return;
     const divs = Array.from(
       container.querySelectorAll<HTMLElement>('.mermaid:not([data-mermaid-processed])')
@@ -343,6 +147,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     this.inputText = '';
     this.showSaveIteration.set(false);
     this.addMsg('user', text);
+    this.saveMessages(); // persiste el mensaje del usuario inmediatamente
 
     const agentMsg = this.addMsg('assistant', '');
     agentMsg.isStreaming = true;
@@ -358,14 +163,17 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
         agentMsg.isStreaming = false;
         this.messages.update(m => [...m]);
         this.notifications.error('Error al conectar con el agente');
+        this.saveMessages(); // persiste el error como estado final
       },
       complete: () => {
         agentMsg.content = this.stripInternalMarkers(agentMsg.content);
+        agentMsg.content = ProposalChatService.stripMetricsBlock(agentMsg.content);
         agentMsg.content = this.fixMermaidBlocks(agentMsg.content);
         agentMsg.isStreaming = false;
         agentMsg.references = this.chatService.currentReferences();
         this.lastCompletedContent = agentMsg.content;
         this.messages.update(m => [...m]);
+        this.saveMessages(); // persiste la respuesta completa del agente
         this.showSaveIteration.set(true);
         this.shouldScroll = true;
         this.shouldRenderMermaid = true;
@@ -426,7 +234,7 @@ export class ProposalChatPanelComponent implements OnInit, AfterViewChecked {
     keywords.forEach(kw => {
       result = result.replace(new RegExp(`(?<!\\n)(${kw})`, 'g'), '\n$1');
     });
-    result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^,\n]+)/g, '\n    $1');
+    result = result.replace(/\s+(["A-Za-záéíóú][^:]+\s*:[^\n]+)/g, '\n    $1');
     return result.split('\n').map((l: string) => l.trimEnd()).filter((l: string) => l.trim().length > 0).join('\n');
   }
 

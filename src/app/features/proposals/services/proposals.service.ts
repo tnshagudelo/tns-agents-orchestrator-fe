@@ -1,9 +1,51 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { BaseApiService } from '../../../core/services/base-api.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { CreateProposalRequest, Proposal, ProposalApprovalStep, ProposalComment, ProposalIteration, ProposalRole, ProposalStatus } from '../models/proposal.model';
-import { CURRENT_USER } from '../models/mock-users.const';
+
+/** Raw shape coming from the backend before normalization */
+interface RawProposalResponse {
+  id: string;
+  name: string;
+  projectName: string;
+  status: string;
+  sessionId: string;
+  iterations: RawIterationResponse[];
+  currentIteration?: number;
+  comments: ProposalComment[];
+  approvalFlow: RawApprovalStepResponse[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+interface RawIterationResponse {
+  version?: number;
+  content?: string;
+  Content?: string;
+  components?: string[];
+  Components?: string[];
+  teamSize?: number;
+  TeamSize?: number;
+  durationWeeks?: number;
+  DurationWeeks?: number;
+  riskLevel?: string;
+  RiskLevel?: string;
+  createdAt?: string;
+  CreatedAt?: string;
+}
+
+interface RawApprovalStepResponse {
+  role: string;
+  userId: string;
+  userName: string;
+  status: string;
+  decidedAt?: string;
+  note?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProposalsService extends BaseApiService {
@@ -11,9 +53,16 @@ export class ProposalsService extends BaseApiService {
   private readonly _selectedProposal = signal<Proposal | null>(null);
   private readonly _isLoading = signal(false);
 
+  private readonly auth = inject(AuthService);
+
   readonly proposals = this._proposals.asReadonly();
   readonly selectedProposal = this._selectedProposal.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
+
+  private get _currentUser() {
+    const u = this.auth.currentUser();
+    return { id: u?.id ?? '', name: u?.username ?? '' };
+  }
 
   constructor(http: HttpClient) {
     super(http);
@@ -21,7 +70,7 @@ export class ProposalsService extends BaseApiService {
 
   loadAll(): Observable<Proposal[]> {
     this._isLoading.set(true);
-    return this.get<any[]>('/proposals').pipe(
+    return this.get<RawProposalResponse[]>('/proposals').pipe(
       map(items => (items ?? []).map(p => this._normalize(p))),
       tap(items => {
         this._proposals.set(items);
@@ -32,7 +81,7 @@ export class ProposalsService extends BaseApiService {
 
   getById(id: string): Observable<Proposal> {
     this._isLoading.set(true);
-    return this.get<any>(`/proposals/${id}`).pipe(
+    return this.get<RawProposalResponse>(`/proposals/${id}`).pipe(
       map(p => this._normalize(p)),
       tap(p => {
         this._selectedProposal.set(p);
@@ -44,37 +93,88 @@ export class ProposalsService extends BaseApiService {
   create(data: Omit<CreateProposalRequest, 'createdByUserId' | 'createdByUserName'>): Observable<Proposal> {
     const payload: CreateProposalRequest = {
       ...data,
-      createdByUserId: CURRENT_USER.id,
-      createdByUserName: CURRENT_USER.name,
+      createdByUserId: this._currentUser.id,
+      createdByUserName: this._currentUser.name,
     };
-    return this.post<any>('/proposals', payload).pipe(
+    return this.post<RawProposalResponse>('/proposals', payload).pipe(
       map(p => this._normalize(p)),
       tap(p => this._proposals.update(list => [p, ...list]))
     );
   }
 
   updateIteration(id: string, iteration: Omit<ProposalIteration, 'version' | 'createdAt'>): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/iterations`, iteration).pipe(
-      map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+    // Optimistic: agrega la nueva iteración localmente de inmediato
+    const snapshot = this._selectedProposal();
+    if (snapshot?.id === id) {
+      const newVersion = (snapshot.iterations[snapshot.iterations.length - 1]?.version ?? 0) + 1;
+      const optimisticIteration: ProposalIteration = {
+        ...iteration,
+        riskLevel: iteration.riskLevel,
+        version: newVersion,
+        createdAt: new Date(),
+      };
+      this._syncLocal({
+        ...snapshot,
+        iterations: [...snapshot.iterations, optimisticIteration],
+        currentIteration: newVersion,
+        updatedAt: new Date(),
+      });
+    }
+
+    return this.post<RawProposalResponse>(`/proposals/${id}/iterations`, iteration).pipe(
+      map(raw => raw?.id && raw?.iterations ? this._normalize(raw) : ({
+        ...(this._selectedProposal()!),
+      })),
+      tap(p => this._syncLocal(p)),
+      catchError(err => {
+        if (snapshot) this._syncLocal(snapshot);
+        return throwError(() => err);
+      })
     );
   }
 
   submitForReview(id: string): Observable<Proposal> {
-    return this.post<any>(`/proposals/${id}/submit`, { userId: CURRENT_USER.id }).pipe(
+    return this.post<RawProposalResponse>(`/proposals/${id}/submit`, { userId: this._currentUser.id }).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
   }
+
+  private static readonly _statusIntMap: Record<ProposalStatus, number> = {
+    draft:            0,
+    in_review:        1,
+    pending_approval: 2,
+    approved:         3,
+    rejected:         4,
+  };
 
   updateStatus(id: string, status: ProposalStatus): Observable<Proposal> {
-    return this.patch<any>(`/proposals/${id}`, { status }).pipe(
+    // Optimistic: apply new status to local signal immediately
+    const previous = this._proposals().find(p => p.id === id) ?? null;
+    if (previous) {
+      this._syncLocal({ ...previous, status });
+    }
+
+    return this.patch<RawProposalResponse>(`/proposals/${id}`, { status: ProposalsService._statusIntMap[status] }).pipe(
       map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+      tap(p => this._syncLocal(p)),
+      catchError(err => {
+        // Revert optimistic update on failure
+        if (previous) {
+          this._syncLocal(previous);
+        }
+        return throwError(() => err);
+      })
     );
   }
 
-  addComment(id: string, comment: Omit<ProposalComment, 'id' | 'createdAt'>): Observable<Proposal> {
+  deleteProposal(id: string): Observable<void> {
+    return this.delete<void>(`/proposals/${id}`).pipe(
+      tap(() => this._proposals.update(list => list.filter(p => p.id !== id)))
+    );
+  }
+
+  addComment(id: string, comment: Omit<ProposalComment, 'id' | 'createdAt'>): Observable<void> {
     const roleIntMap: Record<ProposalRole, number> = { builder: 0, reviewer: 1, approver: 2 };
     const payload = {
       authorId: comment.authorId,
@@ -83,9 +183,31 @@ export class ProposalsService extends BaseApiService {
       body: comment.body,
       iterationVersion: comment.iterationVersion,
     };
-    return this.post<any>(`/proposals/${id}/comments`, payload).pipe(
-      map(p => this._normalize(p)),
-      tap(p => this._syncLocal(p))
+
+    // Optimistic: agrega el comentario localmente de inmediato
+    const optimistic: ProposalComment = {
+      ...comment,
+      id: `tmp-${crypto.randomUUID()}`,
+      createdAt: new Date(),
+    };
+    const snapshot = this._selectedProposal();
+    if (snapshot?.id === id) {
+      this._syncLocal({ ...snapshot, comments: [...snapshot.comments, optimistic] });
+    }
+
+    return this.post<RawProposalResponse>(`/proposals/${id}/comments`, payload).pipe(
+      tap(raw => {
+        // Si el backend retorna la propuesta completa, sincronizamos; si no, dejamos el optimistic
+        if (raw?.id && raw?.iterations) {
+          this._syncLocal(this._normalize(raw));
+        }
+      }),
+      map(() => undefined),
+      catchError(err => {
+        // Revertir optimistic si falla
+        if (snapshot) this._syncLocal(snapshot);
+        return throwError(() => err);
+      })
     );
   }
 
@@ -96,11 +218,11 @@ export class ProposalsService extends BaseApiService {
       changes_requested:  'RequestChanges',
     };
     const payload = {
-      userId: CURRENT_USER.id,
+      userId: this._currentUser.id,
       decision: decisionMap[status] ?? 'Approve',
       note: note ?? null,
     };
-    return this.post<any>(`/proposals/${id}/decisions`, payload).pipe(
+    return this.post<RawProposalResponse>(`/proposals/${id}/decisions`, payload).pipe(
       map(p => this._normalize(p)),
       tap(p => this._syncLocal(p))
     );
@@ -108,25 +230,41 @@ export class ProposalsService extends BaseApiService {
 
   // ── Normalizer: maps backend PascalCase enums → frontend lowercase ──────────
 
-  private _normalize(raw: any): Proposal {
+  private _normalize(raw: RawProposalResponse): Proposal {
     return {
       ...raw,
       status: this._normalizeStatus(raw.status),
       currentIteration: raw.currentIteration
-        ?? (raw.iterations?.length ? raw.iterations[raw.iterations.length - 1].version : 0),
-      iterations: (raw.iterations ?? []).map((i: any) => ({
-        ...i,
-        createdAt: new Date(i.createdAt),
-      })),
-      approvalFlow: (raw.approvalFlow ?? []).map((s: any) => ({
-        ...s,
+        ?? (raw.iterations?.length ? raw.iterations[raw.iterations.length - 1].version ?? 0 : 0),
+      iterations: (raw.iterations ?? []).map((i: RawIterationResponse) => this._normalizeIteration(i)),
+      approvalFlow: (raw.approvalFlow ?? []).map((s: RawApprovalStepResponse) => ({
         role: s.role?.toLowerCase() as ProposalRole,
+        userId: s.userId,
+        userName: s.userName,
         status: this._normalizeApprovalStatus(s.status),
+        decidedAt: s.decidedAt ? new Date(s.decidedAt) : undefined,
+        note: s.note,
       })),
       tags: raw.tags ?? [],
       comments: raw.comments ?? [],
       createdAt: new Date(raw.createdAt),
       updatedAt: new Date(raw.updatedAt),
+    };
+  }
+
+  private _normalizeIteration(i: RawIterationResponse): ProposalIteration {
+    const riskMap: Record<string, ProposalIteration['riskLevel']> = {
+      '0': 'low', '1': 'medium', '2': 'high',
+      low: 'low', medium: 'medium', high: 'high',
+    };
+    return {
+      version:       i.version ?? 0,
+      content:       i.content ?? i.Content ?? '',
+      components:    i.components ?? i.Components ?? [],
+      teamSize:      i.teamSize ?? i.TeamSize ?? 0,
+      durationWeeks: i.durationWeeks ?? i.DurationWeeks ?? 0,
+      riskLevel:     riskMap[(i.riskLevel ?? i.RiskLevel ?? 'medium').toString().toLowerCase()] ?? 'medium',
+      createdAt:     new Date(i.createdAt ?? i.CreatedAt ?? Date.now()),
     };
   }
 

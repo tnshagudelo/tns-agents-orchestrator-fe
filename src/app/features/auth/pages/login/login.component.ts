@@ -1,101 +1,100 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { User } from '../../../../shared/models';
+import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCardModule,
-    MatIconModule,
-  ],
-  template: `
-    <div class="login-container">
-      <mat-card class="login-card">
-        <mat-card-header>
-          <mat-icon class="login-icon">hub</mat-icon>
-          <mat-card-title>Agents Orchestrator</mat-card-title>
-          <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="form" (ngSubmit)="submit()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Username</mat-label>
-              <input matInput formControlName="username" autocomplete="username" />
-              <mat-icon matSuffix>person</mat-icon>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Password</mat-label>
-              <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" />
-              <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
-                <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-            </mat-form-field>
-            <button mat-raised-button color="primary" type="submit" class="full-width login-btn" [disabled]="form.invalid">
-              Sign In
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
+  imports: [MatButtonModule, MatCardModule, MatIconModule],
+  templateUrl: './login.component.html',
   styles: [`
     .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+      background: linear-gradient(160deg, #0d0d1a 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
     }
-    .login-card {
-      width: 400px;
-      padding: 16px;
-      border-radius: 16px !important;
+
+    .login-content {
+      width: 440px; display: flex; flex-direction: column; align-items: center; gap: 36px;
     }
-    .login-icon {
-      font-size: 3rem;
-      width: 3rem;
-      height: 3rem;
-      color: #3f51b5;
-      display: block;
-      margin: 0 auto 8px;
+
+    .login-header {
+      text-align: center; color: white;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      p { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin: 0; letter-spacing: 0.3px; }
     }
-    mat-card-header { flex-direction: column; align-items: center; text-align: center; margin-bottom: 16px; }
-    .full-width { width: 100%; }
-    .login-btn { margin-top: 8px; height: 48px; font-size: 1rem; }
+
+    .login-logo {
+      width: 320px; height: auto;
+      border-radius: 18px;
+      box-shadow:
+        0 4px 24px rgba(98, 0, 234, 0.35),
+        0 0 60px rgba(98, 0, 234, 0.12);
+    }
+
+    .user-cards { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+    .user-card {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06); backdrop-filter: blur(8px);
+      cursor: pointer; transition: all 0.2s; width: 100%; text-align: left;
+      color: white;
+
+      &:hover {
+        background: rgba(255,255,255,0.12);
+        border-color: rgba(218,108,207,0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      }
+    }
+
+    .user-avatar {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      mat-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
+
+      &.avatar-builder  { background: rgba(218,108,207,0.2); color: #da6ccf; }
+      &.avatar-reviewer { background: rgba(186,117,23,0.2);  color: #f0b429; }
+      &.avatar-approver { background: rgba(59,109,17,0.2);   color: #6dd400; }
+    }
+
+    .user-info {
+      display: flex; flex-direction: column; flex: 1; gap: 2px;
+    }
+    .user-name { font-size: 1rem; font-weight: 600; }
+    .user-role { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+
+    .arrow { color: rgba(255,255,255,0.3); transition: color 0.2s; }
+    .user-card:hover .arrow { color: #da6ccf; }
+
+    .login-hint {
+      font-size: 0.72rem; color: rgba(255,255,255,0.3); margin: 0;
+    }
   `],
 })
 export class LoginComponent {
-  private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  showPassword = false;
+  readonly users = MOCK_USERS;
 
-  form = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required],
-  });
-
-  submit(): void {
-    if (this.form.invalid) return;
-    const { username, password } = this.form.getRawValue();
-    this.authService.login({ username: username!, password: password! }).subscribe({
+  loginAs(mockUser: MockUser): void {
+    const user: User = {
+      id: mockUser.id,
+      username: mockUser.name,
+      email: mockUser.email,
+      roles: [mockUser.proposalRole],
+      proposalRole: mockUser.proposalRole,
+    };
+    this.authService.loginWithUser(user).subscribe({
       next: () => this.router.navigate(['/dashboard']),
-      error: () => {
-        // Display error feedback to the user
-        this.form.setErrors({ loginFailed: true });
-      },
     });
   }
 }

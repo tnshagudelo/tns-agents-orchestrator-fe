@@ -1,0 +1,21 @@
+<div class="page-container">
+  <div class="page-header">
+    <mat-icon class="header-icon">terminal</mat-icon>
+    <div>
+      <h1>Context Engineering con Claude Code</h1>
+      <span class="subtitle">Aprende a darle contexto estructurado al agente para mejores resultados y menor consumo de tokens</span>
+    </div>
+  </div>
+
+  <div class="modes-grid">
+    @for (opt of modes; track opt.mode) {
+      <mat-card class="mode-card" (click)="select(opt.mode)" tabindex="0"
+                (keydown.enter)="select(opt.mode)">
+        <mat-icon class="mode-icon">{{ opt.icon }}</mat-icon>
+        <h3>{{ opt.title }}</h3>
+        <p>{{ opt.description }}</p>
+        <mat-icon class="arrow">arrow_forward</mat-icon>
+      </mat-card>
+    }
+  </div>
+</div>

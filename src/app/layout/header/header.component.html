@@ -1,0 +1,48 @@
+<mat-toolbar class="app-header">
+  <button mat-icon-button (click)="toggleSidebar.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button
+    [matBadge]="notificationService.notifications().length || null"
+    matBadgeColor="warn"
+    [matMenuTriggerFor]="notifMenu">
+    <mat-icon>notifications</mat-icon>
+  </button>
+
+  <mat-menu #notifMenu="matMenu">
+    @if (notificationService.notifications().length === 0) {
+      <div class="empty-notifications">Sin notificaciones nuevas</div>
+    } @else {
+      @for (n of notificationService.notifications(); track n.id) {
+        <button mat-menu-item (click)="notificationService.dismiss(n.id)">
+          <mat-icon [color]="n.type === 'error' ? 'warn' : n.type === 'success' ? 'primary' : ''">
+            {{ n.type === 'error' ? 'error' : n.type === 'success' ? 'check_circle' : 'info' }}
+          </mat-icon>
+          <span>{{ n.message }}</span>
+        </button>
+      }
+    }
+  </mat-menu>
+
+  <button mat-icon-button [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    @if (authService.currentUser(); as user) {
+      <div class="user-info">
+        <span class="user-info-name">{{ user.username }}</span>
+        <span class="user-info-role">{{ roleLabel(user.proposalRole) }}</span>
+      </div>
+    }
+    <button mat-menu-item routerLink="/settings">
+      <mat-icon>settings</mat-icon> Configuración
+    </button>
+    <button mat-menu-item (click)="authService.logout()">
+      <mat-icon>logout</mat-icon> Cerrar sesión
+    </button>
+  </mat-menu>
+</mat-toolbar>

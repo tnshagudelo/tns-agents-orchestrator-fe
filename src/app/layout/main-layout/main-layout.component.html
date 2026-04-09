@@ -1,0 +1,10 @@
+<div class="app-shell">
+  <app-sidebar [collapsed]="sidebarCollapsed()" />
+  <div class="content-area">
+    <app-header (toggleSidebar)="toggleSidebar()" />
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+<app-notification-toast />

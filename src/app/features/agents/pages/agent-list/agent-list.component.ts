@@ -23,56 +23,7 @@ import { Agent, AgentStatus } from '../../../../shared/models';
     FormsModule,
     AgentCardComponent,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Agents</h1>
-        <button mat-raised-button color="primary" (click)="createAgent()">
-          <mat-icon>add</mat-icon> New Agent
-        </button>
-      </div>
-
-      <div class="filters">
-        <mat-form-field appearance="outline">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="searchTerm" placeholder="Search agents..." />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="statusFilter">
-            <mat-option value="">All</mat-option>
-            <mat-option value="idle">Idle</mat-option>
-            <mat-option value="running">Running</mat-option>
-            <mat-option value="paused">Paused</mat-option>
-            <mat-option value="error">Error</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      @if (agentService.isLoading()) {
-        <div class="loading-state">Loading agents...</div>
-      } @else if (filteredAgents.length === 0) {
-        <div class="empty-state">
-          <mat-icon>smart_toy</mat-icon>
-          <p>No agents found. Create your first agent!</p>
-        </div>
-      } @else {
-        <div class="agents-grid">
-          @for (agent of filteredAgents; track agent.id) {
-            <app-agent-card
-              [agent]="agent"
-              (view)="viewAgent($event)"
-              (start)="startAgent($event)"
-              (stop)="stopAgent($event)"
-              (edit)="editAgent($event)"
-              (delete)="deleteAgent($event)"
-            />
-          }
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './agent-list.component.html',
   styles: [`
     .page-container { padding: 24px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }

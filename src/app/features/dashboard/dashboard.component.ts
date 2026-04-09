@@ -11,50 +11,7 @@ import { MonitoringService } from '../monitoring/services/monitoring.service';
   selector: 'app-dashboard',
   standalone: true,
   imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule],
-  template: `
-    <div class="page-container">
-      <h1>Dashboard</h1>
-      <p class="subtitle">Welcome to the Agents Orchestrator</p>
-
-      <div class="kpi-grid">
-        <mat-card class="kpi-card kpi-card--agents" routerLink="/agents">
-          <mat-icon>smart_toy</mat-icon>
-          <span class="kpi-value">{{ agentService.agents().length }}</span>
-          <span class="kpi-label">Total Agents</span>
-          <span class="kpi-sub">{{ agentService.activeAgents().length }} running</span>
-        </mat-card>
-
-        <mat-card class="kpi-card kpi-card--pipelines" routerLink="/orchestration">
-          <mat-icon>account_tree</mat-icon>
-          <span class="kpi-value">{{ orchestrationService.pipelines().length }}</span>
-          <span class="kpi-label">Pipelines</span>
-          <span class="kpi-sub">{{ orchestrationService.activeRuns().length }} active runs</span>
-        </mat-card>
-
-        <mat-card class="kpi-card kpi-card--logs" routerLink="/monitoring">
-          <mat-icon>monitor_heart</mat-icon>
-          <span class="kpi-value">{{ monitoringService.logs().length }}</span>
-          <span class="kpi-label">Log Entries</span>
-          <span class="kpi-sub">Last 24 hours</span>
-        </mat-card>
-      </div>
-
-      <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="action-buttons">
-          <button mat-raised-button color="primary" routerLink="/agents/create">
-            <mat-icon>add</mat-icon> New Agent
-          </button>
-          <button mat-stroked-button routerLink="/orchestration">
-            <mat-icon>account_tree</mat-icon> View Pipelines
-          </button>
-          <button mat-stroked-button routerLink="/monitoring">
-            <mat-icon>monitor_heart</mat-icon> Open Monitoring
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './dashboard.component.html',
   styles: [`
     .page-container { padding: 24px; }
     h1 { margin: 0; font-size: 2rem; font-weight: 700; }

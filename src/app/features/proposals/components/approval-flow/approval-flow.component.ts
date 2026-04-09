@@ -7,24 +7,7 @@ import { ProposalApprovalStep } from '../../models/proposal.model';
   selector: 'app-approval-flow',
   standalone: true,
   imports: [MatIconModule, MatTooltipModule],
-  template: `
-    <div class="approval-flow">
-      @for (step of steps(); track step.role; let last = $last) {
-        <div class="step" [class]="'step-' + step.status">
-          <div class="step-icon" [matTooltip]="step.userName">
-            <mat-icon>{{ stepIcon(step.status) }}</mat-icon>
-          </div>
-          <div class="step-info">
-            <span class="step-role">{{ roleLabel(step.role) }}</span>
-            <span class="step-user">{{ step.userName }}</span>
-          </div>
-        </div>
-        @if (!last) {
-          <div class="step-connector" [class.connector-done]="step.status === 'approved'"></div>
-        }
-      }
-    </div>
-  `,
+  templateUrl: './approval-flow.component.html',
   styles: [`
     .approval-flow {
       display: flex;
@@ -75,6 +58,6 @@ export class ApprovalFlowComponent {
   }
 
   roleLabel(role: string): string {
-    return { builder: 'Builder', reviewer: 'Reviewer', approver: 'Approver' }[role] ?? role;
+    return { builder: 'Autor', reviewer: 'Revisor', approver: 'Aprobador' }[role] ?? role;
   }
 }

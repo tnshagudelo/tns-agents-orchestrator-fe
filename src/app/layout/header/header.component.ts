@@ -12,53 +12,7 @@ import { NotificationService } from '../../core/services/notification.service';
   selector: 'app-header',
   standalone: true,
   imports: [RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatBadgeModule],
-  template: `
-    <mat-toolbar class="app-header">
-      <button mat-icon-button (click)="toggleSidebar.emit()">
-        <mat-icon>menu</mat-icon>
-      </button>
-
-      <span class="spacer"></span>
-
-      <button mat-icon-button
-        [matBadge]="notificationService.notifications().length || null"
-        matBadgeColor="warn"
-        [matMenuTriggerFor]="notifMenu">
-        <mat-icon>notifications</mat-icon>
-      </button>
-
-      <mat-menu #notifMenu="matMenu">
-        @if (notificationService.notifications().length === 0) {
-          <div class="empty-notifications">No new notifications</div>
-        } @else {
-          @for (n of notificationService.notifications(); track n.id) {
-            <button mat-menu-item (click)="notificationService.dismiss(n.id)">
-              <mat-icon [color]="n.type === 'error' ? 'warn' : n.type === 'success' ? 'primary' : ''">
-                {{ n.type === 'error' ? 'error' : n.type === 'success' ? 'check_circle' : 'info' }}
-              </mat-icon>
-              <span>{{ n.message }}</span>
-            </button>
-          }
-        }
-      </mat-menu>
-
-      <button mat-icon-button [matMenuTriggerFor]="userMenu">
-        <mat-icon>account_circle</mat-icon>
-      </button>
-
-      <mat-menu #userMenu="matMenu">
-        @if (authService.currentUser(); as user) {
-          <div class="user-info">{{ user.username }}</div>
-        }
-        <button mat-menu-item routerLink="/settings">
-          <mat-icon>settings</mat-icon> Settings
-        </button>
-        <button mat-menu-item (click)="authService.logout()">
-          <mat-icon>logout</mat-icon> Logout
-        </button>
-      </mat-menu>
-    </mat-toolbar>
-  `,
+  templateUrl: './header.component.html',
   styles: [`
     .app-header {
       background: white;
@@ -68,11 +22,20 @@ import { NotificationService } from '../../core/services/notification.service';
     }
     .spacer { flex: 1; }
     .empty-notifications { padding: 16px 24px; color: rgba(0,0,0,0.5); }
-    .user-info { padding: 8px 16px; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .user-info {
+      padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .user-info-name { font-weight: 600; font-size: 0.9rem; }
+    .user-info-role { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
   `],
 })
 export class HeaderComponent {
   toggleSidebar = output();
   protected readonly authService = inject(AuthService);
   protected readonly notificationService = inject(NotificationService);
+
+  roleLabel(role: string): string {
+    return { builder: 'Constructor', reviewer: 'Revisor', approver: 'Aprobador/a' }[role] ?? role;
+  }
 }

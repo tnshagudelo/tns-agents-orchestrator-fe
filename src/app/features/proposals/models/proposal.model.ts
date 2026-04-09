@@ -8,13 +8,19 @@ export interface RagReference {
 }
 export type ProposalRole = 'builder' | 'reviewer' | 'approver';
 
+export interface ProposalMetrics {
+  components: string[];
+  teamSize: number;
+  durationWeeks: number;
+  riskLevel: 'low' | 'medium' | 'high';
+}
+
 export interface ProposalIteration {
   version: number;
   content: string;
   components: string[];
   teamSize: number;
   durationWeeks: number;
-  budgetUsd: number;
   riskLevel: 'low' | 'medium' | 'high';
   createdAt: Date;
 }

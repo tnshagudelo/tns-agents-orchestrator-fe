@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="page-header">
+    <button mat-icon-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Create Agent</h1>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Agent name" />
+            @if (form.get('name')?.hasError('required')) {
+              <mat-error>Name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="llm">LLM</mat-option>
+              <mat-option value="tool">Tool</mat-option>
+              <mat-option value="orchestrator">Orchestrator</mat-option>
+              <mat-option value="retriever">Retriever</mat-option>
+              <mat-option value="custom">Custom</mat-option>
+            </mat-select>
+            @if (form.get('type')?.hasError('required')) {
+              <mat-error>Type is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Describe the agent's purpose"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Model</mat-label>
+          <input matInput formControlName="model" placeholder="e.g. gpt-4o, claude-3-opus" />
+        </mat-form-field>
+
+        <div formGroupName="config">
+          <h3>Configuration</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>System Prompt</mat-label>
+            <textarea matInput formControlName="systemPrompt" rows="4" placeholder="System prompt for the agent"></textarea>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Max Tokens</mat-label>
+              <input matInput type="number" formControlName="maxTokens" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Temperature (0–2)</mat-label>
+              <input matInput type="number" step="0.1" min="0" max="2" formControlName="temperature" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="back()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            Create Agent
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

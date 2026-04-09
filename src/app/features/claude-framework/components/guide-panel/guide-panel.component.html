@@ -1,0 +1,61 @@
+<div class="page-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <button mat-button (click)="goToModes()">
+      <mat-icon>arrow_back</mat-icon> Modos
+    </button>
+    <mat-icon class="separator">chevron_right</mat-icon>
+    <button mat-button (click)="goToTech()">{{ modeLabel() }}</button>
+    <mat-icon class="separator">chevron_right</mat-icon>
+    @if (tech(); as t) {
+      <div class="tech-pill" [style.background]="t.badgeBg" [style.color]="t.badgeColor">
+        {{ t.badge }} {{ t.name }}
+      </div>
+    }
+  </div>
+
+  <!-- Header -->
+  @if (tech(); as t) {
+    <div class="guide-header">
+      <div class="guide-title-row">
+        <div class="tech-badge-lg" [style.background]="t.badgeBg" [style.color]="t.badgeColor">
+          {{ t.badge }}
+        </div>
+        <div>
+          <h1>{{ t.name }}</h1>
+          <span class="tech-stack">{{ t.stack }}</span>
+        </div>
+      </div>
+      <mat-chip class="mode-chip">{{ modeLabel() }}</mat-chip>
+    </div>
+  }
+
+  <!-- Tabs -->
+  <mat-tab-group [selectedIndex]="tabIndex()" (selectedIndexChange)="onTabChange($event)" animationDuration="200ms">
+    <mat-tab label="Pasos">
+      <div class="tab-content">
+        <app-steps-tab />
+      </div>
+    </mat-tab>
+    <mat-tab label="Prompts">
+      <div class="tab-content">
+        <app-prompts-tab />
+      </div>
+    </mat-tab>
+    <mat-tab label="CLAUDE.md">
+      <div class="tab-content">
+        <app-claude-md-tab />
+      </div>
+    </mat-tab>
+    <mat-tab label="System Specs">
+      <div class="tab-content">
+        <app-specs-tab />
+      </div>
+    </mat-tab>
+    <mat-tab label="Convenciones">
+      <div class="tab-content">
+        <app-conventions-tab />
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

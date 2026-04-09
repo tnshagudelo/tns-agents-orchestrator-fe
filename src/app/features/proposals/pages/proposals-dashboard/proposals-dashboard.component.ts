@@ -11,12 +11,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { CURRENT_USER, MOCK_USERS } from '../../models/mock-users.const';
+import { MOCK_USERS, getMockUserByRole } from '../../models/mock-users.const';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { CreateProposalRequest } from '../../models/proposal.model';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
-import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDrag, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ProposalsService } from '../../services/proposals.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Proposal, ProposalStatus } from '../../models/proposal.model';
@@ -31,69 +32,7 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
     MatButtonModule, MatFormFieldModule, MatInputModule,
     MatDialogModule, MatSelectModule, MatChipsModule, MatIconModule,
   ],
-  template: `
-    <h2 mat-dialog-title>Nueva Propuesta</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form" class="dialog-form">
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre de la propuesta *</mat-label>
-          <input matInput formControlName="name" placeholder="Propuesta v1" />
-          <mat-error>Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre del proyecto *</mat-label>
-          <input matInput formControlName="projectName" placeholder="Mi Proyecto" />
-          <mat-error>Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Reviewer *</mat-label>
-          <mat-select formControlName="reviewerId">
-            @for (u of reviewerOptions; track u.id) {
-              <mat-option [value]="u.id">{{ u.name }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Approver *</mat-label>
-          <mat-select formControlName="approverId">
-            @for (u of approverOptions; track u.id) {
-              <mat-option [value]="u.id">{{ u.name }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Tags</mat-label>
-          <mat-chip-grid #chipGrid>
-            @for (tag of tags; track tag) {
-              <mat-chip (removed)="removeTag(tag)">
-                {{ tag }}
-                <button matChipRemove><mat-icon>cancel</mat-icon></button>
-              </mat-chip>
-            }
-          </mat-chip-grid>
-          <input placeholder="Añadir tag y presionar Enter..."
-            [matChipInputFor]="chipGrid"
-            [matChipInputSeparatorKeyCodes]="separatorKeys"
-            (matChipInputTokenEnd)="addTag($event)" />
-        </mat-form-field>
-
-        <p class="creator-info">Creando como: {{ currentUser.name }} (builder)</p>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
-        Crear
-      </button>
-    </mat-dialog-actions>
-  `,
+  templateUrl: './new-proposal-dialog.component.html',
   styles: [`
     .dialog-form { display: flex; flex-direction: column; gap: 8px; min-width: 400px; padding-top: 8px; }
     .creator-info { margin: 0; font-size: 0.78rem; color: rgba(0,0,0,0.45); }
@@ -101,12 +40,13 @@ import { ProposalCardComponent } from '../../components/proposal-card/proposal-c
 })
 export class NewProposalDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<NewProposalDialogComponent>);
+  private readonly auth = inject(AuthService);
 
-  readonly currentUser = CURRENT_USER;
+  readonly currentUser = { id: this.auth.currentUser()?.id ?? '', name: this.auth.currentUser()?.username ?? '' };
   readonly separatorKeys = [ENTER, COMMA] as const;
   tags: string[] = [];
 
-  readonly reviewerOptions = MOCK_USERS.filter(u => u.id !== CURRENT_USER.id);
+  readonly reviewerOptions = MOCK_USERS.filter(u => u.id !== this.currentUser.id);
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -117,7 +57,7 @@ export class NewProposalDialogComponent {
 
   get approverOptions() {
     const reviewerId = this.form.get('reviewerId')?.value;
-    return MOCK_USERS.filter(u => u.id !== CURRENT_USER.id && u.id !== reviewerId);
+    return MOCK_USERS.filter(u => u.id !== this.currentUser.id && u.id !== reviewerId);
   }
 
   addTag(event: MatChipInputEvent): void {
@@ -170,200 +110,8 @@ interface KanbanColumn {
     DragDropModule,
     ProposalCardComponent,
   ],
-  template: `
-    <div class="page-container">
-      <!-- Header -->
-      <div class="page-header">
-        <h1>Propuestas</h1>
-        <div class="header-actions">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Buscar</mat-label>
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [ngModel]="filterText()" (ngModelChange)="filterText.set($event)" placeholder="Nombre de propuesta..." />
-          </mat-form-field>
-
-          <div class="view-toggle">
-            <button mat-icon-button [class.active]="viewMode() === 'kanban'" (click)="viewMode.set('kanban')" matTooltip="Kanban">
-              <mat-icon>view_kanban</mat-icon>
-            </button>
-            <button mat-icon-button [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')" matTooltip="Lista">
-              <mat-icon>view_list</mat-icon>
-            </button>
-          </div>
-
-          <button mat-raised-button color="primary" (click)="openNewDialog()">
-            <mat-icon>add</mat-icon> Nueva propuesta
-          </button>
-        </div>
-      </div>
-
-      <!-- Status filter chips -->
-      <div class="status-filters">
-        <mat-chip-set>
-          <mat-chip (click)="toggleStatus(null)" [class.chip-active]="!activeStatus()">Todas</mat-chip>
-          @for (s of allStatuses; track s.value) {
-            <mat-chip (click)="toggleStatus(s.value)" [class.chip-active]="activeStatus() === s.value" [class]="'chip-' + s.value">
-              {{ s.label }}
-            </mat-chip>
-          }
-        </mat-chip-set>
-      </div>
-
-      <!-- Kanban view -->
-      @if (viewMode() === 'kanban') {
-        <div class="kanban-board">
-          @for (col of kanbanColumns; track col.id) {
-            <div class="kanban-column">
-              <div class="col-header" [style.border-top-color]="col.color">
-                <span>{{ col.label }}</span>
-                <span class="col-count">{{ kanbanCounts()[col.status] }}</span>
-              </div>
-              <div class="col-body"
-                cdkDropList
-                [id]="col.id"
-                [cdkDropListData]="col.cards"
-                [cdkDropListConnectedTo]="dropListIds"
-                (cdkDropListDropped)="onDrop($event, col.status)">
-                @for (p of col.cards; track p.id) {
-                  <div cdkDrag class="drag-item">
-                    <app-proposal-card [proposal]="p" (action)="onCardAction($event)" />
-                    <div *cdkDragPlaceholder class="drag-placeholder"></div>
-                  </div>
-                }
-                @if (col.cards.length === 0) {
-                  <div class="empty-col">Sin propuestas</div>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-
-      <!-- List view -->
-      @if (viewMode() === 'list') {
-        <mat-card>
-          <table mat-table [dataSource]="filteredProposals()" class="proposals-table">
-
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>Propuesta</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="p-name">{{ p.name }}</span>
-                <span class="p-project">{{ p.projectName }}</span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let p">
-                <mat-chip class="status-{{ p.status }}" disableRipple>{{ statusLabel(p.status) }}</mat-chip>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="version">
-              <th mat-header-cell *matHeaderCellDef>Versión</th>
-              <td mat-cell *matCellDef="let p">v{{ p.currentIteration }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="approvalFlow">
-              <th mat-header-cell *matHeaderCellDef>Aprobaciones</th>
-              <td mat-cell *matCellDef="let p">
-                <div class="inline-avatars">
-                  @for (step of p.approvalFlow; track step.role) {
-                    <div class="sm-avatar avatar-{{ step.status }}" [matTooltip]="step.userName + ' · ' + step.role">
-                      {{ step.userName.charAt(0) }}
-                    </div>
-                  }
-                </div>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="updatedAt">
-              <th mat-header-cell *matHeaderCellDef>Actualizado</th>
-              <td mat-cell *matCellDef="let p">{{ p.updatedAt | date:'dd/MM/yy' }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let p">
-                <button mat-icon-button (click)="navigate(p)" matTooltip="Abrir">
-                  <mat-icon>open_in_new</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: tableColumns;" class="table-row"></tr>
-          </table>
-
-          @if (filteredProposals().length === 0) {
-            <div class="table-empty">No hay propuestas. Crea la primera.</div>
-          }
-        </mat-card>
-      }
-    </div>
-  `,
-  styles: [`
-    .page-container { padding: 24px; display: flex; flex-direction: column; gap: 16px; height: calc(100vh - 64px); box-sizing: border-box; }
-
-    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; flex-shrink: 0;
-      h1 { margin: 0; font-size: 1.75rem; font-weight: 600; }
-    }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
-    .search-field { width: 220px; }
-    .view-toggle { display: flex; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;
-      button { border-radius: 0; &.active { background: #2D1B6B; color: white; }
-      }
-    }
-
-    .status-filters { flex-shrink: 0;
-      mat-chip { cursor: pointer; }
-      .chip-active { background: #2D1B6B !important; --mdc-chip-label-text-color: white; }
-      .chip-draft            { --mdc-chip-label-text-color: #888780; }
-      .chip-in_review        { --mdc-chip-label-text-color: #BA7517; }
-      .chip-pending_approval { --mdc-chip-label-text-color: #185FA5; }
-      .chip-approved         { --mdc-chip-label-text-color: #3B6D11; }
-      .chip-rejected         { --mdc-chip-label-text-color: #A32D2D; }
-    }
-
-    /* Kanban */
-    .kanban-board { display: flex; gap: 16px; flex: 1; overflow-x: auto; min-height: 0; }
-    .kanban-column { display: flex; flex-direction: column; min-width: 260px; flex: 1; background: #f8f9fa; border-radius: 8px; overflow: hidden; }
-    .col-header {
-      padding: 12px 16px; font-weight: 600; font-size: 0.85rem; background: white;
-      border-top: 3px solid; display: flex; justify-content: space-between; align-items: center;
-    }
-    .col-count { background: #e5e7eb; border-radius: 12px; padding: 2px 8px; font-size: 0.75rem; }
-    .col-body { flex: 1; padding: 8px; overflow-y: auto; min-height: 80px; }
-
-    .drag-item { margin-bottom: 4px; }
-    .drag-placeholder { min-height: 80px; background: #e8eaf6; border: 2px dashed #9fa8da; border-radius: 8px; margin-bottom: 4px; }
-
-    .cdk-drag-animating { transition: transform 250ms cubic-bezier(0,0,0.2,1); }
-    .cdk-drop-list-dragging .drag-item:not(.cdk-drag-placeholder) { transition: transform 250ms cubic-bezier(0,0,0.2,1); }
-
-    .empty-col { padding: 24px; text-align: center; color: rgba(0,0,0,0.3); font-size: 0.8rem; }
-
-    /* Table */
-    .proposals-table { width: 100%; }
-    .p-name { display: block; font-weight: 600; font-size: 0.9rem; }
-    .p-project { font-size: 0.75rem; color: rgba(0,0,0,0.5); }
-    mat-chip { font-size: 0.75rem; }
-    .status-draft            { --mdc-chip-label-text-color: #888780; background: #f5f5f4 !important; }
-    .status-in_review        { --mdc-chip-label-text-color: #BA7517; background: #fef3c7 !important; }
-    .status-pending_approval { --mdc-chip-label-text-color: #185FA5; background: #dbeafe !important; }
-    .status-approved         { --mdc-chip-label-text-color: #3B6D11; background: #dcfce7 !important; }
-    .status-rejected         { --mdc-chip-label-text-color: #A32D2D; background: #fee2e2 !important; }
-    .inline-avatars { display: flex; gap: 4px; }
-    .sm-avatar {
-      width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; font-weight: 700; color: white; background: #9ca3af;
-    }
-    .avatar-approved { background: #3B6D11; }
-    .avatar-rejected { background: #A32D2D; }
-    .avatar-changes_requested { background: #BA7517; }
-    .table-row:hover { background: #f9fafb; }
-    .table-empty { padding: 32px; text-align: center; color: rgba(0,0,0,0.4); }
-  `],
+  templateUrl: './proposals-dashboard.component.html',
+  styleUrl: './proposals-dashboard.component.scss',
 })
 export class ProposalsDashboardComponent implements OnInit {
   private readonly router = inject(Router);
@@ -374,9 +122,34 @@ export class ProposalsDashboardComponent implements OnInit {
   viewMode = signal<'kanban' | 'list'>('kanban');
   filterText = signal('');
   activeStatus = signal<ProposalStatus | null>(null);
+  draggingProposal = signal<Proposal | null>(null);
 
   readonly tableColumns = ['name', 'status', 'version', 'approvalFlow', 'updatedAt', 'actions'];
   readonly dropListIds = ['col-draft', 'col-in_review', 'col-pending_approval', 'col-final'];
+
+  // ── Workflow: transiciones permitidas en el kanban ────────────────────────
+  readonly allowedTransitions: Record<ProposalStatus, ProposalStatus[]> = {
+    draft:            ['in_review'],
+    in_review:        ['draft', 'pending_approval'],
+    pending_approval: ['in_review', 'approved'],
+    approved:         [],   // terminal
+    rejected:         [],   // terminal
+  };
+
+  // Predicados precomputados por columna para cdkDropListEnterPredicate
+  readonly dropPredicates: Record<ProposalStatus, (drag: CdkDrag<Proposal>) => boolean> =
+    (['draft', 'in_review', 'pending_approval', 'approved', 'rejected'] as ProposalStatus[])
+      .reduce((acc, status) => {
+        acc[status] = (drag: CdkDrag<Proposal>) =>
+          this.allowedTransitions[drag.data?.status]?.includes(status) ?? false;
+        return acc;
+      }, {} as Record<ProposalStatus, (drag: CdkDrag<Proposal>) => boolean>);
+
+  isValidTarget(targetStatus: ProposalStatus): boolean {
+    const d = this.draggingProposal();
+    if (!d || d.status === targetStatus) return false;
+    return this.allowedTransitions[d.status].includes(targetStatus);
+  }
 
   readonly allStatuses = [
     { value: 'draft' as ProposalStatus, label: 'Borrador' },
@@ -450,6 +223,13 @@ export class ProposalsDashboardComponent implements OnInit {
     if (event.previousContainer === event.container) return;
 
     const proposal = event.previousContainer.data[event.previousIndex];
+
+    // Defensa: rechazar si la transición no está permitida (no debería llegar aquí gracias al predicate)
+    if (!this.allowedTransitions[proposal.status].includes(targetStatus)) {
+      this.notifications.error(`No se puede mover de "${this.statusLabel(proposal.status)}" a "${this.statusLabel(targetStatus)}"`);
+      return;
+    }
+
     transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
 
     this.proposalsService.updateStatus(proposal.id, targetStatus).subscribe({

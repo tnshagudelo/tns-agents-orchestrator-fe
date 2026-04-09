@@ -1,0 +1,44 @@
+<div class="comment-thread">
+  @if (comments().length === 0) {
+    <div class="empty-comments">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <span>Sin comentarios aún</span>
+    </div>
+  } @else {
+    <div class="comments-list">
+      @for (comment of filteredComments(); track comment.id) {
+        <div class="comment" [class.resolved]="comment.resolvedAt">
+          <div class="comment-header">
+            <div class="author-avatar">{{ comment.authorName.charAt(0).toUpperCase() }}</div>
+            <div class="author-info">
+              <span class="author-name">{{ comment.authorName }}</span>
+              <span class="role-badge role-{{ comment.authorRole }}">{{ comment.authorRole }}</span>
+            </div>
+            <span class="comment-time">{{ comment.createdAt | date:'dd/MM HH:mm' }}</span>
+          </div>
+
+          <p class="comment-body">{{ comment.body }}</p>
+
+          <div class="comment-actions">
+            @if (comment.resolvedAt) {
+              <span class="resolved-label"><mat-icon>check_circle</mat-icon> Resuelto</span>
+            }
+            <button mat-icon-button class="ask-agent-btn" (click)="askAgent.emit(comment.body)" matTooltip="Enviar al agente">
+              <mat-icon>psychology</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="add-comment">
+    <mat-form-field appearance="outline" class="comment-field">
+      <mat-label>Añadir comentario</mat-label>
+      <textarea matInput [(ngModel)]="newComment" rows="2" (keydown.enter)="submitComment($event)"></textarea>
+    </mat-form-field>
+    <button mat-icon-button color="primary" (click)="submitComment()" [disabled]="!newComment.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

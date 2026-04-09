@@ -54,6 +54,11 @@ export const routes: Routes = [
           import('./features/knowledge/knowledge.routes').then(m => m.KNOWLEDGE_ROUTES),
       },
       {
+        path: 'claude-framework',
+        loadChildren: () =>
+          import('./features/claude-framework/claude-framework.routes').then(m => m.CLAUDE_FRAMEWORK_ROUTES),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),

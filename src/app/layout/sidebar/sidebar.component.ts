@@ -15,43 +15,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterLink, RouterLinkActive, MatListModule, MatIconModule, MatDividerModule, MatTooltipModule],
-  template: `
-    <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
-      <div class="sidebar-logo">
-        @if (!collapsed()) {
-          <span class="logo-text">Agents Orchestrator</span>
-        } @else {
-          <mat-icon>hub</mat-icon>
-        }
-      </div>
-
-      <mat-nav-list>
-        @for (item of navItems; track item.route) {
-          <a mat-list-item
-            [routerLink]="item.route"
-            routerLinkActive="active-link"
-            [matTooltip]="collapsed() ? item.label : ''"
-            matTooltipPosition="right">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            @if (!collapsed()) {
-              <span matListItemTitle>{{ item.label }}</span>
-            }
-          </a>
-        }
-      </mat-nav-list>
-
-      <mat-divider />
-
-      <mat-nav-list class="bottom-nav">
-        <a mat-list-item routerLink="/settings" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>settings</mat-icon>
-          @if (!collapsed()) {
-            <span matListItemTitle>Settings</span>
-          }
-        </a>
-      </mat-nav-list>
-    </aside>
-  `,
+  templateUrl: './sidebar.component.html',
   styles: [`
     .sidebar {
       display: flex;
@@ -98,13 +62,14 @@ export class SidebarComponent {
   collapsed = input(false);
 
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Agents', icon: 'smart_toy', route: '/agents' },
-    { label: 'Orchestration', icon: 'account_tree', route: '/orchestration' },
-    { label: 'Monitoring', icon: 'monitor_heart', route: '/monitoring' },
-    { label: 'PM Agent', icon: 'hub', route: '/projectmanageragent' },
-    { label: 'Proposals', icon: 'description', route: '/proposals' },
-    { label: 'Sessions', icon: 'history', route: '/sessions' },
-    { label: 'Knowledge', icon: 'psychology', route: '/knowledge' },
+    { label: 'Panel', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Agentes', icon: 'smart_toy', route: '/agents' },
+    { label: 'Orquestación', icon: 'account_tree', route: '/orchestration' },
+    { label: 'Monitoreo', icon: 'monitor_heart', route: '/monitoring' },
+    { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
+    { label: 'Propuestas', icon: 'description', route: '/proposals' },
+    { label: 'Sesiones', icon: 'history', route: '/sessions' },
+    { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
+    { label: 'Framework CC', icon: 'terminal', route: '/claude-framework' },
   ];
 }

@@ -1,0 +1,77 @@
+<!-- Tips section -->
+<div class="tips-section">
+  <h3 class="section-title">
+    <mat-icon>lightbulb</mat-icon> Claves del Context Engineering
+  </h3>
+  <div class="tips-grid">
+    @for (tip of tips; track tip.title) {
+      <div class="tip-card">
+        <mat-icon class="tip-icon">{{ tip.icon }}</mat-icon>
+        <div class="tip-content">
+          <span class="tip-title">{{ tip.title }}</span>
+          <p class="tip-desc">{{ tip.description }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Index.md preview -->
+<div class="index-section">
+  <div class="index-header">
+    <div class="file-label">
+      <mat-icon>folder_open</mat-icon>
+      <span>system_spec/index.md</span>
+    </div>
+    <button mat-stroked-button (click)="copyIndex()">
+      <mat-icon>{{ clipboard.isCopied('spec-index') ? 'check' : 'content_copy' }}</mat-icon>
+      {{ clipboard.isCopied('spec-index') ? 'Copiado' : 'Copiar' }}
+    </button>
+  </div>
+  <div class="index-preview">
+    <markdown [data]="indexContent()"></markdown>
+  </div>
+</div>
+
+<!-- Spec files -->
+<div class="specs-section">
+  <h3 class="section-title">
+    <mat-icon>description</mat-icon> Specs de ejemplo para tu proyecto
+  </h3>
+  <p class="section-desc">Cada archivo describe un dominio. Copia el ejemplo y adaptalo a tu proyecto real.</p>
+
+  @for (spec of specFiles(); track spec.name) {
+    <mat-card class="spec-card">
+      <div class="spec-header">
+        <div class="spec-name">
+          <mat-icon>draft</mat-icon>
+          <span>system_spec/{{ spec.name }}</span>
+        </div>
+        <button mat-stroked-button (click)="copySpec(spec)">
+          <mat-icon>{{ clipboard.isCopied('spec-' + spec.name) ? 'check' : 'content_copy' }}</mat-icon>
+          {{ clipboard.isCopied('spec-' + spec.name) ? 'Copiado' : 'Copiar' }}
+        </button>
+      </div>
+      <p class="spec-purpose">{{ spec.purpose }}</p>
+      <details class="spec-details">
+        <summary>Ver ejemplo completo</summary>
+        <pre class="spec-example">{{ spec.example }}</pre>
+      </details>
+    </mat-card>
+  }
+</div>
+
+<!-- Structure visualization -->
+<div class="structure-section">
+  <h3 class="section-title">
+    <mat-icon>account_tree</mat-icon> Estructura recomendada
+  </h3>
+  <pre class="structure-tree">proyecto/
+├── CLAUDE.md                    ← Contexto rapido (stack, comandos, reglas)
+├── system_spec/
+│   ├── index.md                 ← Mapa: que spec leer para cada dominio
+│   ├── auth.spec.md             ← Spec de autenticacion
+│   ├── [modulo].spec.md         ← Una spec por dominio de negocio
+│   └── migration.spec.md        ← Temporal: solo durante migraciones
+└── src/                         ← Codigo fuente</pre>
+</div>

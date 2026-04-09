@@ -17,83 +17,39 @@ export interface ProposalCardAction {
   selector: 'app-proposal-card',
   standalone: true,
   imports: [DatePipe, MatCardModule, MatChipsModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressBarModule],
-  template: `
-    <mat-card class="proposal-card">
-      <mat-card-content>
-        <div class="card-header">
-          <div class="card-titles">
-            <span class="proposal-name">{{ proposal().name }}</span>
-            <span class="project-name">{{ proposal().projectName }}</span>
-          </div>
-          <mat-chip class="status-chip status-{{ proposal().status }}" disableRipple>
-            <mat-icon>{{ statusIcon() }}</mat-icon>
-            {{ statusLabel() }}
-          </mat-chip>
-        </div>
-
-        @if (proposal().tags.length) {
-          <div class="tags">
-            @for (tag of proposal().tags; track tag) {
-              <mat-chip class="tag-chip" disableRipple>{{ tag }}</mat-chip>
-            }
-          </div>
-        }
-
-        <div class="approval-progress">
-          <mat-progress-bar mode="determinate" [value]="approvalProgress()" />
-          <span class="progress-label">{{ approvedSteps() }}/{{ proposal().approvalFlow.length }} aprobaciones</span>
-        </div>
-
-        <div class="card-footer">
-          <div class="avatars">
-            @for (step of proposal().approvalFlow; track step.role) {
-              <div class="avatar" [class]="'avatar-' + step.status" [matTooltip]="step.userName + ' (' + step.role + ')'">
-                {{ step.userName.charAt(0).toUpperCase() }}
-              </div>
-            }
-          </div>
-          <div class="footer-right">
-            <span class="card-date">v{{ proposal().currentIteration }} · {{ proposal().updatedAt | date:'dd/MM/yy' }}</span>
-            <button mat-stroked-button class="action-btn" (click)="onAction()">
-              <mat-icon>{{ actionIcon() }}</mat-icon>
-              {{ actionLabel() }}
-            </button>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  `,
+  templateUrl: './proposal-card.component.html',
   styles: [`
     .proposal-card {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       cursor: grab;
-      transition: box-shadow 0.2s;
-      &:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+      border: 1px solid #ede9f8;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      &:hover { box-shadow: 0 4px 14px rgba(45,27,107,0.12); border-color: #c4b5e8; }
     }
 
     mat-card-content { padding: 12px !important; display: flex; flex-direction: column; gap: 10px; }
 
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .card-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .proposal-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .project-name { font-size: 0.75rem; color: rgba(0,0,0,0.5); }
+    .proposal-name { font-weight: 600; font-size: 0.88rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .project-name { font-size: 0.73rem; color: #6b7280; }
 
     .status-chip {
       font-size: 0.7rem; padding: 0 8px; height: 22px; flex-shrink: 0;
       mat-icon { font-size: 0.85rem; width: 0.85rem; height: 0.85rem; }
     }
-    .status-draft            { --mdc-chip-label-text-color: #888780; background: #f5f5f4 !important; }
+    .status-draft            { --mdc-chip-label-text-color: #6b7280; background: #f4f4f5 !important; }
     .status-in_review        { --mdc-chip-label-text-color: #BA7517; background: #fef3c7 !important; }
     .status-pending_approval { --mdc-chip-label-text-color: #185FA5; background: #dbeafe !important; }
     .status-approved         { --mdc-chip-label-text-color: #3B6D11; background: #dcfce7 !important; }
     .status-rejected         { --mdc-chip-label-text-color: #A32D2D; background: #fee2e2 !important; }
 
     .tags { display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag-chip { font-size: 0.7rem; height: 20px; background: #f0f0f0 !important; }
+    .tag-chip { font-size: 0.7rem; height: 20px; background: #ede9f8 !important; --mdc-chip-label-text-color: #4a3b7c !important; }
 
     .approval-progress { display: flex; flex-direction: column; gap: 4px; }
-    mat-progress-bar { border-radius: 4px; }
-    .progress-label { font-size: 0.7rem; color: rgba(0,0,0,0.45); text-align: right; }
+    mat-progress-bar { border-radius: 4px; --mdc-linear-progress-active-indicator-color: #6d4fcf; }
+    .progress-label { font-size: 0.7rem; color: #9ca3af; text-align: right; }
 
     .card-footer { display: flex; justify-content: space-between; align-items: center; }
 
@@ -101,7 +57,7 @@ export interface ProposalCardAction {
     .avatar {
       width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 0.7rem; font-weight: 700; color: white; border: 2px solid white;
-      background: #888;
+      background: #9ca3af;
       &-pending          { background: #9ca3af; }
       &-approved         { background: #3B6D11; }
       &-rejected         { background: #A32D2D; }
@@ -109,9 +65,12 @@ export interface ProposalCardAction {
     }
 
     .footer-right { display: flex; align-items: center; gap: 8px; }
-    .card-date { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
-    .action-btn { font-size: 0.75rem; height: 28px; line-height: 28px; padding: 0 8px;
+    .card-date { font-size: 0.72rem; color: #9ca3af; }
+    .action-btn {
+      font-size: 0.75rem; height: 28px; line-height: 28px; padding: 0 10px;
+      color: #2D1B6B; border-color: #c4b5e8;
       mat-icon { font-size: 0.9rem; width: 0.9rem; height: 0.9rem; }
+      &:hover { background: #f0edf7; }
     }
   `],
 })

@@ -8,18 +8,7 @@ import { NotificationToastComponent } from '../../shared/components/notification
   selector: 'app-main-layout',
   standalone: true,
   imports: [RouterOutlet, SidebarComponent, HeaderComponent, NotificationToastComponent],
-  template: `
-    <div class="app-shell">
-      <app-sidebar [collapsed]="sidebarCollapsed()" />
-      <div class="content-area">
-        <app-header (toggleSidebar)="toggleSidebar()" />
-        <main class="main-content">
-          <router-outlet />
-        </main>
-      </div>
-    </div>
-    <app-notification-toast />
-  `,
+  templateUrl: './main-layout.component.html',
   styles: [`
     .app-shell {
       display: flex;
