@@ -11,7 +11,7 @@ export function getPrompts(mode: ProjectMode, techId: TechId): PromptTemplate[] 
         id: 'new-p1',
         label: 'Validar que el agente leyo el contexto',
         when: 'Al iniciar cualquier sesion de trabajo',
-        text: `Resume que sabes de este proyecto basandote en CLAUDE.md y las specs disponibles en system_spec/.
+        text: `Resume que sabes de este proyecto basandote en CLAUDE.md y las specs disponibles en docs/specs/.
 
 Incluye:
 - Stack y versiones
@@ -29,14 +29,14 @@ Requisitos:
 - Nombre: [nombre-del-proyecto]
 - Incluye: [listar modulos iniciales]
 
-Antes de generar codigo, lee system_spec/index.md para entender los dominios.
+Antes de generar codigo, lee docs/specs/index.md para entender los dominios.
 Despues de generar, ejecuta: ${tech.commands['build']}`,
       },
       {
         id: 'new-p3',
         label: 'Crear una spec de dominio nueva',
         when: 'Cuando agregas un modulo nuevo al proyecto',
-        text: `Crea el archivo system_spec/[nombre-del-modulo].spec.md con esta estructura:
+        text: `Crea el archivo docs/specs/[nombre-del-modulo].md con esta estructura:
 
 # [Nombre del modulo]
 
@@ -55,13 +55,13 @@ Despues de generar, ejecuta: ${tech.commands['build']}`,
 ## Dependencias
 [Otros modulos o servicios externos de los que depende]
 
-Despues, actualiza system_spec/index.md agregando la nueva entrada.`,
+Despues, actualiza docs/specs/index.md agregando la nueva entrada.`,
       },
       {
         id: 'new-p4',
         label: 'Implementar feature con contexto completo',
         when: 'Cuando ya tienes specs y quieres que el agente construya algo',
-        text: `Lee system_spec/[modulo].spec.md antes de implementar.
+        text: `Lee docs/specs/[modulo].md antes de implementar.
 
 Implementa: [descripcion del feature]
 
@@ -87,13 +87,13 @@ Si el feature cambia la arquitectura, dime que actualizar en las specs.`,
 4. Restricciones importantes
 5. Estructura de carpetas actual
 
-El archivo debe ser conciso — maximo 40 lineas. Los detalles iran en system_spec/.`,
+El archivo debe ser conciso — maximo 40 lineas. Los detalles iran en docs/specs/.`,
       },
       {
         id: 'ext-p2',
         label: 'Generar specs desde codigo existente',
         when: 'Cuando quieres documentar los modulos actuales para el agente',
-        text: `Analiza el modulo [nombre-del-modulo] y genera su spec en system_spec/[nombre].spec.md.
+        text: `Analiza el modulo [nombre-del-modulo] y genera su spec en docs/specs/[nombre].md.
 
 La spec debe incluir:
 - Proposito del modulo (1 linea)
@@ -102,14 +102,14 @@ La spec debe incluir:
 - Restricciones o validaciones importantes
 - Dependencias con otros modulos
 
-Tambien actualiza system_spec/index.md con la nueva entrada.
+Tambien actualiza docs/specs/index.md con la nueva entrada.
 No inventes reglas — solo documenta lo que existe en el codigo.`,
       },
       {
         id: 'ext-p3',
         label: 'Corregir un bug usando el contexto',
         when: 'Cuando hay un bug y quieres que el agente lo resuelva con contexto',
-        text: `Lee system_spec/[modulo-afectado].spec.md antes de investigar.
+        text: `Lee docs/specs/[modulo-afectado].md antes de investigar.
 
 Bug: [descripcion del problema]
 Comportamiento esperado: [que deberia pasar]
@@ -126,9 +126,9 @@ Pasos:
         id: 'ext-p4',
         label: 'Auditar si las specs estan actualizadas',
         when: 'Periodicamente, o cuando sospechas que el contexto esta desactualizado',
-        text: `Compara el estado actual del codigo con las specs en system_spec/:
+        text: `Compara el estado actual del codigo con las specs en docs/specs/:
 
-1. Lee system_spec/index.md
+1. Lee docs/specs/index.md
 2. Para cada spec listada, verifica si el codigo real coincide
 3. Identifica: specs desactualizadas, modulos sin spec, specs de modulos eliminados
 4. Dame un reporte con las acciones necesarias
@@ -144,7 +144,7 @@ Formato del reporte:
         id: 'mig-p1',
         label: 'Crear spec de migracion',
         when: 'Antes de iniciar cualquier migracion',
-        text: `Crea system_spec/migration.spec.md con:
+        text: `Crea docs/specs/migration.md con:
 
 # Migracion: [de que] → [a que]
 
@@ -167,18 +167,18 @@ Formato del reporte:
 - Comando de test: ${tech.commands['test']}
 - Comando de build: ${tech.commands['build']}
 
-Actualiza system_spec/index.md con esta nueva spec.`,
+Actualiza docs/specs/index.md con esta nueva spec.`,
       },
       {
         id: 'mig-p2',
         label: 'Migrar un modulo especifico',
         when: 'Para migrar modulo por modulo siguiendo el orden de la spec',
-        text: `Lee system_spec/migration.spec.md para entender el contexto completo.
+        text: `Lee docs/specs/migration.md para entender el contexto completo.
 
 Migra SOLO el modulo: [nombre-del-modulo]
 
 Pasos:
-1. Lee la spec del modulo en system_spec/[nombre].spec.md
+1. Lee la spec del modulo en docs/specs/[nombre].md
 2. Aplica los cambios segun los breaking changes listados
 3. Actualiza las dependencias afectadas
 4. Ejecuta ${tech.commands['test']}
@@ -195,11 +195,105 @@ Dime que cambiar en la spec del modulo si la migracion afecta sus reglas.`,
 1. Ejecuta ${tech.commands['build']} — debe pasar limpio
 2. Ejecuta ${tech.commands['test']} — todos los tests deben pasar
 3. Revisa que CLAUDE.md refleje las versiones nuevas
-4. Revisa que cada spec en system_spec/ este actualizada
-5. Elimina system_spec/migration.spec.md (ya no se necesita)
-6. Actualiza system_spec/index.md sin la entrada de migracion
+4. Revisa que cada spec en docs/specs/ este actualizada
+5. Elimina docs/specs/migration.md (ya no se necesita)
+6. Actualiza docs/specs/index.md sin la entrada de migracion
 
 Dame un resumen de los cambios realizados para el PR.`,
+      },
+    ],
+    'multi-repo': [
+      {
+        id: 'multi-p1',
+        label: 'Validar que Claude entiende el workspace',
+        when: 'Al iniciar cualquier sesion de trabajo desde la raiz',
+        text: `Resume la estructura de este workspace basandote en los CLAUDE.md disponibles:
+
+1. Que repositorios hay y que hace cada uno
+2. Stack y versiones de cada repo
+3. Reglas cross-repo (protocolo de trabajo)
+4. Donde esta la documentacion compartida (docs/)
+5. Como se hacen commits (por repo, no desde la raiz)
+
+Si encuentras ARCHITECTURE.md o specs en docs/, mencionalos.`,
+      },
+      {
+        id: 'multi-p2',
+        label: 'Tarea cross-repo (toca backend + frontend)',
+        when: 'Cuando una tarea requiere cambios en ambos repositorios',
+        text: `Necesito implementar: [descripcion de la tarea]
+
+Sigue el protocolo cross-repo del CLAUDE.md:
+1. Lee docs/spec_api_contracts.md y docs/spec_shared_types.md primero
+2. Planifica: lista los archivos que cambiaran en cada repo. Espera mi aprobacion.
+3. Backend primero: implementa endpoint + tipos
+4. Valida build del backend antes de continuar
+5. Frontend: implementa service + componente usando los tipos del backend
+6. Un commit por repo al terminar
+7. Actualiza el spec correspondiente en docs/`,
+      },
+      {
+        id: 'multi-p3',
+        label: 'Crear spec compartido nuevo',
+        when: 'Cuando agregas un modulo que afecta ambos repos',
+        text: `Crea docs/specs/SPEC_XX_[nombre-del-modulo].md con esta estructura:
+
+# SPEC_XX — [Nombre del modulo]
+**Estado:** En progreso
+**Ultima actualizacion:** [fecha]
+
+## Que hace
+[Descripcion breve]
+
+## Archivos relevantes (rutas completas de ambos repos)
+### Backend
+- repo-backend/ruta/archivo.cs
+### Frontend
+- repo-frontend/src/app/ruta/archivo.ts
+
+## Endpoints expuestos
+| Metodo | Ruta | Descripcion |
+|--------|------|-------------|
+
+## Decisiones tecnicas
+## Pendientes / deuda tecnica
+
+Despues, actualiza docs/SYSTEM_SPEC_INDEX.md con la nueva entrada.`,
+      },
+      {
+        id: 'multi-p4',
+        label: 'Generar CLAUDE.md global desde workspace existente',
+        when: 'Primera vez configurando el workspace multi-repo',
+        text: `Analiza este workspace y genera el CLAUDE.md de la raiz:
+
+1. Identifica los repos (subdirectorios con .git)
+2. Lee el CLAUDE.md de cada repo (si existe) para entender su stack
+3. Genera el CLAUDE.md global con:
+   - Estructura del workspace (arbol de directorios)
+   - Tabla de repos con stack y puertos
+   - Protocolo cross-repo (backend primero, validar build, etc.)
+   - Reglas de commits por repo (NUNCA desde la raiz)
+   - Reglas de mantenimiento de specs
+   - Comandos rapidos (build, run, test de cada repo)
+
+Maximo 60 lineas. Los detalles van en docs/.`,
+      },
+      {
+        id: 'multi-p5',
+        label: 'Auditar coherencia entre repos',
+        when: 'Periodicamente, o cuando sospechas que los contratos estan desalineados',
+        text: `Verifica la coherencia entre los repos de este workspace:
+
+1. Lee docs/spec_api_contracts.md (si existe)
+2. Compara con los endpoints reales del backend (controllers)
+3. Compara con los services del frontend (URLs y tipos)
+4. Identifica:
+   - Endpoints en el backend sin consumidor en el frontend
+   - Services en el frontend llamando endpoints que no existen
+   - Tipos/DTOs con campos distintos entre repos
+   - Specs desactualizadas
+
+Dame un reporte con las acciones necesarias para cada inconsistencia.`,
       },
     ],
   };

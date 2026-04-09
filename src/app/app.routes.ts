@@ -4,7 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'account-planning',
     pathMatch: 'full',
   },
   {
@@ -14,24 +14,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-      },
-      {
-        path: 'agents',
+        path: 'account-planning',
         loadChildren: () =>
-          import('./features/agents/agents.routes').then(m => m.AGENTS_ROUTES),
-      },
-      {
-        path: 'orchestration',
-        loadChildren: () =>
-          import('./features/orchestration/orchestration.routes').then(m => m.ORCHESTRATION_ROUTES),
-      },
-      {
-        path: 'monitoring',
-        loadChildren: () =>
-          import('./features/monitoring/monitoring.routes').then(m => m.MONITORING_ROUTES),
+          import('./features/account-planning/account-planning.routes').then(m => m.ACCOUNT_PLANNING_ROUTES),
       },
       {
         path: 'projectmanageragent',
@@ -42,11 +27,6 @@ export const routes: Routes = [
         path: 'proposals',
         loadChildren: () =>
           import('./features/proposals/proposals.routes').then(m => m.PROPOSALS_ROUTES),
-      },
-      {
-        path: 'sessions',
-        loadChildren: () =>
-          import('./features/sessions/sessions.routes').then(m => m.SESSIONS_ROUTES),
       },
       {
         path: 'knowledge',

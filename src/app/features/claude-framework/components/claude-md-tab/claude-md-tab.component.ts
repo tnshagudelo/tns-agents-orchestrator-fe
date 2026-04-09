@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MarkdownModule } from 'ngx-markdown';
 import { FrameworkStateService } from '../../services/framework-state.service';
 import { ClipboardService } from '../../services/clipboard.service';
-import { generateClaudeMd } from '../../data/claude-md.data';
+import { generateClaudeMd, generateMultiRepoClaudeMd } from '../../data/claude-md.data';
 
 @Component({
   selector: 'app-claude-md-tab',
@@ -53,7 +53,10 @@ export class ClaudeMdTabComponent {
 
   readonly content = computed(() => {
     const tech = this.state.techId();
-    return tech ? generateClaudeMd(tech) : '';
+    if (!tech) return '';
+    return this.state.mode() === 'multi-repo'
+      ? generateMultiRepoClaudeMd(tech)
+      : generateClaudeMd(tech);
   });
 
   copyAll(): void {

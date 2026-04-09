@@ -1,21 +1,185 @@
 <div class="page-container">
-  <div class="page-header">
-    <mat-icon class="header-icon">terminal</mat-icon>
-    <div>
-      <h1>Context Engineering con Claude Code</h1>
-      <span class="subtitle">Aprende a darle contexto estructurado al agente para mejores resultados y menor consumo de tokens</span>
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-badge">FRAMEWORK DE DESARROLLO</span>
+    <h1>Tech and Solve + Claude Code</h1>
+    <p class="hero-desc">
+      Este es el framework de trabajo que adoptamos en Tech and Solve para desarrollar software
+      con inteligencia artificial. Combina la practica de <strong>Design Docs</strong> con
+      <strong>Claude Code</strong> para que cada linea de codigo que genere la IA este alineada
+      con la arquitectura, convenciones y decisiones del proyecto.
+    </p>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Por que este framework -->
+  <div class="why-section">
+    <h2 class="section-title">
+      <mat-icon>bolt</mat-icon> Por que este framework
+    </h2>
+    <p class="section-desc">
+      Claude Code es una herramienta poderosa, pero sin contexto estructurado genera codigo
+      generico que no respeta las convenciones del proyecto. Este framework resuelve eso.
+    </p>
+    <div class="why-grid">
+      @for (card of whyCards; track card.title) {
+        <div class="why-card">
+          <mat-icon>{{ card.icon }}</mat-icon>
+          <h4>{{ card.title }}</h4>
+          <p>{{ card.desc }}</p>
+        </div>
+      }
     </div>
   </div>
 
-  <div class="modes-grid">
-    @for (opt of modes; track opt.mode) {
-      <mat-card class="mode-card" (click)="select(opt.mode)" tabindex="0"
-                (keydown.enter)="select(opt.mode)">
-        <mat-icon class="mode-icon">{{ opt.icon }}</mat-icon>
-        <h3>{{ opt.title }}</h3>
-        <p>{{ opt.description }}</p>
-        <mat-icon class="arrow">arrow_forward</mat-icon>
-      </mat-card>
-    }
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Que es un Design Doc -->
+  <div class="what-section">
+    <h2 class="section-title">
+      <mat-icon>menu_book</mat-icon> Que es un Design Doc
+    </h2>
+    <p class="what-intro">
+      Un Design Doc es un <strong>documento tecnico que se escribe ANTES de codificar</strong>.
+      Explica que se va a construir, como se va a hacer y que alternativas se consideraron.
+      No es una libreria ni un framework — es una practica de ingenieria que los equipos
+      de software mas maduros del mundo usan para reducir errores y alinear al equipo
+      antes de invertir tiempo en codigo.
+    </p>
+    <div class="what-analogy">
+      <strong>Analogia:</strong> Un Design Doc es al software lo que un plano es a una casa.
+      Puedes construir sin plano, pero vas a tirar paredes. Con un plano, todos saben
+      que se va a construir antes de poner el primer ladrillo.
+    </div>
+
+    <table class="company-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Como lo llaman</th>
+          <th>Referencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of companies; track c.name) {
+          <tr>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.calls }}</td>
+            <td>{{ c.ref }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Flujo de trabajo -->
+  <div class="flow-section">
+    <h2 class="section-title">
+      <mat-icon>route</mat-icon> Como se trabaja
+    </h2>
+    <p class="section-desc">
+      Cada tarea significativa sigue este flujo. La IA no reemplaza al desarrollador —
+      lo potencia. Tu defines el que y revisas el resultado. Claude ejecuta.
+    </p>
+    <div class="flow-steps">
+      @for (step of flowSteps; track step.label; let i = $index) {
+        <div class="flow-step">
+          <span class="flow-number">{{ i + 1 }}</span>
+          <span class="flow-label">{{ step.label }}</span>
+          <span class="flow-desc">{{ step.desc }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Conceptos clave -->
+  <div class="concepts-section">
+    <h2 class="section-title">
+      <mat-icon>school</mat-icon> Archivos y conceptos clave
+    </h2>
+    <p class="section-desc">
+      Estos son los archivos que componen el contexto de un proyecto. Claude Code
+      los lee para entender tu arquitectura y generar codigo alineado.
+    </p>
+    <div class="concept-grid">
+      @for (c of concepts; track c.title) {
+        <div class="concept-card">
+          <mat-icon class="concept-icon">{{ c.icon }}</mat-icon>
+          <div>
+            <span class="concept-title">{{ c.title }}</span>
+            <p class="concept-desc">{{ c.desc }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Cuando usar Design Docs -->
+  <div class="when-section">
+    <h2 class="section-title">
+      <mat-icon>help_outline</mat-icon> Cuando usar Design Docs
+    </h2>
+    <p class="section-desc">
+      No todo necesita un Design Doc. La regla es simple: si la tarea es pequena y directa,
+      ve directo al codigo. Si es grande o toca multiples partes, documenta primero.
+    </p>
+    <div class="when-grid">
+      <div class="when-col col-yes">
+        <h3><mat-icon>check_circle</mat-icon> Necesitas Design Doc</h3>
+        @for (item of whenYes; track item.text) {
+          <div class="when-item">
+            <mat-icon>check</mat-icon>
+            <span>{{ item.text }}<br/><span class="when-reason">{{ item.reason }}</span></span>
+          </div>
+        }
+      </div>
+      <div class="when-col col-no">
+        <h3><mat-icon>cancel</mat-icon> Ve directo al codigo</h3>
+        @for (item of whenNo; track item.text) {
+          <div class="when-item">
+            <mat-icon>close</mat-icon>
+            <span>{{ item.text }}<br/><span class="when-reason">{{ item.reason }}</span></span>
+          </div>
+        }
+      </div>
+    </div>
+    <div class="when-rule">
+      <strong>Regla simple:</strong> Si puedes describir la tarea en 1 prompt y Claude la resuelve
+      en 1 intento — no necesitas Design Doc. Si necesitas decir "primero haz X, despues Y,
+      y cuidado con Z" — necesitas Design Doc.
+    </div>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Configurar tu proyecto -->
+  <div class="modes-section">
+    <h2 class="section-title">
+      <mat-icon>play_circle</mat-icon> Configura tu proyecto
+    </h2>
+    <p class="section-desc">
+      Selecciona el escenario que mejor describe tu situacion. Te guiaremos paso a paso
+      para configurar los archivos de contexto segun tu stack y tipo de proyecto.
+    </p>
+    <div class="modes-grid">
+      @for (opt of modes; track opt.mode) {
+        <mat-card class="mode-card" (click)="select(opt.mode)" tabindex="0"
+                  (keydown.enter)="select(opt.mode)">
+          <mat-icon class="mode-icon">{{ opt.icon }}</mat-icon>
+          <h3>{{ opt.title }}</h3>
+          <p>{{ opt.description }}</p>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card>
+      }
+    </div>
+  </div>
+
 </div>

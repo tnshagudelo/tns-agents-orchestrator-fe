@@ -44,7 +44,7 @@ export function getSpecFiles(techId: TechId): SpecFile[] {
 
   const common: SpecFile[] = [
     {
-      name: 'auth.spec.md',
+      name: 'auth.md',
       purpose: 'Autenticacion y autorizacion: flujos de login, roles, permisos, manejo de tokens',
       example: `# Auth
 
@@ -71,7 +71,7 @@ Manejo de autenticacion JWT y autorizacion basada en roles.
   if (isFrontend) {
     common.push(
       {
-        name: 'ui-patterns.spec.md',
+        name: 'ui-patterns.md',
         purpose: 'Patrones de UI, componentes compartidos, sistema de diseno y manejo de estado',
         example: `# UI Patterns
 
@@ -93,7 +93,7 @@ Convenciones de interfaz y componentes reutilizables.
 - No crear componentes de mas de 300 lineas`,
       },
       {
-        name: 'api-integration.spec.md',
+        name: 'api-integration.md',
         purpose: 'Contratos de API, endpoints consumidos, manejo de errores HTTP',
         example: `# API Integration
 
@@ -122,7 +122,7 @@ Bearer token en header Authorization
   if (isBackend) {
     common.push(
       {
-        name: 'database.spec.md',
+        name: 'database.md',
         purpose: 'Modelo de datos, migraciones, indices y restricciones de base de datos',
         example: `# Database
 
@@ -142,7 +142,7 @@ PostgreSQL 16
 - Indices obligatorios en foreign keys`,
       },
       {
-        name: 'api-endpoints.spec.md',
+        name: 'api-endpoints.md',
         purpose: 'Definicion de endpoints, validaciones de entrada/salida, codigos de respuesta',
         example: `# API Endpoints
 
@@ -168,6 +168,140 @@ Contratos de la API REST.
   return common;
 }
 
+export function getMultiRepoSpecFiles(): SpecFile[] {
+  return [
+    {
+      name: 'ARCHITECTURE.md',
+      purpose: 'Diagramas de estructura, pipeline de agentes, estados, flujo de polling y decisiones de diseno',
+      example: `# ARCHITECTURE.md
+
+## Vision general
+[Descripcion del sistema y como interactuan los repos]
+
+## Diagramas (mermaid)
+- Estructura del sistema
+- Pipeline de procesamiento
+- Maquina de estados
+- Flujo de polling frontend → backend
+
+## Decisiones de diseno
+### D1 — [Nombre de la decision]
+- **Decision:** [que se decidio]
+- **Justificacion:** [por que]
+- **Alternativas descartadas:** [que se considero y por que no]`,
+    },
+    {
+      name: 'SYSTEM_SPEC_INDEX.md',
+      purpose: 'Indice de todos los specs del proyecto con estado y orden de implementacion',
+      example: `# SYSTEM_SPEC_INDEX.md
+
+| Spec | Modulo | Estado | Ultima actualizacion |
+|------|--------|--------|---------------------|
+| SPEC_01 | Dominio y entidades | Implementado | 2026-04-09 |
+| SPEC_02 | Sistema de jobs | Implementado | 2026-04-09 |
+| SPEC_03 | CRUD Clientes | Pendiente | — |`,
+    },
+    {
+      name: 'OPEN_QUESTIONS.md',
+      purpose: 'Preguntas tecnicas y de negocio pendientes de resolver — el agente NO debe asumir respuestas',
+      example: `# OPEN_QUESTIONS.md
+
+### OQ-01 — Que API de busqueda web usar?
+- **Contexto:** Se necesita buscar info publica de empresas
+- **Opciones:** Bing Search API, Google Custom Search, Tavily
+- **Estado:** Pendiente — depende de presupuesto
+
+### OQ-02 — Intervalo de polling recomendado?
+- **Estado:** Resuelto — 5 segundos
+- **Fecha:** 2026-04-09`,
+    },
+    {
+      name: 'specs/SPEC_XX_nombre.md',
+      purpose: 'Spec por modulo — uno por cada dominio funcional, con archivos de ambos repos',
+      example: `# SPEC_XX — [Nombre del modulo]
+**Estado:** Implementado / En progreso / Pendiente
+**Ultima actualizacion:** fecha
+
+## Que hace
+[Descripcion breve]
+
+## Archivos relevantes (rutas completas)
+### Backend
+- mi-backend/Domain/Entities/MiEntidad.cs
+- mi-backend/Application/Services/MiServicio.cs
+### Frontend
+- mi-frontend/src/app/features/mi-feature/
+
+## Endpoints expuestos
+| Metodo | Ruta | Descripcion |
+|--------|------|-------------|
+
+## Decisiones tecnicas tomadas
+## Pendientes / deuda tecnica conocida`,
+    },
+  ];
+}
+
+export const MULTI_REPO_TIPS: SpecTip[] = [
+  {
+    icon: 'account_tree',
+    title: 'Un CLAUDE.md por nivel',
+    description: 'El CLAUDE.md de la raiz orquesta (reglas cross-repo, estructura, protocolo). El CLAUDE.md de cada repo ejecuta (stack, comandos, convenciones). No dupliques informacion entre ellos.',
+  },
+  {
+    icon: 'sync_alt',
+    title: 'Protocolo cross-repo obligatorio',
+    description: 'Sin protocolo, Claude genera endpoints con un contrato y el frontend espera otro. Define el orden: leer contratos → backend primero → validar build → frontend despues → actualizar spec.',
+  },
+  {
+    icon: 'folder_shared',
+    title: 'docs/ es la memoria compartida',
+    description: 'Los specs en docs/ son la fuente de verdad para contratos entre repos. Si un endpoint cambia en el backend, el spec debe actualizarse ANTES de que el frontend lo consuma.',
+  },
+  {
+    icon: 'commit',
+    title: 'Un commit por repo, nunca desde la raiz',
+    description: 'La raiz NO es un repo git. Si Claude intenta hacer commit ahi, fallara. Cada repo tiene su historial independiente. Usa git -C <repo> para operaciones git.',
+  },
+  {
+    icon: 'rule',
+    title: 'Specs con rutas de ambos repos',
+    description: 'Un spec de modulo debe listar los archivos relevantes de AMBOS repos. Esto le dice a Claude exactamente donde buscar cuando trabaja en ese modulo.',
+  },
+];
+
+export function generateMultiRepoIndexMd(): string {
+  const specs = getMultiRepoSpecFiles();
+  const entries = specs
+    .map(s => `| \`${s.name}\` | ${s.purpose} |`)
+    .join('\n');
+
+  return `# docs/SYSTEM_SPEC_INDEX.md
+
+> Indice de specs del workspace multi-repo.
+> Cada spec documenta un modulo con archivos de ambos repos.
+> Claude lee este indice para saber que spec consultar segun la tarea.
+
+## Como usar este indice
+1. Lee este archivo al inicio de cada tarea
+2. Identifica que modulo(s) toca tu tarea
+3. Lee SOLO los specs de esos modulos
+4. Si implementas un modulo nuevo, crea su spec y actualiza este indice
+
+## Mapa de documentos
+
+| Archivo | Que describe |
+|---------|-------------|
+${entries}
+
+## Reglas de mantenimiento
+- Cada tarea que cambia la arquitectura → actualizar ARCHITECTURE.md
+- Cada nuevo endpoint o tipo compartido → actualizar el spec del modulo
+- Cada decision pendiente → agregarla a OPEN_QUESTIONS.md
+- Los specs son la memoria del proyecto — si no se actualizan, Claude asume
+`;
+}
+
 export function generateIndexMd(techId: TechId): string {
   const specs = getSpecFiles(techId);
 
@@ -175,9 +309,9 @@ export function generateIndexMd(techId: TechId): string {
     .map(s => `| \`${s.name}\` | ${s.purpose} |`)
     .join('\n');
 
-  return `# system_spec/index.md
+  return `# docs/specs/index.md
 
-> Este archivo es el mapa de specs del proyecto.
+> Este archivo es el mapa de design docs del proyecto.
 > El agente lo lee para saber QUE spec consultar segun la tarea.
 > NO cargues todas las specs — solo las que necesitas.
 

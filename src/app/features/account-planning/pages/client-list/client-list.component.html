@@ -1,0 +1,67 @@
+<div style="padding: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2 style="margin: 0;">Account Planning — Clientes</h2>
+    <button mat-raised-button color="primary" (click)="createClient()">
+      <mat-icon>add</mat-icon> Nuevo cliente
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <mat-spinner diameter="40" style="margin: 40px auto;"></mat-spinner>
+  } @else if (clients().length === 0) {
+    <mat-card>
+      <mat-card-content style="text-align: center; padding: 40px;">
+        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">business</mat-icon>
+        <p style="margin-top: 16px; color: #666;">No hay clientes registrados. Crea el primero para iniciar.</p>
+        <button mat-raised-button color="primary" (click)="createClient()">Crear cliente</button>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card>
+      <table mat-table [dataSource]="clients()" style="width: 100%;">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Empresa</th>
+          <td mat-cell *matCellDef="let c">{{ c.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="industry">
+          <th mat-header-cell *matHeaderCellDef>Sector</th>
+          <td mat-cell *matCellDef="let c">{{ c.industry }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="country">
+          <th mat-header-cell *matHeaderCellDef>País</th>
+          <td mat-cell *matCellDef="let c">{{ c.country }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef>Última actividad</th>
+          <td mat-cell *matCellDef="let c">{{ c.updatedAt | date:'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let c">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="startPlanning(c)">
+                <mat-icon>rocket_launch</mat-icon> Iniciar planning
+              </button>
+              <button mat-menu-item (click)="editClient(c)">
+                <mat-icon>edit</mat-icon> Editar
+              </button>
+              <button mat-menu-item (click)="deleteClient(c)">
+                <mat-icon>delete</mat-icon> Eliminar
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card>
+  }
+</div>

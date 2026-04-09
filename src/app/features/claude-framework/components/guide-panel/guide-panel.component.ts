@@ -68,7 +68,7 @@ export class GuidePanelComponent {
   });
 
   readonly modeLabel = computed(() => {
-    const labels = { new: 'Proyecto Nuevo', existing: 'Proyecto Existente', migration: 'Migracion' };
+    const labels: Record<string, string> = { new: 'Proyecto Nuevo', existing: 'Proyecto Existente', migration: 'Migracion', 'multi-repo': 'Multi-Repositorio' };
     const m = this.state.mode();
     return m ? labels[m] : '';
   });

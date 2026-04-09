@@ -1,10 +1,10 @@
 <!-- Tips section -->
 <div class="tips-section">
   <h3 class="section-title">
-    <mat-icon>lightbulb</mat-icon> Claves del Context Engineering
+    <mat-icon>lightbulb</mat-icon> Buenas practicas
   </h3>
   <div class="tips-grid">
-    @for (tip of tips; track tip.title) {
+    @for (tip of tips(); track tip.title) {
       <div class="tip-card">
         <mat-icon class="tip-icon">{{ tip.icon }}</mat-icon>
         <div class="tip-content">
@@ -21,7 +21,7 @@
   <div class="index-header">
     <div class="file-label">
       <mat-icon>folder_open</mat-icon>
-      <span>system_spec/index.md</span>
+      <span>docs/specs/index.md</span>
     </div>
     <button mat-stroked-button (click)="copyIndex()">
       <mat-icon>{{ clipboard.isCopied('spec-index') ? 'check' : 'content_copy' }}</mat-icon>
@@ -36,7 +36,7 @@
 <!-- Spec files -->
 <div class="specs-section">
   <h3 class="section-title">
-    <mat-icon>description</mat-icon> Specs de ejemplo para tu proyecto
+    <mat-icon>description</mat-icon> Design docs de ejemplo
   </h3>
   <p class="section-desc">Cada archivo describe un dominio. Copia el ejemplo y adaptalo a tu proyecto real.</p>
 
@@ -45,7 +45,7 @@
       <div class="spec-header">
         <div class="spec-name">
           <mat-icon>draft</mat-icon>
-          <span>system_spec/{{ spec.name }}</span>
+          <span>docs/specs/{{ spec.name }}</span>
         </div>
         <button mat-stroked-button (click)="copySpec(spec)">
           <mat-icon>{{ clipboard.isCopied('spec-' + spec.name) ? 'check' : 'content_copy' }}</mat-icon>
@@ -66,12 +66,33 @@
   <h3 class="section-title">
     <mat-icon>account_tree</mat-icon> Estructura recomendada
   </h3>
-  <pre class="structure-tree">proyecto/
+  @if (state.mode() === 'multi-repo') {
+    <pre class="structure-tree">mi-workspace/                        ← NO es un repo git
+├── CLAUDE.md                        ← Contexto global: repos, protocolo cross-repo
+├── docs/
+│   ├── ARCHITECTURE.md              ← Diagramas y decisiones de diseno
+│   ├── SYSTEM_SPEC_INDEX.md         ← Indice de specs por modulo
+│   ├── OPEN_QUESTIONS.md            ← Decisiones pendientes
+│   └── specs/
+│       ├── SPEC_01_dominio.md       ← Spec por modulo (archivos de ambos repos)
+│       └── SPEC_02_otro.md
+├── mi-backend/                      ← Repo git independiente
+│   ├── .git/
+│   ├── CLAUDE.md                    ← Contexto del backend (stack, comandos, reglas)
+│   └── src/
+└── mi-frontend/                     ← Repo git independiente
+    ├── .git/
+    ├── CLAUDE.md                    ← Contexto del frontend (stack, comandos, reglas)
+    └── src/</pre>
+  } @else {
+    <pre class="structure-tree">proyecto/
 ├── CLAUDE.md                    ← Contexto rapido (stack, comandos, reglas)
-├── system_spec/
-│   ├── index.md                 ← Mapa: que spec leer para cada dominio
-│   ├── auth.spec.md             ← Spec de autenticacion
-│   ├── [modulo].spec.md         ← Una spec por dominio de negocio
-│   └── migration.spec.md        ← Temporal: solo durante migraciones
+├── docs/
+│   └── specs/
+│       ├── index.md             ← Mapa: que spec leer para cada dominio
+│       ├── auth.md              ← Spec de autenticacion
+│       ├── [modulo].md          ← Un design doc por dominio de negocio
+│       └── migration.md         ← Temporal: solo durante migraciones
 └── src/                         ← Codigo fuente</pre>
+  }
 </div>

@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MarkdownModule } from 'ngx-markdown';
 import { FrameworkStateService } from '../../services/framework-state.service';
 import { ClipboardService } from '../../services/clipboard.service';
-import { SPEC_TIPS, getSpecFiles, generateIndexMd } from '../../data/system-spec.data';
+import { SPEC_TIPS, MULTI_REPO_TIPS, getSpecFiles, getMultiRepoSpecFiles, generateIndexMd, generateMultiRepoIndexMd } from '../../data/system-spec.data';
 import { SpecFile } from '../../models/framework.types';
 
 @Component({
@@ -100,17 +100,21 @@ import { SpecFile } from '../../models/framework.types';
   `],
 })
 export class SpecsTabComponent {
-  private readonly state = inject(FrameworkStateService);
+  protected readonly state = inject(FrameworkStateService);
   protected readonly clipboard = inject(ClipboardService);
 
-  readonly tips = SPEC_TIPS;
+  readonly tips = computed(() =>
+    this.state.mode() === 'multi-repo' ? MULTI_REPO_TIPS : SPEC_TIPS
+  );
 
   readonly specFiles = computed(() => {
+    if (this.state.mode() === 'multi-repo') return getMultiRepoSpecFiles();
     const tech = this.state.techId();
     return tech ? getSpecFiles(tech) : [];
   });
 
   readonly indexContent = computed(() => {
+    if (this.state.mode() === 'multi-repo') return generateMultiRepoIndexMd();
     const tech = this.state.techId();
     return tech ? generateIndexMd(tech) : '';
   });

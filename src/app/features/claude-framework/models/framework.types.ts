@@ -1,4 +1,4 @@
-export type ProjectMode = 'new' | 'existing' | 'migration';
+export type ProjectMode = 'new' | 'existing' | 'migration' | 'multi-repo';
 
 export type TechId = 'angular' | 'react' | 'vue' | 'nestjs'
                    | 'express' | 'nextjs' | 'fastapi' | 'django';

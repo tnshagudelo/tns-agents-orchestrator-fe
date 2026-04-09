@@ -1,0 +1,175 @@
+@if (session(); as s) {
+  <div class="session-container">
+
+    <!-- Status bar -->
+    @if (statusInfo(); as info) {
+      <mat-card class="status-bar">
+        <mat-card-content style="display: flex; align-items: center; gap: 12px;">
+          <mat-icon [style.color]="info.color === 'warn' ? '#f44336' : info.color === 'accent' ? '#ff4081' : '#3f51b5'">
+            {{ info.icon }}
+          </mat-icon>
+          <span style="font-weight: 500;">{{ info.label }}</span>
+          <span style="flex: 1;"></span>
+          <mat-chip>{{ s.language | uppercase }}</mat-chip>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Polling progress -->
+    @if (isPolling() && currentJob(); as job) {
+      <mat-card style="margin-bottom: 16px;">
+        <mat-card-content>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <mat-icon class="spin">autorenew</mat-icon>
+            <span>{{ job.currentStep ?? 'Procesando...' }}</span>
+            <span style="flex: 1;"></span>
+            <span>{{ job.progress }}%</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="job.progress"></mat-progress-bar>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Chat panel (estados conversacionales) -->
+    @if (s.status === 'Queued' || s.status === 'QuickSearchDone' || s.status === 'AwaitingConfirmation') {
+      <mat-card style="margin-bottom: 16px;">
+        <mat-card-header>
+          <mat-card-title>Conversación</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chat-history">
+            @for (msg of chatHistory(); track $index) {
+              <div [class]="'chat-msg chat-msg--' + msg.role">
+                <strong>{{ msg.role === 'user' ? 'Tú' : 'Agente' }}:</strong>
+                <markdown [data]="msg.content"></markdown>
+              </div>
+            }
+            @if (isStreaming()) {
+              <div class="chat-msg chat-msg--assistant">
+                <strong>Agente:</strong>
+                <markdown [data]="streamingContent()"></markdown>
+              </div>
+            }
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <mat-form-field appearance="outline" style="flex: 1;">
+              <input matInput [(ngModel)]="chatInput" placeholder="Escribe tu mensaje..."
+                     (keyup.enter)="sendChat()" [disabled]="isStreaming()" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="sendChat()" [disabled]="isStreaming() || !chatInput.trim()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+
+          @if (s.status === 'AwaitingConfirmation' || s.status === 'QuickSearchDone') {
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+              <button mat-raised-button color="primary" (click)="confirmClient()">
+                <mat-icon>check</mat-icon> Confirmar cliente e iniciar investigación
+              </button>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- LinkedIn fallback -->
+    @if (s.status === 'AwaitingLinkedInInput') {
+      <mat-card style="margin-bottom: 16px;">
+        <mat-card-header>
+          <mat-card-title>Datos de LinkedIn requeridos</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>No fue posible obtener datos de LinkedIn automáticamente. Pega el contenido del perfil de la empresa aquí:</p>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <textarea matInput [(ngModel)]="linkedInInput" rows="6"
+                      placeholder="Pega aquí el contenido del perfil de LinkedIn..."></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="submitLinkedIn()" [disabled]="!linkedInInput.trim()">
+            <mat-icon>send</mat-icon> Enviar y continuar
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Focus selector (post-review) -->
+    @if (s.status === 'AwaitingFocus') {
+      <mat-card style="margin-bottom: 16px;">
+        <mat-card-header>
+          <mat-card-title>Definir enfoque del portafolio</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Selecciona el enfoque para personalizar el portafolio:</p>
+          <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
+            <mat-label>Tipo de empresa</mat-label>
+            <input matInput [(ngModel)]="focusCompanyType" placeholder="Ej: Enterprise, Startup, Gobierno..." />
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
+            <mat-label>Rol del interlocutor</mat-label>
+            <input matInput [(ngModel)]="focusContactRole" placeholder="Ej: CTO, Director TI, Gerente de compras..." />
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="setFocus()"
+                  [disabled]="!focusCompanyType.trim() || !focusContactRole.trim()">
+            <mat-icon>auto_awesome</mat-icon> Generar portafolio
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Portfolio review -->
+    @if (s.status === 'UnderRevision') {
+      <mat-card style="margin-bottom: 16px;">
+        <mat-card-header>
+          <mat-card-title>Portafolio generado</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p style="color: #666;">Revisa el portafolio. Puedes aprobarlo o regenerarlo con otro enfoque/idioma.</p>
+
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button mat-raised-button color="primary" (click)="approve()">
+              <mat-icon>check_circle</mat-icon> Aprobar
+            </button>
+            <mat-form-field appearance="outline" style="width: 120px;">
+              <mat-label>Idioma</mat-label>
+              <input matInput [(ngModel)]="regenerateLanguage" placeholder="es, en, pt" />
+            </mat-form-field>
+            <button mat-raised-button (click)="regenerate()">
+              <mat-icon>refresh</mat-icon> Regenerar
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Approved -->
+    @if (s.status === 'Approved') {
+      <mat-card style="margin-bottom: 16px; border-left: 4px solid #4caf50;">
+        <mat-card-content style="display: flex; align-items: center; gap: 12px;">
+          <mat-icon style="color: #4caf50;">verified</mat-icon>
+          <span style="font-weight: 500; color: #4caf50;">Planning aprobado</span>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Failed -->
+    @if (s.status === 'Failed') {
+      <mat-card style="margin-bottom: 16px; border-left: 4px solid #f44336;">
+        <mat-card-content>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <mat-icon style="color: #f44336;">error</mat-icon>
+            <span style="font-weight: 500; color: #f44336;">Error en el procesamiento</span>
+          </div>
+          <button mat-raised-button color="warn" (click)="retry()" style="margin-top: 12px;">
+            <mat-icon>refresh</mat-icon> Reintentar
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+
+  </div>
+} @else {
+  <div style="padding: 24px; text-align: center;">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">hourglass_empty</mat-icon>
+    <p>Cargando sesión...</p>
+  </div>
+}
