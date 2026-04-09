@@ -66,6 +66,6 @@ export class SidebarComponent {
     { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
     { label: 'Propuestas', icon: 'description', route: '/proposals' },
     { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
-    { label: 'Guia Claude Code', icon: 'auto_stories', route: '/claude-framework' },
+    { label: 'Como trabajamos', icon: 'auto_stories', route: '/claude-framework' },
   ];
 }
