@@ -7,6 +7,7 @@ import {
   PlanningSessionWithJob,
   SetFocusRequest,
   RegenerateRequest,
+  ResearchResult,
 } from '../models/account-planning.model';
 
 @Injectable({ providedIn: 'root' })
@@ -115,6 +116,16 @@ export class PlanningSessionService extends BaseApiService {
     return this.post<PlanningSessionWithJob>(`/api/planning-sessions/${sessionId}/retry`, {}).pipe(
       map(r => ({ session: this.normalize(r.session), jobId: r.jobId })),
       tap(r => this._currentSession.set(r.session))
+    );
+  }
+
+  getResults(sessionId: string): Observable<ResearchResult[]> {
+    return this.get<ResearchResult[]>(`/api/planning-sessions/${sessionId}/results`).pipe(
+      map(items => (items ?? []).map(r => ({
+        ...r,
+        sourceDate: r.sourceDate ? new Date(r.sourceDate) : undefined,
+        createdAt: new Date(r.createdAt),
+      })))
     );
   }
 

@@ -15,11 +15,12 @@ import { PlanningSessionService } from '../../services/planning-session.service'
 import { PlanningChatService } from '../../services/planning-chat.service';
 import { JobPollingService } from '../../services/job-polling.service';
 import { ClientService } from '../../services/client.service';
-import { SESSION_STATUS_MAP, Client, PlanningSession } from '../../models/account-planning.model';
+import { SESSION_STATUS_MAP, Client, PlanningSession, ResearchResult } from '../../models/account-planning.model';
 import { SessionChatComponent, ChatMessage } from './components/session-chat/session-chat.component';
 import { ClientSidebarComponent } from './components/client-sidebar/client-sidebar.component';
 import { ConfirmationCardComponent } from './components/confirmation-card/confirmation-card.component';
 import { SearchProgressComponent } from './components/search-progress/search-progress.component';
+import { DashboardShellComponent } from './components/dashboard/dashboard-shell.component';
 
 @Component({
   selector: 'app-planning-session',
@@ -28,7 +29,7 @@ import { SearchProgressComponent } from './components/search-progress/search-pro
     FormsModule, UpperCasePipe, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule,
     MatChipsModule, SessionChatComponent, ClientSidebarComponent,
-    ConfirmationCardComponent, SearchProgressComponent,
+    ConfirmationCardComponent, SearchProgressComponent, DashboardShellComponent,
   ],
   templateUrl: './planning-session.component.html',
   styleUrl: './planning-session.component.scss',
@@ -48,15 +49,28 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
 
   readonly client = signal<Client | null>(null);
   readonly isReturningClient = signal(false);
+  readonly researchResults = signal<ResearchResult[]>([]);
+  readonly showFocusSelector = signal(false);
   private autoStarted = false;
   private sessionId = '';
 
+  readonly isConversationalState = computed(() => {
+    const s = this.session();
+    if (!s) return true;
+    return ['Queued', 'QuickSearching', 'QuickSearchDone', 'AwaitingConfirmation', 'DeepSearching', 'AwaitingLinkedInInput'].includes(s.status);
+  });
+
   constructor() {
-    // Watch for job completion → reload session to get updated status
+    // Watch for job completion → reload session + load results
     effect(() => {
       const job = this.currentJob();
       if (job && (job.status === 'Completed' || job.status === 'Failed') && this.sessionId) {
-        this.sessionService.getById(this.sessionId).subscribe();
+        this.sessionService.getById(this.sessionId).subscribe(session => {
+          if (session.status === 'AwaitingReview' || session.status === 'AwaitingFocus'
+            || session.status === 'UnderRevision' || session.status === 'Approved') {
+            this.loadResults();
+          }
+        });
       }
     });
   }
@@ -84,10 +98,15 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
         tap(client => {
           this.client.set(client);
           // TODO: check if client has previous investigations to set isReturningClient
+          // Auto-start chat if session is new
           if (session.status === 'Queued' && !this.autoStarted) {
             this.autoStarted = true;
-            // Small delay to ensure signals are propagated before greeting
             setTimeout(() => this.sendAutoGreeting(session, client), 100);
+          }
+          // Load results if session already has investigation data
+          if (['AwaitingReview', 'AwaitingFocus', 'GeneratingPortfolio',
+               'UnderRevision', 'Approved'].includes(session.status)) {
+            this.loadResults();
           }
         })
       ))
@@ -246,6 +265,13 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
 
     this.sessionService.retry(s.id).subscribe(result => {
       this.pollingService.startPolling(result.jobId);
+    });
+  }
+
+  private loadResults(): void {
+    if (!this.sessionId) return;
+    this.sessionService.getResults(this.sessionId).subscribe(results => {
+      this.researchResults.set(results);
     });
   }
 

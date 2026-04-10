@@ -1,0 +1,60 @@
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h2>Resultados de investigación</h2>
+      <p>{{ client().name }} — Investigación completada @if (sessionDate()) { el {{ sessionDate() | date:'d MMM yyyy' }} }</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="defineFocus.emit()">
+        <mat-icon>auto_awesome</mat-icon> Definir enfoque y generar portafolio
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-layout">
+
+    <!-- Mini-nav -->
+    <nav class="mini-nav">
+      <h4>Secciones</h4>
+      @for (section of sections(); track section.id) {
+        <button class="nav-item" [class.active]="activeSectionId() === section.id"
+          (click)="scrollTo(section.id)">
+          <mat-icon>{{ section.icon }}</mat-icon>
+          <div class="nav-item-text">
+            <span class="nav-title">{{ section.title }}</span>
+            <span class="nav-preview">{{ section.preview }}</span>
+          </div>
+        </button>
+      }
+    </nav>
+
+    <!-- Sections -->
+    <div class="sections-area">
+      <mat-accordion multi>
+        @for (section of sections(); track section.id) {
+          <mat-expansion-panel [id]="'section-' + section.id" [expanded]="section.expanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
+                {{ section.title }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="section-content">
+              <markdown [data]="section.content"></markdown>
+            </div>
+
+            <mat-action-row>
+              <button mat-button matTooltip="Copiar contenido" (click)="copySection(section.content)">
+                <mat-icon>content_copy</mat-icon> Copiar
+              </button>
+            </mat-action-row>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </div>
+
+  </div>
+</div>
