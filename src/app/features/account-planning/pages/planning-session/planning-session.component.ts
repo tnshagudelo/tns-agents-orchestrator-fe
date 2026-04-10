@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
@@ -49,6 +49,17 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   readonly client = signal<Client | null>(null);
   readonly isReturningClient = signal(false);
   private autoStarted = false;
+  private sessionId = '';
+
+  constructor() {
+    // Watch for job completion → reload session to get updated status
+    effect(() => {
+      const job = this.currentJob();
+      if (job && (job.status === 'Completed' || job.status === 'Failed') && this.sessionId) {
+        this.sessionService.getById(this.sessionId).subscribe();
+      }
+    });
+  }
 
   readonly statusInfo = computed(() => {
     const s = this.session();
@@ -66,6 +77,7 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
+    this.sessionId = id;
 
     this.sessionService.getById(id).pipe(
       switchMap(session => this.clientService.getById(session.clientId).pipe(

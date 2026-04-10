@@ -10,7 +10,8 @@ interface SearchPhase {
   status: 'pending' | 'active' | 'completed';
 }
 
-const PHASE_ORDER = ['WEB_SEARCH', 'LINKEDIN', 'RAG_SEARCH', 'ANALYSIS'];
+/** Must match the currentStep strings sent by DeepResearchWorker */
+const PHASE_ORDER = ['WEB_SEARCH', 'RAG_SEARCH', 'ANALYSIS', 'COMPLETING'];
 
 @Component({
   selector: 'app-search-progress',
@@ -28,10 +29,9 @@ export class SearchProgressComponent {
     const currentIndex = PHASE_ORDER.indexOf(currentStep);
 
     return [
-      { id: 'WEB_SEARCH', label: 'Búsqueda web', icon: 'travel_explore' },
-      { id: 'LINKEDIN', label: 'LinkedIn', icon: 'work' },
+      { id: 'WEB_SEARCH', label: 'Investigación', icon: 'travel_explore' },
       { id: 'RAG_SEARCH', label: 'Base de conocimiento', icon: 'psychology' },
-      { id: 'ANALYSIS', label: 'Análisis', icon: 'analytics' },
+      { id: 'ANALYSIS', label: 'Análisis estratégico', icon: 'analytics' },
     ].map((phase, i) => ({
       ...phase,
       status: i < currentIndex ? 'completed' as const
@@ -43,19 +43,20 @@ export class SearchProgressComponent {
   readonly progressLabel = computed(() => {
     const step = this.job().currentStep;
     switch (step) {
-      case 'WEB_SEARCH': return 'Buscando en portales web confiables...';
-      case 'LINKEDIN': return 'Consultando perfil de LinkedIn...';
-      case 'RAG_SEARCH': return 'Buscando en base de conocimiento interna...';
-      case 'ANALYSIS': return 'Analizando hallazgos y generando insights...';
+      case 'PREPARING': return 'Preparando investigación...';
+      case 'WEB_SEARCH': return 'Investigando la empresa en fuentes públicas...';
+      case 'RAG_SEARCH': return 'Consultando base de conocimiento interna...';
+      case 'ANALYSIS': return 'Analizando hallazgos y generando insights estratégicos...';
+      case 'COMPLETING': return 'Finalizando...';
       default: return 'Procesando...';
     }
   });
 
   readonly estimatedTime = computed(() => {
     const progress = this.job().progress;
-    if (progress >= 90) return 'Finalizando...';
-    if (progress >= 70) return 'Menos de 1 minuto';
-    if (progress >= 40) return '~2 minutos restantes';
-    return '~3-4 minutos restantes';
+    if (progress >= 90) return 'Casi listo...';
+    if (progress >= 65) return 'Menos de 1 minuto';
+    if (progress >= 40) return '~1-2 minutos restantes';
+    return '~2-3 minutos restantes';
   });
 }
