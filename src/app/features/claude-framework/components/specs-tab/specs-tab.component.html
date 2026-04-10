@@ -1,7 +1,7 @@
 <!-- Tips section -->
 <div class="tips-section">
   <h3 class="section-title">
-    <mat-icon>lightbulb</mat-icon> Buenas practicas
+    <mat-icon>lightbulb</mat-icon> Buenas prácticas
   </h3>
   <div class="tips-grid">
     @for (tip of tips(); track tip.title) {
@@ -38,7 +38,7 @@
   <h3 class="section-title">
     <mat-icon>description</mat-icon> Design docs de ejemplo
   </h3>
-  <p class="section-desc">Cada archivo describe un dominio. Copia el ejemplo y adaptalo a tu proyecto real.</p>
+  <p class="section-desc">Cada archivo describe un dominio. Copia el ejemplo y adáptalo a tu proyecto real.</p>
 
   @for (spec of specFiles(); track spec.name) {
     <mat-card class="spec-card">
@@ -70,11 +70,11 @@
     <pre class="structure-tree">mi-workspace/                        ← NO es un repo git
 ├── CLAUDE.md                        ← Contexto global: repos, protocolo cross-repo
 ├── docs/
-│   ├── ARCHITECTURE.md              ← Diagramas y decisiones de diseno
-│   ├── SYSTEM_SPEC_INDEX.md         ← Indice de specs por modulo
+│   ├── ARCHITECTURE.md              ← Diagramas y decisiones de diseño
+│   ├── SYSTEM_SPEC_INDEX.md         ← Índice de specs por módulo
 │   ├── OPEN_QUESTIONS.md            ← Decisiones pendientes
 │   └── specs/
-│       ├── SPEC_01_dominio.md       ← Spec por modulo (archivos de ambos repos)
+│       ├── SPEC_01_dominio.md       ← Spec por módulo (archivos de ambos repos)
 │       └── SPEC_02_otro.md
 ├── mi-backend/                      ← Repo git independiente
 │   ├── .git/
@@ -86,13 +86,13 @@
     └── src/</pre>
   } @else {
     <pre class="structure-tree">proyecto/
-├── CLAUDE.md                    ← Contexto rapido (stack, comandos, reglas)
+├── CLAUDE.md                    ← Contexto rápido (stack, comandos, reglas)
 ├── docs/
 │   └── specs/
-│       ├── index.md             ← Mapa: que spec leer para cada dominio
-│       ├── auth.md              ← Spec de autenticacion
+│       ├── index.md             ← Mapa: qué spec leer para cada dominio
+│       ├── auth.md              ← Spec de autenticación
 │       ├── [modulo].md          ← Un design doc por dominio de negocio
 │       └── migration.md         ← Temporal: solo durante migraciones
-└── src/                         ← Codigo fuente</pre>
+└── src/                         ← Código fuente</pre>
   }
 </div>

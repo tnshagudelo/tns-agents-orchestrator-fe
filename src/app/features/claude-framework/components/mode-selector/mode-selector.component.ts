@@ -175,22 +175,22 @@ export class ModeSelectorComponent {
     {
       icon: 'speed',
       title: 'Productividad',
-      desc: 'Claude Code genera codigo alineado con tu arquitectura si le das contexto estructurado. Sin contexto, adivina.',
+      desc: 'Un agente con contexto estructurado genera código alineado con tu arquitectura. Sin contexto, adivina y tú corriges.',
     },
     {
       icon: 'group',
       title: 'Consistencia',
-      desc: 'Todos los desarrolladores del equipo trabajan con las mismas convenciones, documentadas en un solo lugar.',
+      desc: 'Design Docs centralizan las convenciones del equipo. Todos — humanos y agentes — trabajan con las mismas reglas.',
     },
     {
       icon: 'history',
       title: 'Memoria del proyecto',
-      desc: 'Los design docs son la memoria tecnica. Cuando alguien nuevo llega al proyecto, lee los docs y entiende.',
+      desc: 'Los Design Docs son la memoria técnica del proyecto. Cuando alguien nuevo llega, lee los docs y entiende.',
     },
     {
       icon: 'verified',
       title: 'Calidad',
-      desc: 'Disenar antes de codificar reduce errores, retrabajos y decisiones que hay que revertir despues.',
+      desc: 'Diseñar antes de codificar reduce errores, retrabajos y decisiones que hay que revertir después.',
     },
   ];
 
@@ -199,18 +199,18 @@ export class ModeSelectorComponent {
   readonly companies = [
     { name: 'Google', calls: 'Design Doc', ref: 'Software Engineering at Google (O\'Reilly, 2020)' },
     { name: 'Amazon', calls: 'Technical Design Document', ref: 'Working Backwards process' },
-    { name: 'Uber / Spotify', calls: 'RFC (Request for Comments)', ref: 'Propuesta tecnica abierta a revision' },
-    { name: 'Microsoft', calls: 'Design Specification', ref: 'Documentacion interna de ingenieria' },
-    { name: 'Startups', calls: 'Tech Spec', ref: 'Version ligera y pragmatica' },
+    { name: 'Uber / Spotify', calls: 'RFC (Request for Comments)', ref: 'Propuesta técnica abierta a revisión' },
+    { name: 'Microsoft', calls: 'Design Specification', ref: 'Documentación interna de ingeniería' },
+    { name: 'Startups', calls: 'Tech Spec', ref: 'Versión ligera y pragmática' },
   ];
 
   // ── Flujo de trabajo ────────────────────────────────────────────────────────
 
   readonly flowSteps = [
-    { label: 'HU / Necesidad', desc: 'Defines que quieres lograr' },
-    { label: 'Design Doc', desc: 'Claude genera el plan tecnico' },
-    { label: 'Revision', desc: 'Tu apruebas o ajustas' },
-    { label: 'Implementar', desc: 'Claude codifica segun el doc' },
+    { label: 'HU / Necesidad', desc: 'Defines qué quieres lograr' },
+    { label: 'Design Doc', desc: 'El agente genera el plan técnico' },
+    { label: 'Revisión', desc: 'Tú apruebas o ajustas' },
+    { label: 'Implementar', desc: 'El agente codifica según el doc' },
     { label: 'Actualizar', desc: 'El doc refleja lo implementado' },
   ];
 
@@ -220,41 +220,41 @@ export class ModeSelectorComponent {
     {
       icon: 'description',
       title: 'CLAUDE.md',
-      desc: 'Archivo que Claude Code lee automaticamente al abrir el proyecto. Define stack, comandos, convenciones y reglas.',
+      desc: 'Archivo de contexto que el agente lee automáticamente al abrir el proyecto. Define stack, comandos, convenciones y reglas.',
     },
     {
       icon: 'folder',
       title: 'docs/specs/',
-      desc: 'Carpeta con design docs por modulo. Cada doc describe: que hace, entidades, endpoints, decisiones y deuda tecnica.',
+      desc: 'Carpeta con design docs por módulo. Cada doc describe: qué hace, entidades, endpoints, decisiones y deuda técnica.',
     },
     {
       icon: 'architecture',
       title: 'ARCHITECTURE.md',
-      desc: 'Documento con diagramas, decisiones de diseno y estructura del sistema. La vision tecnica del proyecto.',
+      desc: 'Documento con diagramas, decisiones de diseño y estructura del sistema. La visión técnica del proyecto.',
     },
     {
       icon: 'quiz',
       title: 'OPEN_QUESTIONS.md',
-      desc: 'Preguntas tecnicas pendientes de resolver. Claude NO debe asumir respuestas — debe consultar aqui primero.',
+      desc: 'Preguntas técnicas pendientes de resolver. El agente NO debe asumir respuestas — debe consultar aquí primero.',
     },
   ];
 
   // ── Cuando usar Design Docs ─────────────────────────────────────────────────
 
   readonly whenYes = [
-    { text: 'Feature nuevo que toca 2+ modulos', reason: 'Sin plan, Claude genera piezas que no encajan' },
-    { text: 'Cambio de arquitectura', reason: 'Decisiones dificiles de revertir' },
+    { text: 'Feature nuevo que toca 2+ módulos', reason: 'Sin plan, el agente genera piezas que no encajan' },
+    { text: 'Cambio de arquitectura', reason: 'Decisiones difíciles de revertir' },
     { text: 'Nuevo endpoint + UI que lo consume', reason: 'El contrato debe definirse antes' },
-    { text: 'Integracion con sistema externo', reason: 'Las interfaces deben ser explicitas' },
-    { text: 'Tarea de mas de 1 dia', reason: 'Necesitas dividirla y planificar' },
+    { text: 'Integración con sistema externo', reason: 'Las interfaces deben ser explícitas' },
+    { text: 'Tarea de más de 1 día', reason: 'Necesitas dividirla y planificar' },
   ];
 
   readonly whenNo = [
-    { text: 'Bug fix de pocas lineas', reason: 'Directo con un prompt claro' },
+    { text: 'Bug fix de pocas líneas', reason: 'Directo con un prompt claro' },
     { text: 'Cambiar un texto en la UI', reason: 'Directo' },
     { text: 'Actualizar dependencia sin breaking changes', reason: 'Directo' },
     { text: 'Refactor en un solo archivo', reason: 'Directo' },
-    { text: 'Tarea con Design Doc existente', reason: 'Leer el doc y trabajar sobre el' },
+    { text: 'Tarea con Design Doc existente', reason: 'Leer el doc y trabajar sobre él' },
   ];
 
   // ── Escenarios de configuracion ─────────────────────────────────────────────
@@ -263,19 +263,19 @@ export class ModeSelectorComponent {
     {
       mode: 'new',
       title: 'Proyecto nuevo',
-      description: 'Primeros pasos: definir arquitectura, crear CLAUDE.md y los primeros design docs antes de escribir codigo.',
+      description: 'Primeros pasos: definir arquitectura, crear CLAUDE.md y los primeros design docs antes de escribir código.',
       icon: 'add_circle_outline',
     },
     {
       mode: 'existing',
       title: 'Proyecto existente',
-      description: 'Documentar un proyecto con codigo existente para que Claude entienda la arquitectura.',
+      description: 'Documentar un proyecto con código existente para que el agente entienda la arquitectura.',
       icon: 'edit_note',
     },
     {
       mode: 'migration',
-      title: 'Migracion',
-      description: 'Design docs temporales para migracion: breaking changes, orden de modulos y validacion.',
+      title: 'Migración',
+      description: 'Design docs temporales para migración: breaking changes, orden de módulos y validación.',
       icon: 'swap_horiz',
     },
     {

@@ -2,26 +2,30 @@
 
   <!-- Hero -->
   <div class="hero">
-    <span class="hero-badge">FRAMEWORK DE DESARROLLO</span>
-    <h1>Tech and Solve + Claude Code</h1>
+    <span class="hero-badge">DESIGN DOCS + CONTEXT ENGINEERING</span>
+    <h1>Metodología de desarrollo con IA</h1>
     <p class="hero-desc">
-      Este es el framework de trabajo que adoptamos en Tech and Solve para desarrollar software
-      con inteligencia artificial. Combina la practica de <strong>Design Docs</strong> con
-      <strong>Claude Code</strong> para que cada linea de codigo que genere la IA este alineada
-      con la arquitectura, convenciones y decisiones del proyecto.
+      En Tech and Solve adoptamos una metodología basada en <strong>Design Docs</strong> y
+      <strong>Context Engineering</strong> para potenciar el desarrollo con inteligencia artificial.
+      La idea es simple: si el agente de IA entiende tu arquitectura, convenciones y decisiones
+      técnicas, genera código alineado. Si no las tiene, adivina.
+    </p>
+    <p class="hero-desc" style="margin-top: 8px;">
+      Esta guía te enseña a aplicar esta metodología usando <strong>Claude Code</strong> como agente de desarrollo.
     </p>
   </div>
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Por que este framework -->
+  <!-- Por que esta metodologia -->
   <div class="why-section">
     <h2 class="section-title">
-      <mat-icon>bolt</mat-icon> Por que este framework
+      <mat-icon>bolt</mat-icon> Por qué esta metodología
     </h2>
     <p class="section-desc">
-      Claude Code es una herramienta poderosa, pero sin contexto estructurado genera codigo
-      generico que no respeta las convenciones del proyecto. Este framework resuelve eso.
+      Cualquier agente de IA genera código genérico si no tiene contexto. Con Design Docs y
+      Context Engineering, el agente trabaja con la misma información que tendría un desarrollador
+      senior del equipo.
     </p>
     <div class="why-grid">
       @for (card of whyCards; track card.title) {
@@ -39,26 +43,26 @@
   <!-- Que es un Design Doc -->
   <div class="what-section">
     <h2 class="section-title">
-      <mat-icon>menu_book</mat-icon> Que es un Design Doc
+      <mat-icon>menu_book</mat-icon> Qué es un Design Doc
     </h2>
     <p class="what-intro">
-      Un Design Doc es un <strong>documento tecnico que se escribe ANTES de codificar</strong>.
-      Explica que se va a construir, como se va a hacer y que alternativas se consideraron.
-      No es una libreria ni un framework — es una practica de ingenieria que los equipos
-      de software mas maduros del mundo usan para reducir errores y alinear al equipo
-      antes de invertir tiempo en codigo.
+      Un Design Doc es un <strong>documento técnico que se escribe ANTES de codificar</strong>.
+      Explica qué se va a construir, cómo se va a hacer y qué alternativas se consideraron.
+      No es una librería ni un framework — es una práctica de ingeniería que los equipos
+      de software más maduros del mundo usan para reducir errores y alinear al equipo
+      antes de invertir tiempo en código.
     </p>
     <div class="what-analogy">
-      <strong>Analogia:</strong> Un Design Doc es al software lo que un plano es a una casa.
+      <strong>Analogía:</strong> Un Design Doc es al software lo que un plano es a una casa.
       Puedes construir sin plano, pero vas a tirar paredes. Con un plano, todos saben
-      que se va a construir antes de poner el primer ladrillo.
+      qué se va a construir antes de poner el primer ladrillo.
     </div>
 
     <table class="company-table">
       <thead>
         <tr>
           <th>Empresa</th>
-          <th>Como lo llaman</th>
+          <th>Cómo lo llaman</th>
           <th>Referencia</th>
         </tr>
       </thead>
@@ -79,11 +83,11 @@
   <!-- Flujo de trabajo -->
   <div class="flow-section">
     <h2 class="section-title">
-      <mat-icon>route</mat-icon> Como se trabaja
+      <mat-icon>route</mat-icon> Cómo se trabaja
     </h2>
     <p class="section-desc">
       Cada tarea significativa sigue este flujo. La IA no reemplaza al desarrollador —
-      lo potencia. Tu defines el que y revisas el resultado. Claude ejecuta.
+      lo potencia. Tú defines el qué y revisas el resultado. El agente ejecuta.
     </p>
     <div class="flow-steps">
       @for (step of flowSteps; track step.label; let i = $index) {
@@ -104,8 +108,8 @@
       <mat-icon>school</mat-icon> Archivos y conceptos clave
     </h2>
     <p class="section-desc">
-      Estos son los archivos que componen el contexto de un proyecto. Claude Code
-      los lee para entender tu arquitectura y generar codigo alineado.
+      Estos son los archivos que componen el contexto de un proyecto. El agente de IA
+      los lee para entender tu arquitectura y generar código alineado.
     </p>
     <div class="concept-grid">
       @for (c of concepts; track c.title) {
@@ -125,11 +129,11 @@
   <!-- Cuando usar Design Docs -->
   <div class="when-section">
     <h2 class="section-title">
-      <mat-icon>help_outline</mat-icon> Cuando usar Design Docs
+      <mat-icon>help_outline</mat-icon> Cuándo usar Design Docs
     </h2>
     <p class="section-desc">
-      No todo necesita un Design Doc. La regla es simple: si la tarea es pequena y directa,
-      ve directo al codigo. Si es grande o toca multiples partes, documenta primero.
+      No todo necesita un Design Doc. La regla es simple: si la tarea es pequeña y directa,
+      ve directo al código. Si es grande o toca múltiples partes, documenta primero.
     </p>
     <div class="when-grid">
       <div class="when-col col-yes">
@@ -142,7 +146,7 @@
         }
       </div>
       <div class="when-col col-no">
-        <h3><mat-icon>cancel</mat-icon> Ve directo al codigo</h3>
+        <h3><mat-icon>cancel</mat-icon> Ve directo al código</h3>
         @for (item of whenNo; track item.text) {
           <div class="when-item">
             <mat-icon>close</mat-icon>
@@ -152,8 +156,8 @@
       </div>
     </div>
     <div class="when-rule">
-      <strong>Regla simple:</strong> Si puedes describir la tarea en 1 prompt y Claude la resuelve
-      en 1 intento — no necesitas Design Doc. Si necesitas decir "primero haz X, despues Y,
+      <strong>Regla simple:</strong> Si puedes describir la tarea en 1 prompt y el agente la resuelve
+      en 1 intento — no necesitas Design Doc. Si necesitas decir "primero haz X, después Y,
       y cuidado con Z" — necesitas Design Doc.
     </div>
   </div>
@@ -166,8 +170,8 @@
       <mat-icon>play_circle</mat-icon> Configura tu proyecto
     </h2>
     <p class="section-desc">
-      Selecciona el escenario que mejor describe tu situacion. Te guiaremos paso a paso
-      para configurar los archivos de contexto segun tu stack y tipo de proyecto.
+      Selecciona el escenario que mejor describe tu situación. Te guiaremos paso a paso
+      para configurar los archivos de contexto según tu stack y tipo de proyecto.
     </p>
     <div class="modes-grid">
       @for (opt of modes; track opt.mode) {

@@ -11,17 +11,17 @@ export const SPEC_TIPS: SpecTip[] = [
   {
     icon: 'savings',
     title: 'Menos tokens, misma calidad',
-    description: 'Con un index.md bien escrito, el agente lee solo las specs que necesita. Un proyecto con 10 specs de 50 lineas cada una consume 90% menos tokens que poner todo en un solo archivo de 500 lineas.',
+    description: 'Con un index.md bien escrito, el agente lee solo las specs que necesita. Un proyecto con 10 specs de 50 líneas cada una consume 90% menos tokens que poner todo en un solo archivo de 500 líneas.',
   },
   {
     icon: 'sync',
     title: 'Actualiza specs cuando el proyecto cambia',
-    description: 'Cada vez que agregas un modulo, cambias una regla de negocio o modificas la arquitectura, actualiza la spec afectada. Contexto desactualizado genera codigo incorrecto.',
+    description: 'Cada vez que agregas un módulo, cambias una regla de negocio o modificas la arquitectura, actualiza la spec afectada. Contexto desactualizado genera código incorrecto.',
   },
   {
     icon: 'rule',
     title: 'Una spec por dominio, no por archivo',
-    description: 'Las specs describen dominios de negocio (auth, payments, notifications), no archivos individuales. Un dominio puede tener 20 archivos pero una sola spec de 30 lineas.',
+    description: 'Las specs describen dominios de negocio (auth, payments, notifications), no archivos individuales. Un dominio puede tener 20 archivos pero una sola spec de 30 líneas.',
   },
   {
     icon: 'visibility_off',
@@ -31,7 +31,7 @@ export const SPEC_TIPS: SpecTip[] = [
   {
     icon: 'edit_note',
     title: 'Specs cortas y concretas',
-    description: 'Cada spec debe tener entre 20-60 lineas. Si supera 80 lineas, probablemente mezcla dos dominios y debe dividirse.',
+    description: 'Cada spec debe tener entre 20-60 líneas. Si supera 80 líneas, probablemente mezcla dos dominios y debe dividirse.',
   },
 ];
 
@@ -45,11 +45,11 @@ export function getSpecFiles(techId: TechId): SpecFile[] {
   const common: SpecFile[] = [
     {
       name: 'auth.md',
-      purpose: 'Autenticacion y autorizacion: flujos de login, roles, permisos, manejo de tokens',
+      purpose: 'Autenticación y autorización: flujos de login, roles, permisos, manejo de tokens',
       example: `# Auth
 
-## Proposito
-Manejo de autenticacion JWT y autorizacion basada en roles.
+## Propósito
+Manejo de autenticación JWT y autorización basada en roles.
 
 ## Entidades
 - User: id, email, passwordHash, role, createdAt
@@ -58,13 +58,13 @@ Manejo de autenticacion JWT y autorizacion basada en roles.
 ## Reglas de negocio
 1. Los tokens expiran en 24 horas
 2. Refresh token tiene validez de 7 dias
-3. Maximo 3 sesiones activas por usuario
+3. Máximo 3 sesiones activas por usuario
 4. Roles: admin, editor, viewer
 
 ## Restricciones
 - No almacenar passwords en texto plano
 - No exponer tokens en URLs
-- No permitir escalacion de privilegios`,
+- No permitir escalación de privilegios`,
     },
   ];
 
@@ -72,10 +72,10 @@ Manejo de autenticacion JWT y autorizacion basada en roles.
     common.push(
       {
         name: 'ui-patterns.md',
-        purpose: 'Patrones de UI, componentes compartidos, sistema de diseno y manejo de estado',
+        purpose: 'Patrones de UI, componentes compartidos, sistema de diseño y manejo de estado',
         example: `# UI Patterns
 
-## Proposito
+## Propósito
 Convenciones de interfaz y componentes reutilizables.
 
 ## Estado
@@ -84,33 +84,33 @@ Convenciones de interfaz y componentes reutilizables.
 - No duplicar estado entre componentes
 
 ## Componentes compartidos
-- StatusBadge: muestra estado con color semantico
+- StatusBadge: muestra estado con color semántico
 - LoadingSpinner: overlay global durante peticiones HTTP
 - NotificationToast: feedback al usuario (success, error, warning)
 
 ## Restricciones
 - No usar estilos inline en el template
-- No crear componentes de mas de 300 lineas`,
+- No crear componentes de más de 300 líneas`,
       },
       {
         name: 'api-integration.md',
         purpose: 'Contratos de API, endpoints consumidos, manejo de errores HTTP',
         example: `# API Integration
 
-## Proposito
-Comunicacion con el backend via REST API.
+## Propósito
+Comunicación con el backend vía REST API.
 
 ## Base URL
 - Dev: https://localhost:7018
 - Prod: /api
 
-## Autenticacion
+## Autenticación
 Bearer token en header Authorization
 
 ## Manejo de errores
 - 401: redirigir a login
 - 403: mostrar mensaje de permisos
-- 500: toast de error generico
+- 500: toast de error genérico
 
 ## Restricciones
 - No hacer fetch directo — usar el servicio base
@@ -123,10 +123,10 @@ Bearer token en header Authorization
     common.push(
       {
         name: 'database.md',
-        purpose: 'Modelo de datos, migraciones, indices y restricciones de base de datos',
+        purpose: 'Modelo de datos, migraciones, índices y restricciones de base de datos',
         example: `# Database
 
-## Proposito
+## Propósito
 Esquema de base de datos y reglas de acceso a datos.
 
 ## Motor
@@ -134,32 +134,32 @@ PostgreSQL 16
 
 ## Migraciones
 - Comando: ${tech.commands['migrate'] ?? 'npm run migrate'}
-- Siempre crear migracion antes de cambiar el esquema
+- Siempre crear migración antes de cambiar el esquema
 
 ## Restricciones
-- No hacer queries raw sin justificacion
-- No eliminar columnas sin migracion de datos
-- Indices obligatorios en foreign keys`,
+- No hacer queries raw sin justificación
+- No eliminar columnas sin migración de datos
+- Índices obligatorios en foreign keys`,
       },
       {
         name: 'api-endpoints.md',
-        purpose: 'Definicion de endpoints, validaciones de entrada/salida, codigos de respuesta',
+        purpose: 'Definición de endpoints, validaciones de entrada/salida, códigos de respuesta',
         example: `# API Endpoints
 
-## Proposito
+## Propósito
 Contratos de la API REST.
 
 ## Convenciones
 - Versionado: /api/v1/
 - Formato: JSON
-- Paginacion: ?page=1&pageSize=20
+- Paginación: ?page=1&pageSize=20
 
-## Validacion
+## Validación
 - Request: validar con ${tech.id === 'nestjs' ? 'class-validator DTOs' : tech.id === 'fastapi' ? 'Pydantic models' : tech.id === 'django' ? 'DRF Serializers' : 'Zod schemas'}
 - Response: siempre tipado, nunca any
 
 ## Restricciones
-- No poner logica de negocio en controllers
+- No poner lógica de negocio en controllers
 - No retornar entidades de BD directamente`,
       },
     );
@@ -172,30 +172,30 @@ export function getMultiRepoSpecFiles(): SpecFile[] {
   return [
     {
       name: 'ARCHITECTURE.md',
-      purpose: 'Diagramas de estructura, pipeline de agentes, estados, flujo de polling y decisiones de diseno',
+      purpose: 'Diagramas de estructura, pipeline de agentes, estados, flujo de polling y decisiones de diseño',
       example: `# ARCHITECTURE.md
 
-## Vision general
-[Descripcion del sistema y como interactuan los repos]
+## Visión general
+[Descripción del sistema y cómo interactúan los repos]
 
 ## Diagramas (mermaid)
 - Estructura del sistema
 - Pipeline de procesamiento
-- Maquina de estados
+- Máquina de estados
 - Flujo de polling frontend → backend
 
-## Decisiones de diseno
-### D1 — [Nombre de la decision]
-- **Decision:** [que se decidio]
-- **Justificacion:** [por que]
-- **Alternativas descartadas:** [que se considero y por que no]`,
+## Decisiones de diseño
+### D1 — [Nombre de la decisión]
+- **Decisión:** [qué se decidió]
+- **Justificación:** [por qué]
+- **Alternativas descartadas:** [qué se consideró y por qué no]`,
     },
     {
       name: 'SYSTEM_SPEC_INDEX.md',
-      purpose: 'Indice de todos los specs del proyecto con estado y orden de implementacion',
+      purpose: 'Índice de todos los specs del proyecto con estado y orden de implementación',
       example: `# SYSTEM_SPEC_INDEX.md
 
-| Spec | Modulo | Estado | Ultima actualizacion |
+| Spec | Módulo | Estado | Última actualización |
 |------|--------|--------|---------------------|
 | SPEC_01 | Dominio y entidades | Implementado | 2026-04-09 |
 | SPEC_02 | Sistema de jobs | Implementado | 2026-04-09 |
@@ -203,27 +203,27 @@ export function getMultiRepoSpecFiles(): SpecFile[] {
     },
     {
       name: 'OPEN_QUESTIONS.md',
-      purpose: 'Preguntas tecnicas y de negocio pendientes de resolver — el agente NO debe asumir respuestas',
+      purpose: 'Preguntas técnicas y de negocio pendientes de resolver — el agente NO debe asumir respuestas',
       example: `# OPEN_QUESTIONS.md
 
-### OQ-01 — Que API de busqueda web usar?
-- **Contexto:** Se necesita buscar info publica de empresas
+### OQ-01 — ¿Qué API de búsqueda web usar?
+- **Contexto:** Se necesita buscar info pública de empresas
 - **Opciones:** Bing Search API, Google Custom Search, Tavily
 - **Estado:** Pendiente — depende de presupuesto
 
-### OQ-02 — Intervalo de polling recomendado?
+### OQ-02 — ¿Intervalo de polling recomendado?
 - **Estado:** Resuelto — 5 segundos
 - **Fecha:** 2026-04-09`,
     },
     {
       name: 'specs/SPEC_XX_nombre.md',
-      purpose: 'Spec por modulo — uno por cada dominio funcional, con archivos de ambos repos',
-      example: `# SPEC_XX — [Nombre del modulo]
+      purpose: 'Spec por módulo — uno por cada dominio funcional, con archivos de ambos repos',
+      example: `# SPEC_XX — [Nombre del módulo]
 **Estado:** Implementado / En progreso / Pendiente
-**Ultima actualizacion:** fecha
+**Última actualización:** fecha
 
-## Que hace
-[Descripcion breve]
+## Qué hace
+[Descripción breve]
 
 ## Archivos relevantes (rutas completas)
 ### Backend
@@ -233,11 +233,11 @@ export function getMultiRepoSpecFiles(): SpecFile[] {
 - mi-frontend/src/app/features/mi-feature/
 
 ## Endpoints expuestos
-| Metodo | Ruta | Descripcion |
+| Método | Ruta | Descripción |
 |--------|------|-------------|
 
-## Decisiones tecnicas tomadas
-## Pendientes / deuda tecnica conocida`,
+## Decisiones técnicas tomadas
+## Pendientes / deuda técnica conocida`,
     },
   ];
 }
@@ -246,12 +246,12 @@ export const MULTI_REPO_TIPS: SpecTip[] = [
   {
     icon: 'account_tree',
     title: 'Un CLAUDE.md por nivel',
-    description: 'El CLAUDE.md de la raiz orquesta (reglas cross-repo, estructura, protocolo). El CLAUDE.md de cada repo ejecuta (stack, comandos, convenciones). No dupliques informacion entre ellos.',
+    description: 'El CLAUDE.md de la raíz orquesta (reglas cross-repo, estructura, protocolo). El CLAUDE.md de cada repo ejecuta (stack, comandos, convenciones). No dupliques información entre ellos.',
   },
   {
     icon: 'sync_alt',
     title: 'Protocolo cross-repo obligatorio',
-    description: 'Sin protocolo, Claude genera endpoints con un contrato y el frontend espera otro. Define el orden: leer contratos → backend primero → validar build → frontend despues → actualizar spec.',
+    description: 'Sin protocolo, el agente genera endpoints con un contrato y el frontend espera otro. Define el orden: leer contratos → backend primero → validar build → frontend después → actualizar spec.',
   },
   {
     icon: 'folder_shared',
@@ -260,13 +260,13 @@ export const MULTI_REPO_TIPS: SpecTip[] = [
   },
   {
     icon: 'commit',
-    title: 'Un commit por repo, nunca desde la raiz',
-    description: 'La raiz NO es un repo git. Si Claude intenta hacer commit ahi, fallara. Cada repo tiene su historial independiente. Usa git -C <repo> para operaciones git.',
+    title: 'Un commit por repo, nunca desde la raíz',
+    description: 'La raíz NO es un repo git. Si el agente intenta hacer commit ahí, fallará. Cada repo tiene su historial independiente. Usa git -C <repo> para operaciones git.',
   },
   {
     icon: 'rule',
     title: 'Specs con rutas de ambos repos',
-    description: 'Un spec de modulo debe listar los archivos relevantes de AMBOS repos. Esto le dice a Claude exactamente donde buscar cuando trabaja en ese modulo.',
+    description: 'Un spec de módulo debe listar los archivos relevantes de AMBOS repos. Esto le dice al agente exactamente dónde buscar cuando trabaja en ese módulo.',
   },
 ];
 
@@ -278,27 +278,27 @@ export function generateMultiRepoIndexMd(): string {
 
   return `# docs/SYSTEM_SPEC_INDEX.md
 
-> Indice de specs del workspace multi-repo.
-> Cada spec documenta un modulo con archivos de ambos repos.
-> Claude lee este indice para saber que spec consultar segun la tarea.
+> Índice de specs del workspace multi-repo.
+> Cada spec documenta un módulo con archivos de ambos repos.
+> El agente lee este índice para saber qué spec consultar según la tarea.
 
-## Como usar este indice
+## Cómo usar este índice
 1. Lee este archivo al inicio de cada tarea
-2. Identifica que modulo(s) toca tu tarea
-3. Lee SOLO los specs de esos modulos
-4. Si implementas un modulo nuevo, crea su spec y actualiza este indice
+2. Identifica qué módulo(s) toca tu tarea
+3. Lee SOLO los specs de esos módulos
+4. Si implementas un módulo nuevo, crea su spec y actualiza este índice
 
 ## Mapa de documentos
 
-| Archivo | Que describe |
+| Archivo | Qué describe |
 |---------|-------------|
 ${entries}
 
 ## Reglas de mantenimiento
 - Cada tarea que cambia la arquitectura → actualizar ARCHITECTURE.md
-- Cada nuevo endpoint o tipo compartido → actualizar el spec del modulo
-- Cada decision pendiente → agregarla a OPEN_QUESTIONS.md
-- Los specs son la memoria del proyecto — si no se actualizan, Claude asume
+- Cada nuevo endpoint o tipo compartido → actualizar el spec del módulo
+- Cada decisión pendiente → agregarla a OPEN_QUESTIONS.md
+- Los specs son la memoria del proyecto — si no se actualizan, el agente asume
 `;
 }
 
@@ -312,25 +312,25 @@ export function generateIndexMd(techId: TechId): string {
   return `# docs/specs/index.md
 
 > Este archivo es el mapa de design docs del proyecto.
-> El agente lo lee para saber QUE spec consultar segun la tarea.
+> El agente lo lee para saber QUÉ spec consultar según la tarea.
 > NO cargues todas las specs — solo las que necesitas.
 
-## Como usar este indice
+## Cómo usar este índice
 1. Lee este archivo al inicio de cada tarea
-2. Identifica que dominio(s) toca tu tarea
+2. Identifica qué dominio(s) toca tu tarea
 3. Lee SOLO las specs de esos dominios
-4. Si necesitas crear un modulo nuevo, crea su spec y actualiza este indice
+4. Si necesitas crear un módulo nuevo, crea su spec y actualiza este índice
 
 ## Mapa de specs
 
-| Archivo | Que describe |
+| Archivo | Qué describe |
 |---------|-------------|
 ${entries}
 
 ## Reglas de mantenimiento
 - Agregar entrada cuando se crea una spec nueva
-- Eliminar entrada cuando un modulo se elimina
-- Actualizar la descripcion si el proposito del modulo cambia
-- Mantener ordenado alfabeticamente
+- Eliminar entrada cuando un módulo se elimina
+- Actualizar la descripción si el propósito del módulo cambia
+- Mantener ordenado alfabéticamente
 `;
 }

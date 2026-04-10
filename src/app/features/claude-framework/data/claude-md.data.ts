@@ -7,9 +7,9 @@ export function generateMultiRepoClaudeMd(techId: TechId): string {
 
   return `# CLAUDE.md — Workspace Multi-Repositorio
 
-> Este archivo orquesta el trabajo con multiples repos desde un directorio raiz.
-> Claude Code lo lee automaticamente al abrir desde esta carpeta.
-> Cada repo tiene su propio CLAUDE.md con detalles especificos.
+> Este archivo orquesta el trabajo con múltiples repos desde un directorio raíz.
+> El agente lo lee automáticamente al abrir desde esta carpeta.
+> Cada repo tiene su propio CLAUDE.md con detalles específicos.
 
 ## Workspace y repositorios
 
@@ -17,20 +17,20 @@ export function generateMultiRepoClaudeMd(techId: TechId): string {
 mi-workspace/
 ├── CLAUDE.md                     ← este archivo (orquestador)
 ├── mi-backend/                   ← Repo 1: Backend
-│   └── CLAUDE.md                 ← contexto especifico del backend
+│   └── CLAUDE.md                 ← contexto específico del backend
 ├── mi-frontend/                  ← Repo 2: Frontend
-│   └── CLAUDE.md                 ← contexto especifico del frontend
+│   └── CLAUDE.md                 ← contexto específico del frontend
 └── docs/
-    ├── ARCHITECTURE.md           ← diagramas y decisiones de diseno
-    ├── SYSTEM_SPEC_INDEX.md      ← indice de specs por modulo
+    ├── ARCHITECTURE.md           ← diagramas y decisiones de diseño
+    ├── SYSTEM_SPEC_INDEX.md      ← índice de specs por módulo
     ├── OPEN_QUESTIONS.md         ← decisiones pendientes
     └── specs/
-        └── SPEC_XX_nombre.md     ← specs por modulo/dominio
+        └── SPEC_XX_nombre.md     ← specs por módulo/dominio
 \`\`\`
 
 ## Stack
 
-| Repo | Tecnologia | Puerto |
+| Repo | Tecnología | Puerto |
 |------|-----------|--------|
 | mi-backend | ${tech.stack} | :XXXX |
 | mi-frontend | [stack frontend] | :4200 |
@@ -38,7 +38,7 @@ mi-workspace/
 ## Protocolo cross-repo (cuando la tarea toca ambos repos)
 
 1. **DEFINIR:** Lee docs/spec_api_contracts.md y docs/spec_shared_types.md
-2. **PLANIFICAR:** Lista los archivos que cambiaran en cada repo. Espera aprobacion.
+2. **PLANIFICAR:** Lista los archivos que cambiarán en cada repo. Espera aprobación.
 3. **BACKEND PRIMERO:** Implementa endpoint + tipos en mi-backend
 4. **VALIDAR:** El backend debe compilar antes de tocar el frontend
 5. **FRONTEND:** Implementa el service y componente en mi-frontend
@@ -48,9 +48,9 @@ mi-workspace/
 ## Regla de commits
 
 \`\`\`bash
-# NUNCA hagas git commit desde la raiz — no es un repo git
+# NUNCA hagas git commit desde la raíz — no es un repo git
 git -C mi-backend add .
-git -C mi-backend commit -m "tipo(scope): descripcion"
+git -C mi-backend commit -m "tipo(scope): descripción"
 
 git -C mi-frontend add .
 git -C mi-frontend commit -m "tipo(scope): descripcion"
@@ -61,7 +61,7 @@ git -C mi-frontend commit -m "tipo(scope): descripcion"
 - Nueva ruta o endpoint → actualizar spec de contratos API
 - Nuevo tipo compartido → actualizar spec de tipos compartidos
 - Cambio de arquitectura → actualizar ARCHITECTURE.md
-- Los specs son la memoria del proyecto. Si no se actualizan, se vuelven inutiles.
+- Los specs son la memoria del proyecto. Si no se actualizan, se vuelven inútiles.
 
 ## Carga de contexto
 
@@ -88,8 +88,8 @@ export function generateClaudeMd(techId: TechId): string {
 
   return `# CLAUDE.md
 
-> Este archivo es la fuente de verdad rapida del proyecto.
-> El agente lo lee automaticamente al iniciar cada sesion.
+> Este archivo es la fuente de verdad rápida del proyecto.
+> El agente lo lee automáticamente al iniciar cada sesión.
 > Mantenlo conciso — los detalles van en docs/specs/.
 
 ## Stack
@@ -105,8 +105,8 @@ ${conventionsSection}
 ${restrictionsSection}
 
 ## Context Engineering
-- Las specs de dominio estan en \`docs/specs/\`
-- Lee \`docs/specs/index.md\` para saber que spec consultar segun la tarea
+- Las specs de dominio están en \`docs/specs/\`
+- Lee \`docs/specs/index.md\` para saber qué spec consultar según la tarea
 - NO cargues todas las specs — solo las relevantes para la tarea actual
 - Si una tarea modifica la arquitectura, actualiza la spec afectada
 
@@ -117,7 +117,7 @@ ${restrictionsSection}
 4. Valida con \`${tech.commands['test']}\` y \`${tech.commands['build']}\`
 5. Si el cambio afecta la arquitectura, actualiza las specs
 
-## Actualizacion de este archivo
+## Actualización de este archivo
 Actualiza CLAUDE.md cuando:
 - Cambien las versiones del stack
 - Se agreguen o modifiquen comandos
