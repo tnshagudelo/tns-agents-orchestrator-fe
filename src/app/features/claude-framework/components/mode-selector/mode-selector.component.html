@@ -102,6 +102,64 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
+  <!-- Cómo se genera un Design Doc -->
+  <div class="how-section">
+    <h2 class="section-title">
+      <mat-icon>auto_fix_high</mat-icon> Cómo se genera un Design Doc con IA
+    </h2>
+    <p class="section-desc">
+      La técnica se llama <strong>Prompt-Driven Design</strong>: tú describes la necesidad,
+      el agente propone el plan técnico, y tú apruebas antes de codificar. Funciona porque
+      el agente ya leyó el contexto de tu proyecto.
+    </p>
+
+    <div class="how-steps">
+      @for (step of howSteps; track step.title; let i = $index) {
+        <div class="how-step">
+          <div class="how-step-header">
+            <span class="how-step-number">{{ i + 1 }}</span>
+            <div class="how-step-role" [class]="'role--' + step.role">{{ step.roleLabel }}</div>
+          </div>
+          <h4>{{ step.title }}</h4>
+          <p>{{ step.desc }}</p>
+          @if (step.example) {
+            <div class="how-step-example">
+              <mat-icon>{{ step.exampleIcon }}</mat-icon>
+              <span>{{ step.example }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="how-tip">
+      <div class="how-tip-header">
+        <mat-icon>tips_and_updates</mat-icon>
+        <strong>Prompt eficiente para generar un Design Doc</strong>
+      </div>
+      <pre class="how-tip-prompt">{{ designDocPrompt }}</pre>
+      <button mat-stroked-button class="how-tip-copy" (click)="copyPrompt()">
+        <mat-icon>{{ promptCopied ? 'check' : 'content_copy' }}</mat-icon>
+        {{ promptCopied ? 'Copiado' : 'Copiar prompt' }}
+      </button>
+    </div>
+
+    <div class="how-key-insight">
+      <mat-icon>lightbulb</mat-icon>
+      <div>
+        <strong>¿Por qué funciona?</strong>
+        <p>
+          Sin contexto, el agente genera un plan genérico que no sirve. Con Context Engineering
+          (CLAUDE.md + specs), el agente ya conoce tu stack, convenciones y módulos existentes
+          — por eso su propuesta está alineada con tu proyecto real. Tú solo describes
+          <strong>qué</strong> necesitas, no <strong>cómo</strong> hacerlo.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
   <!-- Conceptos clave -->
   <div class="concepts-section">
     <h2 class="section-title">

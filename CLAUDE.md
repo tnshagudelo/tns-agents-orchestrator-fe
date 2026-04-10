@@ -1,6 +1,9 @@
 # CLAUDE.md — tns-agents-orchestrator-fe
 # Ver reglas globales en: ../CLAUDE.md
-# Ver contratos en: ../docs/spec_api_contracts.md y ../docs/spec_shared_types.md
+# Ver contratos en: ../tns-agents-docs/contracts/api-contracts.md y ../tns-agents-docs/contracts/shared-types.md
+# Ver arquitectura en: ../tns-agents-docs/architecture/ARCHITECTURE.md
+# Ver specs en: ../tns-agents-docs/specs/INDEX.md
+# Ver ADRs en: ../tns-agents-docs/adrs/INDEX.md
 
 ## Stack específico
 - Angular 21.2.x standalone (sin NgModules) | TypeScript ~5.9.2 | RxJS ~7.8.0
@@ -22,17 +25,17 @@
 - NO `any` en TypeScript — strict mode habilitado
 - NO lógica de negocio en componentes — solo en services
 - NO imports entre features — solo de `shared/` y `core/`
-- SSE usa `fetch()` nativo (no HttpClient) — URL hardcoded a `https://localhost:7292`
-- Los tipos de respuesta del backend DEBEN coincidir con `../docs/spec_shared_types.md`
+- SSE usa `fetch()` nativo, no HttpClient (ADR-005) — URL hardcoded a `https://localhost:7292`
+- Los tipos de respuesta del backend DEBEN coincidir con `../tns-agents-docs/contracts/shared-types.md`
 
 ## Para agregar un nuevo feature
-1. Verifica el contrato en `../docs/spec_api_contracts.md`
-2. Crea/verifica el tipo en `../docs/spec_shared_types.md`
+1. Verifica el contrato en `../tns-agents-docs/contracts/api-contracts.md`
+2. Crea/verifica el tipo en `../tns-agents-docs/contracts/shared-types.md`
 3. Crea service en `features/{feature}/services/` extendiendo `BaseApiService`
 4. Crea componentes en `features/{feature}/pages/` (ruteados) y `components/` (reutilizables)
 5. Crea `features/{feature}/{feature}.routes.ts` con lazy loading
 6. Registra en `app.routes.ts` con `loadChildren`
-7. Actualiza `../docs/spec_frontend.md` con la ruta nueva
+7. Actualiza el spec correspondiente en `../tns-agents-docs/specs/`
 
 ## Comandos de este repo
 ```
