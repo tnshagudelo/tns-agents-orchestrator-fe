@@ -1,67 +1,109 @@
-<div style="padding: 24px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <h2 style="margin: 0;">Account Planning — Clientes</h2>
-    <button mat-raised-button color="primary" (click)="createClient()">
-      <mat-icon>add</mat-icon> Nuevo cliente
-    </button>
+<div class="page-header">
+  <div class="header-text">
+    <h2>Clientes</h2>
+    <p>Gestiona tus clientes y lanza procesos de Account Planning</p>
+  </div>
+  <button mat-raised-button color="primary" class="new-client-btn" (click)="createClient()">
+    <mat-icon>add</mat-icon> Nuevo cliente
+  </button>
+</div>
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (clients().length === 0) {
+  <mat-card class="empty-state-card">
+    <mat-card-content>
+      <div class="empty-state">
+        <div class="empty-icon-wrapper">
+          <mat-icon>business</mat-icon>
+        </div>
+        <h3>Sin clientes aún</h3>
+        <p>Agrega tu primer cliente para comenzar a generar Account Plannings con inteligencia artificial.</p>
+        <button mat-raised-button color="primary" (click)="createClient()">
+          <mat-icon>add</mat-icon> Crear primer cliente
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar por nombre, sector o país..." [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+    </mat-form-field>
+    <span class="client-count">{{ filteredClients().length }} cliente{{ filteredClients().length !== 1 ? 's' : '' }}</span>
   </div>
 
-  @if (isLoading()) {
-    <mat-spinner diameter="40" style="margin: 40px auto;"></mat-spinner>
-  } @else if (clients().length === 0) {
-    <mat-card>
-      <mat-card-content style="text-align: center; padding: 40px;">
-        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">business</mat-icon>
-        <p style="margin-top: 16px; color: #666;">No hay clientes registrados. Crea el primero para iniciar.</p>
-        <button mat-raised-button color="primary" (click)="createClient()">Crear cliente</button>
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <mat-card>
-      <table mat-table [dataSource]="clients()" style="width: 100%;">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Empresa</th>
-          <td mat-cell *matCellDef="let c">{{ c.name }}</td>
-        </ng-container>
+  <mat-card class="clients-table-card">
+    <table mat-table [dataSource]="filteredClients()" class="clients-table">
 
-        <ng-container matColumnDef="industry">
-          <th mat-header-cell *matHeaderCellDef>Sector</th>
-          <td mat-cell *matCellDef="let c">{{ c.industry }}</td>
-        </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Empresa</th>
+        <td mat-cell *matCellDef="let c">
+          <div class="client-name-cell">
+            <div class="client-avatar" [style.background]="getAvatarColor(c.name)">
+              {{ c.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="client-info">
+              <div class="name">{{ c.name }}</div>
+              @if (c.website) {
+                <div class="website">{{ c.website | stripProtocol }}</div>
+              }
+            </div>
+          </div>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="country">
-          <th mat-header-cell *matHeaderCellDef>País</th>
-          <td mat-cell *matCellDef="let c">{{ c.country }}</td>
-        </ng-container>
+      <ng-container matColumnDef="industry">
+        <th mat-header-cell *matHeaderCellDef>Sector</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="industry-chip">{{ c.industry }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="updatedAt">
-          <th mat-header-cell *matHeaderCellDef>Última actividad</th>
-          <td mat-cell *matCellDef="let c">{{ c.updatedAt | date:'short' }}</td>
-        </ng-container>
+      <ng-container matColumnDef="country">
+        <th mat-header-cell *matHeaderCellDef>País</th>
+        <td mat-cell *matCellDef="let c">
+          <div class="country-cell">
+            <mat-icon>location_on</mat-icon> {{ c.country }}
+          </div>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let c">
-            <button mat-icon-button [matMenuTriggerFor]="menu">
+      <ng-container matColumnDef="updatedAt">
+        <th mat-header-cell *matHeaderCellDef>Última actividad</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="date-cell">{{ c.updatedAt | relativeTime }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let c">
+          <div class="actions-cell">
+            <button mat-icon-button class="action-btn-planning" matTooltip="Iniciar planning" (click)="startPlanning(c)">
+              <mat-icon>rocket_launch</mat-icon>
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Más opciones">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="startPlanning(c)">
-                <mat-icon>rocket_launch</mat-icon> Iniciar planning
-              </button>
               <button mat-menu-item (click)="editClient(c)">
                 <mat-icon>edit</mat-icon> Editar
               </button>
               <button mat-menu-item (click)="deleteClient(c)">
-                <mat-icon>delete</mat-icon> Eliminar
+                <mat-icon color="warn">delete</mat-icon>
+                <span style="color: #f44336;">Eliminar</span>
               </button>
             </mat-menu>
-          </td>
-        </ng-container>
+          </div>
+        </td>
+      </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </mat-card>
-  }
-</div>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card>
+}

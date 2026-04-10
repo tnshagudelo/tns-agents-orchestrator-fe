@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -17,11 +17,13 @@ import { CreateClientRequest } from '../../models/account-planning.model';
     MatButtonModule, MatIconModule,
   ],
   templateUrl: './client-form.component.html',
+  styleUrl: './client-form.component.scss',
 })
 export class ClientFormComponent implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   isEdit = false;
   clientId = '';
@@ -49,6 +51,7 @@ export class ClientFormComponent implements OnInit {
           description: c.description ?? '',
           linkedInUrl: c.linkedInUrl ?? '',
         };
+        this.cdr.markForCheck();
       });
     }
   }

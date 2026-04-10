@@ -1,44 +1,86 @@
-<div style="padding: 24px; max-width: 600px; margin: 0 auto;">
-  <h2>{{ isEdit ? 'Editar' : 'Nuevo' }} Cliente</h2>
+<nav class="breadcrumb">
+  <a (click)="cancel()">Clientes</a>
+  <mat-icon>chevron_right</mat-icon>
+  <span class="current">{{ isEdit ? 'Editar cliente' : 'Nuevo cliente' }}</span>
+</nav>
 
-  <mat-card>
-    <mat-card-content>
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>Nombre de la empresa</mat-label>
-        <input matInput [(ngModel)]="form.name" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>Sector / Industria</mat-label>
-        <input matInput [(ngModel)]="form.industry" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>País</mat-label>
-        <input matInput [(ngModel)]="form.country" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>Sitio web</mat-label>
-        <input matInput [(ngModel)]="form.website" placeholder="https://" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>LinkedIn URL</mat-label>
-        <input matInput [(ngModel)]="form.linkedInUrl" placeholder="https://linkedin.com/company/..." />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput [(ngModel)]="form.description" rows="3"></textarea>
-      </mat-form-field>
-
-      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px;">
-        <button mat-button (click)="cancel()">Cancelar</button>
-        <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.name || !form.industry || !form.country">
-          {{ isEdit ? 'Guardar cambios' : 'Crear cliente' }}
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+<div class="form-header">
+  <h2>{{ isEdit ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+  <p>{{ isEdit ? 'Actualiza la información del cliente.' : 'Ingresa los datos básicos del cliente para iniciar su Account Planning.' }}</p>
 </div>
+
+<mat-card class="form-card">
+  <mat-card-content>
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>business</mat-icon> Información principal
+      </div>
+      <div class="form-row single">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre de la empresa</mat-label>
+          <input matInput [(ngModel)]="form.name" required placeholder="Ej: Bancolombia" />
+          <mat-icon matPrefix>apartment</mat-icon>
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Sector / Industria</mat-label>
+          <input matInput [(ngModel)]="form.industry" required placeholder="Ej: Banca y Finanzas" />
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>País</mat-label>
+          <input matInput [(ngModel)]="form.country" required placeholder="Ej: Colombia" />
+          <mat-icon matPrefix>public</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>link</mat-icon> Presencia digital
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Sitio web</mat-label>
+          <input matInput [(ngModel)]="form.website" placeholder="https://ejemplo.com" />
+          <mat-icon matPrefix>language</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>LinkedIn URL</mat-label>
+          <input matInput [(ngModel)]="form.linkedInUrl" placeholder="https://linkedin.com/company/..." />
+          <mat-icon matPrefix>work</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>notes</mat-icon> Contexto adicional
+      </div>
+      <div class="form-row single">
+        <mat-form-field appearance="outline">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput [(ngModel)]="form.description" rows="3"
+            placeholder="Contexto adicional sobre el cliente que pueda ayudar en la investigación..."></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-button (click)="cancel()">Cancelar</button>
+      <button mat-raised-button color="primary" class="save-btn"
+        (click)="save()"
+        [disabled]="!form.name || !form.industry || !form.country">
+        <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
+        {{ isEdit ? 'Guardar cambios' : 'Crear cliente' }}
+      </button>
+    </div>
+
+  </mat-card-content>
+</mat-card>
