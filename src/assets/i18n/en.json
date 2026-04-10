@@ -1,0 +1,211 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "copy": "Copy",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "approve": "Approve",
+    "language": "Language",
+    "search": "Search",
+    "saveChanges": "Save changes",
+    "createClient": "Create client"
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Manage your clients and launch Account Planning processes",
+    "new": "New client",
+    "createFirst": "Create first client",
+    "emptyTitle": "No clients yet",
+    "emptyMessage": "Add your first client to start generating Account Plannings with artificial intelligence.",
+    "searchPlaceholder": "Search by name, industry or country...",
+    "count": "{{count}} client(s)",
+    "columns": {
+      "company": "Company",
+      "industry": "Industry",
+      "country": "Country",
+      "status": "Status",
+      "actions": ""
+    },
+    "status": {
+      "notInvestigated": "Not investigated",
+      "inProgress": "In progress",
+      "approved": "Approved",
+      "error": "Error"
+    },
+    "actions": {
+      "startPlanning": "Start planning",
+      "continuePlanning": "Continue planning"
+    },
+    "deleteConfirm": {
+      "title": "Delete client",
+      "message": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    }
+  },
+  "clientForm": {
+    "newTitle": "New client",
+    "editTitle": "Edit client",
+    "newSubtitle": "Enter the client's basic information to start their Account Planning.",
+    "editSubtitle": "Update the client's information.",
+    "sections": {
+      "main": "Main information",
+      "digital": "Digital presence",
+      "context": "Additional context"
+    },
+    "fields": {
+      "name": "Company name",
+      "namePlaceholder": "E.g.: Bancolombia",
+      "industry": "Industry / Sector",
+      "industryPlaceholder": "E.g.: Banking & Finance",
+      "country": "Country",
+      "countryPlaceholder": "E.g.: Colombia",
+      "website": "Website",
+      "websitePlaceholder": "https://example.com",
+      "linkedin": "LinkedIn URL",
+      "linkedInUrl": "LinkedIn URL",
+      "linkedinPlaceholder": "https://linkedin.com/company/...",
+      "linkedInUrlPlaceholder": "https://linkedin.com/company/...",
+      "description": "Description",
+      "descriptionPlaceholder": "Additional context about the client that may help in the research..."
+    },
+    "saveNew": "Create client",
+    "saveEdit": "Save changes"
+  },
+  "session": {
+    "backToClients": "Clients",
+    "status": {
+      "queued": "Queued",
+      "quickSearching": "Quick search...",
+      "quickSearchDone": "Quick search done",
+      "awaitingConfirmation": "Awaiting confirmation",
+      "deepSearching": "Deep research...",
+      "awaitingLinkedIn": "LinkedIn data required",
+      "awaitingReview": "Ready for review",
+      "awaitingFocus": "Define focus",
+      "generatingPortfolio": "Generating portfolio...",
+      "underRevision": "Under revision",
+      "approved": "Approved",
+      "failed": "Error"
+    },
+    "chat": {
+      "placeholder": "Describe the business need...",
+      "you": "You",
+      "agent": "Agent",
+      "welcomeTitle": "Account Planning Assistant",
+      "welcomeNew": "Describe the business need for <strong>{{name}}</strong> and I'll start the research.",
+      "welcomeReturning": "This client was previously investigated. Do you want to update the research or view previous results?"
+    },
+    "confirmation": {
+      "title": "Quick search result",
+      "subtitle": "Verify this is the correct company before continuing.",
+      "confirm": "Confirm & investigate",
+      "reject": "Not this company"
+    },
+    "searchProgress": {
+      "title": "Deep research in progress",
+      "subtitle": "Researching <strong>{{name}}</strong> across multiple sources",
+      "phases": {
+        "webSearch": "Research",
+        "rag": "Knowledge base",
+        "analysis": "Strategic analysis"
+      },
+      "preparing": "Preparing research...",
+      "webSearching": "Researching the company in public sources...",
+      "ragSearching": "Querying internal knowledge base...",
+      "analyzing": "Analyzing findings and generating strategic insights...",
+      "completing": "Finishing...",
+      "almostReady": "Almost ready...",
+      "lessThanMinute": "Less than 1 minute",
+      "fewMinutes": "~1-2 minutes remaining",
+      "severalMinutes": "~2-3 minutes remaining"
+    },
+    "linkedin": {
+      "title": "LinkedIn data required",
+      "subtitle": "Could not retrieve LinkedIn data automatically. Paste the company profile content.",
+      "placeholder": "Paste LinkedIn profile content here...",
+      "submit": "Submit and continue"
+    },
+    "focus": {
+      "title": "Define portfolio focus",
+      "subtitle": "Customize the portfolio based on company type and contact role.",
+      "companyType": "Company type",
+      "companyTypePlaceholder": "E.g.: Enterprise insurance",
+      "contactRole": "Contact role",
+      "contactRolePlaceholder": "E.g.: CTO, IT Director",
+      "generate": "Generate portfolio"
+    },
+    "portfolio": {
+      "title": "Portfolio generated",
+      "subtitle": "Review the portfolio. You can approve it or regenerate with a different focus or language.",
+      "regenerate": "Regenerate",
+      "languageLabel": "Language"
+    },
+    "approved": "Planning approved",
+    "failed": "Processing error"
+  },
+  "dashboard": {
+    "resultsTitle": "Research results",
+    "newInvestigation": "New investigation",
+    "previousVersions": "Previous versions",
+    "generatePortfolio": "Generate portfolio",
+    "sections": {
+      "findings": "Key findings",
+      "stakeholders": "Key people",
+      "opportunities": "Business opportunities",
+      "swot": "SWOT Analysis",
+      "sector": "Sector comparison",
+      "pvs": "Pain-Value-Service",
+      "proposal": "Strategic proposal",
+      "news": "Recent news",
+      "sources": "Sources consulted"
+    },
+    "findings": {
+      "all": "All",
+      "commercial": "Commercial insight"
+    },
+    "stakeholders": {
+      "painPoints": "Pain points",
+      "approach": "Approach"
+    },
+    "pvs": {
+      "pain": "Client's pain",
+      "value": "Value T&S brings",
+      "service": "Service"
+    },
+    "proposal": {
+      "keyBenefits": "Key benefits"
+    },
+    "sector": {
+      "position": "Position",
+      "competitors": "Competitors",
+      "trends": "Industry trends",
+      "differentiators": "Differentiators"
+    },
+    "sources": {
+      "source": "Source",
+      "type": "Type",
+      "url": "URL"
+    },
+    "internationalAlert": {
+      "title": "International client"
+    },
+    "copyTable": "Copy"
+  },
+  "sidebar": {
+    "sector": "Industry",
+    "country": "Country",
+    "web": "Web",
+    "linkedin": "LinkedIn",
+    "description": "Description",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "investigated": "Investigated",
+    "notInvestigated": "Not investigated",
+    "viewLastAnalysis": "View last analysis"
+  }
+}

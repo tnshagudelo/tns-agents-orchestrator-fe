@@ -8,13 +8,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientService } from '../../services/client.service';
 import { CreateClientRequest } from '../../models/account-planning.model';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-client-form',
   standalone: true,
   imports: [
     FormsModule, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule,
+    MatButtonModule, MatIconModule, TranslatePipe,
   ],
   templateUrl: './client-form.component.html',
   styleUrl: './client-form.component.scss',

@@ -15,6 +15,8 @@ import { ClientService } from '../../services/client.service';
 import { PlanningSessionService } from '../../services/planning-session.service';
 import { Client, PlanningSession } from '../../models/account-planning.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 
 @Pipe({ name: 'stripProtocol', standalone: true })
 export class StripProtocolPipe implements PipeTransform {
@@ -35,7 +37,7 @@ const AVATAR_COLORS = [
   imports: [
     FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatTableModule,
     MatMenuModule, MatProgressSpinnerModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, StripProtocolPipe,
+    MatTooltipModule, StripProtocolPipe, TranslatePipe,
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',
@@ -45,6 +47,7 @@ export class ClientListComponent implements OnInit {
   private readonly sessionService = inject(PlanningSessionService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly i18n = inject(TranslationService);
 
   readonly clients = this.clientService.clients;
   readonly isLoading = this.clientService.isLoading;
@@ -78,14 +81,14 @@ export class ClientListComponent implements OnInit {
     });
   }
 
-  getClientStatus(clientId: string): { label: string; color: string; icon: string } {
+  getClientStatus(clientId: string): { label: string; color: string; icon: string; key: string } {
     const session = this.latestSessions()[clientId];
-    if (!session) return { label: 'Sin investigar', color: '#999', icon: 'fiber_new' };
-    if (session.status === 'Approved') return { label: 'Aprobado', color: '#059669', icon: 'verified' };
-    if (session.status === 'Failed') return { label: 'Error', color: '#dc2626', icon: 'error' };
+    if (!session) return { label: this.i18n.get('clients.status.notInvestigated'), color: '#999', icon: 'fiber_new', key: 'notInvestigated' };
+    if (session.status === 'Approved') return { label: this.i18n.get('clients.status.approved'), color: '#059669', icon: 'verified', key: 'approved' };
+    if (session.status === 'Failed') return { label: this.i18n.get('clients.status.error'), color: '#dc2626', icon: 'error', key: 'error' };
     if (['DeepSearching', 'GeneratingPortfolio', 'QuickSearching'].includes(session.status))
-      return { label: 'En progreso', color: '#d97706', icon: 'autorenew' };
-    return { label: 'En proceso', color: '#4f46e5', icon: 'pending' };
+      return { label: this.i18n.get('clients.status.inProgress'), color: '#d97706', icon: 'autorenew', key: 'inProgress' };
+    return { label: this.i18n.get('clients.status.inProgress'), color: '#4f46e5', icon: 'pending', key: 'inProgress' };
   }
 
   createClient(): void {
@@ -113,10 +116,10 @@ export class ClientListComponent implements OnInit {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Eliminar cliente',
-        message: `¿Estás seguro de que deseas eliminar "${client.name}"? Esta acción no se puede deshacer.`,
-        confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
+        title: this.i18n.get('clients.deleteConfirm.title'),
+        message: this.i18n.get('clients.deleteConfirm.message', { name: client.name }),
+        confirmText: this.i18n.get('common.delete'),
+        cancelText: this.i18n.get('common.cancel'),
         color: 'warn',
         icon: 'warning',
       },

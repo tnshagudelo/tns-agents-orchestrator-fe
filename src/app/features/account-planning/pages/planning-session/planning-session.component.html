@@ -4,7 +4,7 @@
     <!-- Back nav -->
     <nav class="back-nav">
       <button mat-button (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon> Clientes
+        <mat-icon>arrow_back</mat-icon> {{ 'session.backToClients' | translate }}
       </button>
       @if (client(); as c) {
         <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
@@ -86,18 +86,18 @@
                   <mat-icon>person_search</mat-icon>
                 </div>
                 <div>
-                  <h3>Datos de LinkedIn requeridos</h3>
-                  <p>No fue posible obtener datos de LinkedIn automáticamente. Pega el contenido del perfil de la empresa.</p>
+                  <h3>{{ 'session.linkedin.title' | translate }}</h3>
+                  <p>{{ 'session.linkedin.subtitle' | translate }}</p>
                 </div>
               </div>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Perfil de LinkedIn</mat-label>
+                <mat-label>{{ 'session.linkedin.placeholder' | translate }}</mat-label>
                 <textarea matInput [(ngModel)]="linkedInInput" rows="6"
-                  placeholder="Pega aquí el contenido del perfil de LinkedIn..."></textarea>
+                  [placeholder]="'session.linkedin.placeholder' | translate"></textarea>
               </mat-form-field>
               <div class="action-card-actions">
                 <button mat-raised-button color="primary" (click)="submitLinkedIn()" [disabled]="!linkedInInput.trim()">
-                  <mat-icon>send</mat-icon> Enviar y continuar
+                  <mat-icon>send</mat-icon> {{ 'session.linkedin.submit' | translate }}
                 </button>
               </div>
             </mat-card-content>
@@ -113,27 +113,27 @@
                   <mat-icon>center_focus_strong</mat-icon>
                 </div>
                 <div>
-                  <h3>Definir enfoque del portafolio</h3>
-                  <p>Personaliza el portafolio según el tipo de empresa y el rol del interlocutor.</p>
+                  <h3>{{ 'session.focus.title' | translate }}</h3>
+                  <p>{{ 'session.focus.subtitle' | translate }}</p>
                 </div>
               </div>
               <div class="focus-fields">
                 <mat-form-field appearance="outline">
-                  <mat-label>Tipo de empresa</mat-label>
+                  <mat-label>{{ 'session.focus.companyType' | translate }}</mat-label>
                   <input matInput [(ngModel)]="focusCompanyType" placeholder="Ej: Aseguradora enterprise" />
                   <mat-icon matPrefix>business</mat-icon>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                  <mat-label>Rol del interlocutor</mat-label>
+                  <mat-label>{{ 'session.focus.contactRole' | translate }}</mat-label>
                   <input matInput [(ngModel)]="focusContactRole" placeholder="Ej: CTO, Director TI" />
                   <mat-icon matPrefix>person</mat-icon>
                 </mat-form-field>
               </div>
               <div class="action-card-actions">
-                <button mat-button (click)="showFocusSelector.set(false)">Cancelar</button>
+                <button mat-button (click)="showFocusSelector.set(false)">{{ 'common.cancel' | translate }}</button>
                 <button mat-raised-button color="primary" (click)="setFocus()"
                   [disabled]="!focusCompanyType.trim() || !focusContactRole.trim()">
-                  <mat-icon>auto_awesome</mat-icon> Generar portafolio
+                  <mat-icon>auto_awesome</mat-icon> {{ 'session.focus.generate' | translate }}
                 </button>
               </div>
             </mat-card-content>
@@ -165,20 +165,20 @@
                   <mat-icon>description</mat-icon>
                 </div>
                 <div>
-                  <h3>Portafolio generado</h3>
-                  <p>Revisa el portafolio. Puedes aprobarlo o regenerarlo con otro enfoque o idioma.</p>
+                  <h3>{{ 'session.portfolio.title' | translate }}</h3>
+                  <p>{{ 'session.portfolio.subtitle' | translate }}</p>
                 </div>
               </div>
               <div class="action-card-actions">
                 <button mat-raised-button color="primary" (click)="approve()">
-                  <mat-icon>check_circle</mat-icon> Aprobar
+                  <mat-icon>check_circle</mat-icon> {{ 'common.approve' | translate }}
                 </button>
                 <mat-form-field appearance="outline" class="lang-field">
-                  <mat-label>Idioma</mat-label>
+                  <mat-label>{{ 'session.portfolio.languageLabel' | translate }}</mat-label>
                   <input matInput [(ngModel)]="regenerateLanguage" placeholder="es, en, pt" />
                 </mat-form-field>
                 <button mat-stroked-button (click)="regenerate()">
-                  <mat-icon>refresh</mat-icon> Regenerar
+                  <mat-icon>refresh</mat-icon> {{ 'session.portfolio.regenerate' | translate }}
                 </button>
               </div>
             </mat-card-content>
@@ -189,7 +189,7 @@
         @if (s.status === 'Approved') {
           <div class="result-banner result-banner--success">
             <mat-icon>verified</mat-icon>
-            <span>Planning aprobado</span>
+            <span>{{ 'session.approved' | translate }}</span>
           </div>
         }
 
@@ -198,9 +198,9 @@
           <div class="result-banner result-banner--error">
             <mat-icon>error</mat-icon>
             <div>
-              <span>Error en el procesamiento</span>
+              <span>{{ 'session.failed' | translate }}</span>
               <button mat-stroked-button color="warn" (click)="retry()">
-                <mat-icon>refresh</mat-icon> Reintentar
+                <mat-icon>refresh</mat-icon> {{ 'common.retry' | translate }}
               </button>
             </div>
           </div>
@@ -226,6 +226,6 @@
 } @else {
   <div class="loading-state">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando sesión...</p>
+    <p>{{ 'common.loading' | translate }}</p>
   </div>
 }

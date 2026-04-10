@@ -16,6 +16,8 @@ import { PlanningChatService } from '../../services/planning-chat.service';
 import { JobPollingService } from '../../services/job-polling.service';
 import { ClientService } from '../../services/client.service';
 import { SESSION_STATUS_MAP, Client, PlanningSession, ResearchResult } from '../../models/account-planning.model';
+import { TranslationService } from '../../../../core/i18n/translation.service';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { SessionChatComponent, ChatMessage } from './components/session-chat/session-chat.component';
 import { ClientSidebarComponent } from './components/client-sidebar/client-sidebar.component';
 import { ConfirmationCardComponent } from './components/confirmation-card/confirmation-card.component';
@@ -28,7 +30,7 @@ import { DashboardShellComponent } from './components/dashboard/dashboard-shell.
   imports: [
     FormsModule, UpperCasePipe, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule,
-    MatChipsModule, SessionChatComponent, ClientSidebarComponent,
+    MatChipsModule, TranslatePipe, SessionChatComponent, ClientSidebarComponent,
     ConfirmationCardComponent, SearchProgressComponent, DashboardShellComponent,
   ],
   templateUrl: './planning-session.component.html',
@@ -41,6 +43,7 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   private readonly chatService = inject(PlanningChatService);
   private readonly pollingService = inject(JobPollingService);
   private readonly clientService = inject(ClientService);
+  private readonly i18n = inject(TranslationService);
 
   readonly session = this.sessionService.currentSession;
   readonly streamingContent = this.chatService.streamingContent;
@@ -360,6 +363,7 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
       clientWebsite: client.website ?? '',
       clientLinkedIn: client.linkedInUrl ?? '',
       clientDescription: client.description ?? '',
+      language: this.i18n.currentLang(),
     };
   }
 }

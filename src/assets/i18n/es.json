@@ -1,0 +1,211 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "copy": "Copiar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "approve": "Aprobar",
+    "language": "Idioma",
+    "search": "Buscar",
+    "saveChanges": "Guardar cambios",
+    "createClient": "Crear cliente"
+  },
+  "clients": {
+    "title": "Clientes",
+    "subtitle": "Gestiona tus clientes y lanza procesos de Account Planning",
+    "new": "Nuevo cliente",
+    "createFirst": "Crear primer cliente",
+    "emptyTitle": "Sin clientes aún",
+    "emptyMessage": "Agrega tu primer cliente para comenzar a generar Account Plannings con inteligencia artificial.",
+    "searchPlaceholder": "Buscar por nombre, sector o país...",
+    "count": "{{count}} cliente(s)",
+    "columns": {
+      "company": "Empresa",
+      "industry": "Sector",
+      "country": "País",
+      "status": "Estado",
+      "actions": ""
+    },
+    "status": {
+      "notInvestigated": "Sin investigar",
+      "inProgress": "En proceso",
+      "approved": "Aprobado",
+      "error": "Error"
+    },
+    "actions": {
+      "startPlanning": "Iniciar planning",
+      "continuePlanning": "Continuar planning"
+    },
+    "deleteConfirm": {
+      "title": "Eliminar cliente",
+      "message": "¿Estás seguro de que deseas eliminar \"{{name}}\"? Esta acción no se puede deshacer."
+    }
+  },
+  "clientForm": {
+    "newTitle": "Nuevo cliente",
+    "editTitle": "Editar cliente",
+    "newSubtitle": "Ingresa los datos básicos del cliente para iniciar su Account Planning.",
+    "editSubtitle": "Actualiza la información del cliente.",
+    "sections": {
+      "main": "Información principal",
+      "digital": "Presencia digital",
+      "context": "Contexto adicional"
+    },
+    "fields": {
+      "name": "Nombre de la empresa",
+      "namePlaceholder": "Ej: Bancolombia",
+      "industry": "Sector / Industria",
+      "industryPlaceholder": "Ej: Banca y Finanzas",
+      "country": "País",
+      "countryPlaceholder": "Ej: Colombia",
+      "website": "Sitio web",
+      "websitePlaceholder": "https://ejemplo.com",
+      "linkedin": "LinkedIn URL",
+      "linkedInUrl": "LinkedIn URL",
+      "linkedinPlaceholder": "https://linkedin.com/company/...",
+      "linkedInUrlPlaceholder": "https://linkedin.com/company/...",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Contexto adicional sobre el cliente que pueda ayudar en la investigación..."
+    },
+    "saveNew": "Crear cliente",
+    "saveEdit": "Guardar cambios"
+  },
+  "session": {
+    "backToClients": "Clientes",
+    "status": {
+      "queued": "En cola",
+      "quickSearching": "Búsqueda rápida...",
+      "quickSearchDone": "Búsqueda rápida lista",
+      "awaitingConfirmation": "Esperando confirmación",
+      "deepSearching": "Investigación profunda...",
+      "awaitingLinkedIn": "Datos LinkedIn requeridos",
+      "awaitingReview": "Listo para revisión",
+      "awaitingFocus": "Definir enfoque",
+      "generatingPortfolio": "Generando portafolio...",
+      "underRevision": "En revisión",
+      "approved": "Aprobado",
+      "failed": "Error"
+    },
+    "chat": {
+      "placeholder": "Describe la necesidad comercial...",
+      "you": "Tú",
+      "agent": "Agente",
+      "welcomeTitle": "Account Planning Assistant",
+      "welcomeNew": "Describe la necesidad comercial para <strong>{{name}}</strong> y comenzaré la investigación.",
+      "welcomeReturning": "Este cliente fue investigado anteriormente. ¿Deseas actualizar la investigación o consultar los resultados?"
+    },
+    "confirmation": {
+      "title": "Resultado de búsqueda rápida",
+      "subtitle": "Verifica que esta sea la empresa correcta antes de continuar.",
+      "confirm": "Confirmar e investigar",
+      "reject": "No es esta empresa"
+    },
+    "searchProgress": {
+      "title": "Investigación profunda en curso",
+      "subtitle": "Investigando <strong>{{name}}</strong> en múltiples fuentes",
+      "phases": {
+        "webSearch": "Investigación",
+        "rag": "Base de conocimiento",
+        "analysis": "Análisis estratégico"
+      },
+      "preparing": "Preparando investigación...",
+      "webSearching": "Investigando la empresa en fuentes públicas...",
+      "ragSearching": "Consultando base de conocimiento interna...",
+      "analyzing": "Analizando hallazgos y generando insights estratégicos...",
+      "completing": "Finalizando...",
+      "almostReady": "Casi listo...",
+      "lessThanMinute": "Menos de 1 minuto",
+      "fewMinutes": "~1-2 minutos restantes",
+      "severalMinutes": "~2-3 minutos restantes"
+    },
+    "linkedin": {
+      "title": "Datos de LinkedIn requeridos",
+      "subtitle": "No fue posible obtener datos de LinkedIn automáticamente. Pega el contenido del perfil de la empresa.",
+      "placeholder": "Pega aquí el contenido del perfil de LinkedIn...",
+      "submit": "Enviar y continuar"
+    },
+    "focus": {
+      "title": "Definir enfoque del portafolio",
+      "subtitle": "Personaliza el portafolio según el tipo de empresa y el rol del interlocutor.",
+      "companyType": "Tipo de empresa",
+      "companyTypePlaceholder": "Ej: Aseguradora enterprise",
+      "contactRole": "Rol del interlocutor",
+      "contactRolePlaceholder": "Ej: CTO, Director TI",
+      "generate": "Generar portafolio"
+    },
+    "portfolio": {
+      "title": "Portafolio generado",
+      "subtitle": "Revisa el portafolio. Puedes aprobarlo o regenerarlo con otro enfoque o idioma.",
+      "regenerate": "Regenerar",
+      "languageLabel": "Idioma"
+    },
+    "approved": "Planning aprobado",
+    "failed": "Error en el procesamiento"
+  },
+  "dashboard": {
+    "resultsTitle": "Resultados de investigación",
+    "newInvestigation": "Nueva investigación",
+    "previousVersions": "Versiones anteriores",
+    "generatePortfolio": "Generar portafolio",
+    "sections": {
+      "findings": "Hallazgos clave",
+      "stakeholders": "Personas clave",
+      "opportunities": "Oportunidades comerciales",
+      "swot": "Análisis DOFA",
+      "sector": "Comparativa de sector",
+      "pvs": "Dolor-Valor-Servicio",
+      "proposal": "Propuesta estratégica",
+      "news": "Noticias recientes",
+      "sources": "Fuentes consultadas"
+    },
+    "findings": {
+      "all": "Todos",
+      "commercial": "Insight comercial"
+    },
+    "stakeholders": {
+      "painPoints": "Pain points",
+      "approach": "Approach"
+    },
+    "pvs": {
+      "pain": "Dolor del cliente",
+      "value": "Valor que aporta T&S",
+      "service": "Servicio"
+    },
+    "proposal": {
+      "keyBenefits": "Beneficios clave"
+    },
+    "sector": {
+      "position": "Posición",
+      "competitors": "Competidores",
+      "trends": "Tendencias del sector",
+      "differentiators": "Diferenciadores"
+    },
+    "sources": {
+      "source": "Fuente",
+      "type": "Tipo",
+      "url": "URL"
+    },
+    "internationalAlert": {
+      "title": "Cliente internacional"
+    },
+    "copyTable": "Copiar"
+  },
+  "sidebar": {
+    "sector": "Sector",
+    "country": "País",
+    "web": "Web",
+    "linkedin": "LinkedIn",
+    "description": "Descripción",
+    "showMore": "Ver más",
+    "showLess": "Ver menos",
+    "investigated": "Investigado",
+    "notInvestigated": "Sin investigar",
+    "viewLastAnalysis": "Ver último análisis"
+  }
+}
