@@ -275,8 +275,14 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
     });
   }
 
+  onDefineFocus(): void {
+    this.showFocusSelector.set(true);
+    setTimeout(() => {
+      document.getElementById('focus-selector')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
   rejectClient(): void {
-    // Send a message to the agent saying the client is not correct
     this.sendChat('No es la empresa correcta. Necesito buscar otra.');
   }
 

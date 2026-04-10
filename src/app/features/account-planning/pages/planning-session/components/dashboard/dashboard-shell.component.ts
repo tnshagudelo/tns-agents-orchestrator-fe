@@ -4,25 +4,47 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MarkdownComponent } from 'ngx-markdown';
-import { Client, ResearchResult } from '../../../../models/account-planning.model';
+import {
+  Client, ResearchResult, AnalysisResponse, StakeholderAnalysis,
+} from '../../../../models/account-planning.model';
 
-interface DashboardSection {
-  id: string;
-  title: string;
-  icon: string;
-  expanded: boolean;
-  content: string;
-  preview: string;
-}
+const STAKEHOLDER_COLORS: Record<string, string> = {
+  'STRATEGIC_DECISOR': '#7c3aed',
+  'TECH_DECISOR': '#2563eb',
+  'INFLUENCER': '#059669',
+  'GATEKEEPER': '#6b7280',
+  'FINANCIAL_DECISOR': '#ea580c',
+};
+
+const STAKEHOLDER_LABELS: Record<string, string> = {
+  'STRATEGIC_DECISOR': 'Decisor estratégico',
+  'TECH_DECISOR': 'Decisor técnico',
+  'INFLUENCER': 'Influenciador',
+  'GATEKEEPER': 'Gatekeeper',
+  'FINANCIAL_DECISOR': 'Decisor financiero',
+};
+
+const PRIORITY_COLORS: Record<string, string> = {
+  'HIGH': '#059669',
+  'MEDIUM': '#d97706',
+  'LOW': '#6b7280',
+};
+
+const HORIZON_LABELS: Record<string, string> = {
+  'SHORT_TERM': 'Corto plazo',
+  'MEDIUM_TERM': 'Mediano plazo',
+  'LONG_TERM': 'Largo plazo',
+};
 
 @Component({
   selector: 'app-dashboard-shell',
   standalone: true,
   imports: [
     DatePipe, MatExpansionModule, MatIconModule, MatButtonModule,
-    MatTooltipModule, MatDividerModule, MarkdownComponent,
+    MatTooltipModule, MatChipsModule, MatDividerModule, MarkdownComponent,
   ],
   templateUrl: './dashboard-shell.component.html',
   styleUrl: './dashboard-shell.component.scss',
@@ -34,62 +56,63 @@ export class DashboardShellComponent {
 
   readonly defineFocus = output<void>();
 
-  readonly sections = computed<DashboardSection[]>(() => {
+  /** Parsed structured analysis from AnalysisAgent */
+  readonly analysis = computed<AnalysisResponse | null>(() => {
     const results = this.results();
-    const deepResearch = results.find(r => r.category === 'deep-research');
-    const analysis = results.find(r => r.category === 'analysis');
-
-    return [
-      {
-        id: 'company',
-        title: 'Ficha de empresa',
-        icon: 'business',
-        expanded: true,
-        content: this.buildCompanyCard(),
-        preview: this.client().industry + ' — ' + this.client().country,
-      },
-      {
-        id: 'research',
-        title: 'Investigación profunda',
-        icon: 'travel_explore',
-        expanded: true,
-        content: deepResearch?.snippet ?? '_Sin resultados de investigación._',
-        preview: deepResearch ? `${Math.round(deepResearch.snippet.length / 100)} párrafos` : 'Sin datos',
-      },
-      {
-        id: 'analysis',
-        title: 'Análisis estratégico',
-        icon: 'analytics',
-        expanded: true,
-        content: analysis?.snippet ?? '_Sin análisis disponible._',
-        preview: analysis ? 'Análisis generado' : 'Sin datos',
-      },
-    ];
+    const structured = results.find(r => r.category === 'analysis-structured');
+    if (!structured) return null;
+    try {
+      return JSON.parse(structured.snippet) as AnalysisResponse;
+    } catch {
+      return null;
+    }
   });
+
+  /** Fallback: raw deep research markdown */
+  readonly rawResearch = computed(() => {
+    return this.results().find(r => r.category === 'deep-research')?.snippet ?? '';
+  });
+
+  /** Whether we have structured data or fallback to markdown */
+  readonly hasStructuredData = computed(() => this.analysis() !== null);
 
   readonly activeSectionId = signal<string | null>(null);
 
-  scrollTo(sectionId: string): void {
-    this.activeSectionId.set(sectionId);
-    const el = document.getElementById('section-' + sectionId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  getStakeholderColor(type: string): string {
+    return STAKEHOLDER_COLORS[type] ?? '#6b7280';
   }
 
-  copySection(content: string): void {
-    navigator.clipboard.writeText(content).then(() => {
-      // TODO: toast notification
-    });
+  getStakeholderLabel(type: string): string {
+    return STAKEHOLDER_LABELS[type] ?? type;
   }
 
-  private buildCompanyCard(): string {
-    const c = this.client();
-    let md = `## ${c.name}\n\n`;
-    md += `| Dato | Valor |\n|------|-------|\n`;
-    md += `| **Sector** | ${c.industry} |\n`;
-    md += `| **País** | ${c.country} |\n`;
-    if (c.website) md += `| **Sitio web** | [${c.website}](${c.website}) |\n`;
-    if (c.linkedInUrl) md += `| **LinkedIn** | [Ver perfil](${c.linkedInUrl}) |\n`;
-    if (c.description) md += `\n${c.description}\n`;
-    return md;
+  getPriorityColor(priority: string): string {
+    return PRIORITY_COLORS[priority] ?? '#6b7280';
+  }
+
+  getHorizonLabel(horizon: string): string {
+    return HORIZON_LABELS[horizon] ?? horizon;
+  }
+
+  getMetricEntries(metrics: Record<string, string> | undefined): { key: string; value: string }[] {
+    if (!metrics) return [];
+    return Object.entries(metrics).map(([key, value]) => ({ key, value }));
+  }
+
+  scrollTo(id: string): void {
+    this.activeSectionId.set(id);
+    document.getElementById('section-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  copyText(text: string): void {
+    navigator.clipboard.writeText(text);
+  }
+
+  copyPainValueTable(): void {
+    const a = this.analysis();
+    if (!a) return;
+    const header = 'Dolor\tValor\tServicio T&S';
+    const rows = a.painValueServiceMap.map(r => `${r.pain}\t${r.value}\t${r.service}`);
+    this.copyText([header, ...rows].join('\n'));
   }
 }

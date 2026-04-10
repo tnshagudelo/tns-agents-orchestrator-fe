@@ -91,6 +91,42 @@
           </mat-card>
         }
 
+        <!-- Focus selector (ABOVE dashboard so it's visible immediately) -->
+        @if ((s.status === 'AwaitingReview' || s.status === 'AwaitingFocus') && showFocusSelector()) {
+          <mat-card class="action-card focus-card-highlight" id="focus-selector">
+            <mat-card-content>
+              <div class="action-card-header">
+                <div class="action-icon-wrapper action-icon--accent">
+                  <mat-icon>center_focus_strong</mat-icon>
+                </div>
+                <div>
+                  <h3>Definir enfoque del portafolio</h3>
+                  <p>Personaliza el portafolio según el tipo de empresa y el rol del interlocutor.</p>
+                </div>
+              </div>
+              <div class="focus-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tipo de empresa</mat-label>
+                  <input matInput [(ngModel)]="focusCompanyType" placeholder="Ej: Aseguradora enterprise" />
+                  <mat-icon matPrefix>business</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Rol del interlocutor</mat-label>
+                  <input matInput [(ngModel)]="focusContactRole" placeholder="Ej: CTO, Director TI" />
+                  <mat-icon matPrefix>person</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="action-card-actions">
+                <button mat-button (click)="showFocusSelector.set(false)">Cancelar</button>
+                <button mat-raised-button color="primary" (click)="setFocus()"
+                  [disabled]="!focusCompanyType.trim() || !focusContactRole.trim()">
+                  <mat-icon>auto_awesome</mat-icon> Generar portafolio
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
         <!-- Dashboard (post-investigation states) -->
         @if (s.status === 'AwaitingReview' || s.status === 'AwaitingFocus' || s.status === 'GeneratingPortfolio' || s.status === 'UnderRevision' || s.status === 'Approved') {
           @if (client(); as c) {
@@ -98,46 +134,8 @@
               [client]="c"
               [results]="researchResults()"
               [sessionDate]="s.updatedAt"
-              (defineFocus)="showFocusSelector.set(true)"
+              (defineFocus)="onDefineFocus()"
             />
-          }
-        }
-
-        <!-- Focus selector (overlay on dashboard) -->
-        @if (s.status === 'AwaitingReview' || s.status === 'AwaitingFocus') {
-          @if (showFocusSelector()) {
-            <mat-card class="action-card">
-              <mat-card-content>
-                <div class="action-card-header">
-                  <div class="action-icon-wrapper action-icon--accent">
-                    <mat-icon>center_focus_strong</mat-icon>
-                  </div>
-                  <div>
-                    <h3>Definir enfoque del portafolio</h3>
-                    <p>Personaliza el portafolio según el tipo de empresa y el rol del interlocutor.</p>
-                  </div>
-                </div>
-                <div class="focus-fields">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Tipo de empresa</mat-label>
-                    <input matInput [(ngModel)]="focusCompanyType" placeholder="Ej: Aseguradora enterprise" />
-                    <mat-icon matPrefix>business</mat-icon>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Rol del interlocutor</mat-label>
-                    <input matInput [(ngModel)]="focusContactRole" placeholder="Ej: CTO, Director TI" />
-                    <mat-icon matPrefix>person</mat-icon>
-                  </mat-form-field>
-                </div>
-                <div class="action-card-actions">
-                  <button mat-button (click)="showFocusSelector.set(false)">Cancelar</button>
-                  <button mat-raised-button color="primary" (click)="setFocus()"
-                    [disabled]="!focusCompanyType.trim() || !focusContactRole.trim()">
-                    <mat-icon>auto_awesome</mat-icon> Generar portafolio
-                  </button>
-                </div>
-              </mat-card-content>
-            </mat-card>
           }
         }
 

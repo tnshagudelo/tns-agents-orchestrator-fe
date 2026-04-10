@@ -1,60 +1,320 @@
+@if (analysis(); as a) {
 <div class="dashboard">
 
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-left">
-      <h2>Resultados de investigación</h2>
-      <p>{{ client().name }} — Investigación completada @if (sessionDate()) { el {{ sessionDate() | date:'d MMM yyyy' }} }</p>
+  <!-- ═══ ZONA 1: Header ejecutivo ═══ -->
+  <div class="exec-header" id="section-header">
+    <div class="exec-header-top">
+      <div class="company-avatar" [style.background]="getStakeholderColor('STRATEGIC_DECISOR')">
+        {{ a.clientCard.name.charAt(0) }}
+      </div>
+      <div class="company-info">
+        <h1>{{ a.clientCard.name }}</h1>
+        <div class="company-tags">
+          <span class="tag tag--industry">{{ a.clientCard.industry }}</span>
+          <span class="tag tag--size">{{ a.clientCard.estimatedSize }}</span>
+          <span class="tag tag--country">{{ a.clientCard.country }}</span>
+        </div>
+        <p class="exec-summary">{{ a.clientCard.summary }}</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="defineFocus.emit()">
+          <mat-icon>auto_awesome</mat-icon> Generar portafolio
+        </button>
+      </div>
     </div>
-    <div class="header-actions">
-      <button mat-raised-button color="primary" (click)="defineFocus.emit()">
-        <mat-icon>auto_awesome</mat-icon> Definir enfoque y generar portafolio
-      </button>
+
+    <!-- Stat cards -->
+    @if (getMetricEntries(a.clientCard.keyMetrics).length > 0) {
+      <div class="stat-cards">
+        @for (metric of getMetricEntries(a.clientCard.keyMetrics); track metric.key) {
+          <div class="stat-card">
+            <span class="stat-value">{{ metric.value }}</span>
+            <span class="stat-label">{{ metric.key }}</span>
+          </div>
+        }
+        @if (a.clientCard.founded) {
+          <div class="stat-card">
+            <span class="stat-value">{{ a.clientCard.founded }}</span>
+            <span class="stat-label">Fundación</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Links & specialties -->
+    <div class="company-meta">
+      @if (client().website) {
+        <a [href]="client().website" target="_blank" class="meta-link">
+          <mat-icon>language</mat-icon> {{ client().website }}
+        </a>
+      }
+      @if (client().linkedInUrl) {
+        <a [href]="client().linkedInUrl" target="_blank" class="meta-link">
+          <mat-icon>work</mat-icon> LinkedIn
+        </a>
+      }
     </div>
   </div>
 
-  <div class="dashboard-layout">
+  <div class="dashboard-body">
 
     <!-- Mini-nav -->
     <nav class="mini-nav">
       <h4>Secciones</h4>
-      @for (section of sections(); track section.id) {
-        <button class="nav-item" [class.active]="activeSectionId() === section.id"
-          (click)="scrollTo(section.id)">
-          <mat-icon>{{ section.icon }}</mat-icon>
-          <div class="nav-item-text">
-            <span class="nav-title">{{ section.title }}</span>
-            <span class="nav-preview">{{ section.preview }}</span>
-          </div>
+      @for (item of [{id:'stakeholders',icon:'people',label:'Personas clave'},{id:'opportunities',icon:'trending_up',label:'Oportunidades'},{id:'swot',icon:'grid_view',label:'DOFA'},{id:'sector',icon:'leaderboard',label:'Sector'},{id:'pvs',icon:'table_chart',label:'Dolor-Valor-Servicio'},{id:'proposal',icon:'lightbulb',label:'Propuesta estratégica'},{id:'news',icon:'newspaper',label:'Noticias'},{id:'sources',icon:'link',label:'Fuentes'}]; track item.id) {
+        <button class="nav-item" [class.active]="activeSectionId() === item.id" (click)="scrollTo(item.id)">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
         </button>
       }
     </nav>
 
     <!-- Sections -->
-    <div class="sections-area">
-      <mat-accordion multi>
-        @for (section of sections(); track section.id) {
-          <mat-expansion-panel [id]="'section-' + section.id" [expanded]="section.expanded">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
-                {{ section.title }}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
+    <div class="sections">
 
-            <div class="section-content">
-              <markdown [data]="section.content"></markdown>
+      <!-- ═══ ZONA 2: Personas clave ═══ -->
+      <section id="section-stakeholders" class="section">
+        <h2><mat-icon>people</mat-icon> Personas clave</h2>
+        <div class="stakeholders-grid">
+          @for (s of a.stakeholders; track s.name) {
+            <div class="stakeholder-card">
+              <div class="stakeholder-header">
+                <div class="stakeholder-avatar" [style.background]="getStakeholderColor(s.type)">
+                  {{ s.name.charAt(0) }}
+                </div>
+                <div>
+                  <div class="stakeholder-name">{{ s.name }}</div>
+                  <div class="stakeholder-role">{{ s.role }}</div>
+                </div>
+              </div>
+              <span class="type-badge" [style.background]="getStakeholderColor(s.type) + '18'" [style.color]="getStakeholderColor(s.type)">
+                {{ getStakeholderLabel(s.type) }}
+              </span>
+              @if (s.painPoints.length > 0) {
+                <div class="stakeholder-section">
+                  <span class="section-label">Pain points</span>
+                  <ul>
+                    @for (p of s.painPoints; track p) { <li>{{ p }}</li> }
+                  </ul>
+                </div>
+              }
+              @if (s.interests.length > 0) {
+                <div class="stakeholder-chips">
+                  @for (i of s.interests; track i) {
+                    <span class="chip">{{ i }}</span>
+                  }
+                </div>
+              }
+              <p class="stakeholder-approach"><strong>Approach:</strong> {{ s.approach }}</p>
+              @if (s.linkedinUrl) {
+                <a [href]="s.linkedinUrl" target="_blank" class="linkedin-link">
+                  <mat-icon>open_in_new</mat-icon> LinkedIn
+                </a>
+              }
             </div>
+          }
+        </div>
+      </section>
 
-            <mat-action-row>
-              <button mat-button matTooltip="Copiar contenido" (click)="copySection(section.content)">
-                <mat-icon>content_copy</mat-icon> Copiar
-              </button>
-            </mat-action-row>
-          </mat-expansion-panel>
-        }
-      </mat-accordion>
+      <!-- ═══ ZONA 3: Oportunidades ═══ -->
+      <section id="section-opportunities" class="section">
+        <h2><mat-icon>trending_up</mat-icon> Oportunidades comerciales</h2>
+        <div class="opportunities-list">
+          @for (o of a.opportunities; track o.title) {
+            <div class="opportunity-card" [style.border-left-color]="getPriorityColor(o.priority)">
+              <div class="opp-header">
+                <h3>{{ o.title }}</h3>
+                <div class="opp-badges">
+                  <span class="badge" [style.background]="getPriorityColor(o.priority)" style="color:#fff">{{ o.priority }}</span>
+                  <span class="badge badge--outline">{{ getHorizonLabel(o.horizon) }}</span>
+                </div>
+              </div>
+              <p>{{ o.description }}</p>
+              <p class="opp-rationale"><mat-icon>psychology</mat-icon> {{ o.rationale }}</p>
+              <div class="opp-services">
+                @for (s of o.matchedServices; track s) {
+                  <span class="chip chip--primary">{{ s }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ═══ ZONA 3b: DOFA ═══ -->
+      <section id="section-swot" class="section">
+        <h2><mat-icon>grid_view</mat-icon> Análisis DOFA</h2>
+        <div class="swot-grid">
+          <div class="swot-quadrant swot--strengths">
+            <h4>Fortalezas</h4>
+            @for (item of a.swotAnalysis.strengths; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--weaknesses">
+            <h4>Debilidades</h4>
+            @for (item of a.swotAnalysis.weaknesses; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--opportunities">
+            <h4>Oportunidades</h4>
+            @for (item of a.swotAnalysis.opportunities; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--threats">
+            <h4>Amenazas</h4>
+            @for (item of a.swotAnalysis.threats; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ Sector ═══ -->
+      <section id="section-sector" class="section">
+        <h2><mat-icon>leaderboard</mat-icon> Comparativa de sector</h2>
+        <div class="sector-grid">
+          <div class="sector-card">
+            <h4>Posición</h4>
+            <p>{{ a.sectorComparison.position }}</p>
+            @if (a.sectorComparison.marketShare) {
+              <p class="market-share">Participación: {{ a.sectorComparison.marketShare }}</p>
+            }
+          </div>
+          <div class="sector-card">
+            <h4>Competidores</h4>
+            <ul>
+              @for (c of a.sectorComparison.competitors; track c) { <li>{{ c }}</li> }
+            </ul>
+          </div>
+          <div class="sector-card">
+            <h4>Tendencias del sector</h4>
+            <ul>
+              @for (t of a.sectorComparison.trends; track t) { <li>{{ t }}</li> }
+            </ul>
+          </div>
+          <div class="sector-card">
+            <h4>Diferenciadores</h4>
+            <ul>
+              @for (d of a.sectorComparison.differentiators; track d) { <li>{{ d }}</li> }
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ZONA 4: Pain-Value-Service ═══ -->
+      <section id="section-pvs" class="section">
+        <div class="section-header-row">
+          <h2><mat-icon>table_chart</mat-icon> Mapa Dolor-Valor-Servicio</h2>
+          <button mat-stroked-button (click)="copyPainValueTable()" matTooltip="Copiar tabla">
+            <mat-icon>content_copy</mat-icon> Copiar
+          </button>
+        </div>
+        <table class="pvs-table">
+          <thead>
+            <tr>
+              <th>Dolor del cliente</th>
+              <th>Valor que aporta T&S</th>
+              <th>Servicio</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of a.painValueServiceMap; track row.pain) {
+              <tr>
+                <td>{{ row.pain }}</td>
+                <td>{{ row.value }}</td>
+                <td><span class="chip chip--primary">{{ row.service }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ═══ ZONA 5: Propuesta estratégica ═══ -->
+      <section id="section-proposal" class="section">
+        <h2><mat-icon>lightbulb</mat-icon> Propuesta estratégica</h2>
+        <div class="proposal-card">
+          <h3>{{ a.strategicProposal.title }}</h3>
+          <markdown [data]="a.strategicProposal.summary"></markdown>
+          <div class="proposal-benefits">
+            <h4>Beneficios clave</h4>
+            <ul>
+              @for (b of a.strategicProposal.keyBenefits; track b) { <li>{{ b }}</li> }
+            </ul>
+          </div>
+          <div class="proposal-services">
+            @for (s of a.strategicProposal.matchedServices; track s) {
+              <span class="chip chip--primary">{{ s }}</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ Noticias ═══ -->
+      @if (a.recentNews.length > 0) {
+        <section id="section-news" class="section">
+          <h2><mat-icon>newspaper</mat-icon> Noticias recientes</h2>
+          @for (n of a.recentNews; track n.title) {
+            <div class="news-item">
+              <div class="news-header">
+                <strong>{{ n.title }}</strong>
+                @if (n.date) { <span class="news-date">{{ n.date }}</span> }
+              </div>
+              <p>{{ n.summary }}</p>
+              <span class="news-source">{{ n.source }}</span>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ═══ Fuentes ═══ -->
+      <section id="section-sources" class="section">
+        <h2><mat-icon>link</mat-icon> Fuentes consultadas</h2>
+        <table class="sources-table">
+          <thead><tr><th>Fuente</th><th>Tipo</th><th>URL</th></tr></thead>
+          <tbody>
+            @for (s of a.sources; track s.name) {
+              <tr>
+                <td>{{ s.name }}</td>
+                <td><span class="chip">{{ s.type }}</span></td>
+                <td>@if (s.url) { <a [href]="s.url" target="_blank">{{ s.url }}</a> } @else { — }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ═══ Alerta internacional ═══ -->
+      @if (a.internationalAlert.isInternational) {
+        <div class="international-alert">
+          <mat-icon>translate</mat-icon>
+          <div>
+            <strong>Cliente internacional</strong>
+            <p>Idiomas: {{ a.internationalAlert.languages.join(', ') }}</p>
+            @if (a.internationalAlert.recommendation) {
+              <p>{{ a.internationalAlert.recommendation }}</p>
+            }
+          </div>
+        </div>
+      }
+
     </div>
-
   </div>
 </div>
+} @else {
+  <!-- Fallback: markdown crudo si no hay datos estructurados -->
+  <div class="dashboard">
+    <div class="exec-header">
+      <h1>{{ client().name }}</h1>
+      <p>Resultados de investigación (vista básica)</p>
+      <button mat-raised-button color="primary" (click)="defineFocus.emit()">
+        <mat-icon>auto_awesome</mat-icon> Generar portafolio
+      </button>
+    </div>
+    <div class="fallback-content">
+      <markdown [data]="rawResearch()"></markdown>
+    </div>
+  </div>
+}

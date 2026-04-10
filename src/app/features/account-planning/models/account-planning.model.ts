@@ -124,6 +124,116 @@ export interface AccountPlan {
   createdAt: Date;
 }
 
+// ─── Analysis Dashboard (structured JSON from AnalysisAgent) ─────────────────
+
+export interface AnalysisResponse {
+  clientCard: AnalysisClientCard;
+  stakeholders: StakeholderAnalysis[];
+  opportunities: OpportunityCard[];
+  swotAnalysis: SwotAnalysis;
+  sectorComparison: SectorComparison;
+  painValueServiceMap: PainValueService[];
+  strategicProposal: StrategicProposal;
+  recentNews: NewsItem[];
+  sources: SourceReference[];
+  internationalAlert: InternationalAlert;
+  decisionStructure: DecisionStructure;
+}
+
+export interface AnalysisClientCard {
+  name: string;
+  industry: string;
+  country: string;
+  estimatedSize: string;
+  summary: string;
+  headquarters?: string;
+  founded?: string;
+  specialties?: string[];
+  keyMetrics?: Record<string, string>;
+}
+
+export interface StakeholderAnalysis {
+  name: string;
+  role: string;
+  type: string;
+  relevance: string;
+  painPoints: string[];
+  interests: string[];
+  approach: string;
+  linkedinUrl?: string;
+}
+
+export interface OpportunityCard {
+  title: string;
+  description: string;
+  horizon: string;
+  matchedServices: string[];
+  priority: string;
+  rationale: string;
+}
+
+export interface SwotAnalysis {
+  strengths: SwotItem[];
+  weaknesses: SwotItem[];
+  opportunities: SwotItem[];
+  threats: SwotItem[];
+}
+
+export interface SwotItem {
+  title: string;
+  description: string;
+  source?: string;
+}
+
+export interface SectorComparison {
+  position: string;
+  marketShare?: string;
+  competitors: string[];
+  trends: string[];
+  differentiators: string[];
+}
+
+export interface PainValueService {
+  pain: string;
+  value: string;
+  service: string;
+}
+
+export interface StrategicProposal {
+  title: string;
+  summary: string;
+  keyBenefits: string[];
+  matchedServices: string[];
+}
+
+export interface NewsItem {
+  title: string;
+  summary: string;
+  source: string;
+  sourceUrl?: string;
+  date?: string;
+  relevance: string;
+}
+
+export interface SourceReference {
+  name: string;
+  url?: string;
+  type: string;
+  accessDate?: string;
+}
+
+export interface InternationalAlert {
+  isInternational: boolean;
+  languages: string[];
+  recommendation?: string;
+}
+
+export interface DecisionStructure {
+  model: string;
+  keyInfluencers: string;
+  approvalProcess: string;
+}
+
 // ─── UI Helpers ───────────────────────────────────────────────────────────────
 
 export interface SessionStatusInfo {
