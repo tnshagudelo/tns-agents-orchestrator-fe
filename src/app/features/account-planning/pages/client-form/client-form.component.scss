@@ -121,7 +121,7 @@
 }
 
 @media (max-width: 600px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+  :host { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .form-header h2 { font-size: 20px; }
 }

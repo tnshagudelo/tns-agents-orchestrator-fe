@@ -265,6 +265,16 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
+// Responsive
+@media (max-width: 600px) {
+  .chat-panel { min-height: 400px; }
+  .chat-messages { padding: 16px; }
+  .chat-bubble { max-width: 95%; }
+  .chat-input-area { padding: 12px 16px; }
+  .bubble-text { padding: 10px 12px; font-size: 13px; }
+  .bubble-avatar { display: none; }
+}
+
 // Confirmation bar
 .confirmation-bar {
   display: flex;

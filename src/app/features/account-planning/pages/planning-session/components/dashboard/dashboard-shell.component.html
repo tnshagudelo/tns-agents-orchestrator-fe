@@ -16,11 +16,29 @@
         </div>
         <p class="exec-summary">{{ a.clientCard.summary }}</p>
       </div>
-      <div class="header-actions">
-        <button mat-raised-button color="primary" (click)="defineFocus.emit()">
-          <mat-icon>auto_awesome</mat-icon> Generar portafolio
+    </div>
+
+    <!-- Actions row (separate from company info) -->
+    <div class="header-actions">
+      @if (otherSessions().length > 0) {
+        <button mat-stroked-button [matMenuTriggerFor]="versionMenu">
+          <mat-icon>history</mat-icon> Versiones anteriores
         </button>
-      </div>
+        <mat-menu #versionMenu="matMenu">
+          @for (s of otherSessions(); track s.id) {
+            <button mat-menu-item (click)="sessionChanged.emit(s.id)">
+              <mat-icon>{{ s.status === 'Approved' ? 'verified' : 'description' }}</mat-icon>
+              {{ getStatusLabel(s.status) }} — {{ s.updatedAt | relativeTime }}
+            </button>
+          }
+        </mat-menu>
+      }
+      <button mat-stroked-button (click)="newInvestigation.emit()">
+        <mat-icon>refresh</mat-icon> Nueva investigación
+      </button>
+      <button mat-raised-button color="primary" (click)="defineFocus.emit()">
+        <mat-icon>auto_awesome</mat-icon> Generar portafolio
+      </button>
     </div>
 
     <!-- Stat cards -->
@@ -61,7 +79,7 @@
     <!-- Mini-nav -->
     <nav class="mini-nav">
       <h4>Secciones</h4>
-      @for (item of [{id:'stakeholders',icon:'people',label:'Personas clave'},{id:'opportunities',icon:'trending_up',label:'Oportunidades'},{id:'swot',icon:'grid_view',label:'DOFA'},{id:'sector',icon:'leaderboard',label:'Sector'},{id:'pvs',icon:'table_chart',label:'Dolor-Valor-Servicio'},{id:'proposal',icon:'lightbulb',label:'Propuesta estratégica'},{id:'news',icon:'newspaper',label:'Noticias'},{id:'sources',icon:'link',label:'Fuentes'}]; track item.id) {
+      @for (item of [{id:'findings',icon:'search',label:'Hallazgos'},{id:'stakeholders',icon:'people',label:'Personas clave'},{id:'opportunities',icon:'trending_up',label:'Oportunidades'},{id:'swot',icon:'grid_view',label:'DOFA'},{id:'sector',icon:'leaderboard',label:'Sector'},{id:'pvs',icon:'table_chart',label:'Dolor-Valor-Servicio'},{id:'proposal',icon:'lightbulb',label:'Propuesta estratégica'},{id:'news',icon:'newspaper',label:'Noticias'},{id:'sources',icon:'link',label:'Fuentes'}]; track item.id) {
         <button class="nav-item" [class.active]="activeSectionId() === item.id" (click)="scrollTo(item.id)">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span>{{ item.label }}</span>
@@ -71,6 +89,49 @@
 
     <!-- Sections -->
     <div class="sections">
+
+      <!-- ═══ HALLAZGOS CLAVE ═══ -->
+      @if (a.keyFindings && a.keyFindings.length > 0) {
+        <section id="section-findings" class="section">
+          <div class="section-header-row">
+            <h2><mat-icon>search</mat-icon> Hallazgos clave</h2>
+            <div class="findings-filters">
+              @for (type of findingTypes(); track type) {
+                <button class="filter-chip" [class.active]="findingsFilter() === type"
+                  (click)="findingsFilter.set(type)">
+                  {{ findingTypeLabels[type] || type }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="findings-list">
+            @for (f of filteredFindings(); track f.title) {
+              <div class="finding-card" [class.irrelevant]="f.isRelevant === false">
+                <div class="finding-header">
+                  <span class="finding-type-badge">{{ findingTypeLabels[f.type] || f.type }}</span>
+                  <button mat-icon-button class="relevance-toggle"
+                    [matTooltip]="(f.isRelevant ?? true) ? 'Marcar como irrelevante' : 'Marcar como relevante'"
+                    (click)="toggleFindingRelevance(f)">
+                    <mat-icon>{{ (f.isRelevant ?? true) ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+                </div>
+                <h4>{{ f.title }}</h4>
+                <p>{{ f.content }}</p>
+                <div class="finding-insight">
+                  <mat-icon>lightbulb</mat-icon>
+                  <span>{{ f.commercialInsight }}</span>
+                </div>
+                @if (f.source) {
+                  <span class="finding-source">
+                    {{ f.source }}
+                    @if (f.sourceUrl) { — <a [href]="f.sourceUrl" target="_blank">ver fuente</a> }
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
 
       <!-- ═══ ZONA 2: Personas clave ═══ -->
       <section id="section-stakeholders" class="section">

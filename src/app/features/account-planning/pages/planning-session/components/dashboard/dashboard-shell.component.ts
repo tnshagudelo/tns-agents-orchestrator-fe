@@ -6,9 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
 import { MarkdownComponent } from 'ngx-markdown';
+import { RelativeTimePipe } from '../../../../../../shared/pipes/relative-time.pipe';
 import {
-  Client, ResearchResult, AnalysisResponse, StakeholderAnalysis,
+  Client, ResearchResult, AnalysisResponse, FindingCard, PlanningSession,
+  SESSION_STATUS_MAP,
 } from '../../../../models/account-planning.model';
 
 const STAKEHOLDER_COLORS: Record<string, string> = {
@@ -43,8 +46,9 @@ const HORIZON_LABELS: Record<string, string> = {
   selector: 'app-dashboard-shell',
   standalone: true,
   imports: [
-    DatePipe, MatExpansionModule, MatIconModule, MatButtonModule,
-    MatTooltipModule, MatChipsModule, MatDividerModule, MarkdownComponent,
+    MatExpansionModule, MatIconModule, MatButtonModule,
+    MatTooltipModule, MatChipsModule, MatDividerModule, MatMenuModule,
+    MarkdownComponent, RelativeTimePipe,
   ],
   templateUrl: './dashboard-shell.component.html',
   styleUrl: './dashboard-shell.component.scss',
@@ -54,7 +58,19 @@ export class DashboardShellComponent {
   readonly results = input.required<ResearchResult[]>();
   readonly sessionDate = input<Date | null>(null);
 
+  readonly currentSessionId = input<string>('');
+  readonly clientSessions = input<PlanningSession[]>([]);
+
   readonly defineFocus = output<void>();
+  readonly sessionChanged = output<string>();
+  readonly newInvestigation = output<void>();
+
+  readonly otherSessions = computed(() => {
+    const current = this.currentSessionId();
+    return this.clientSessions()
+      .filter(s => s.id !== current && ['AwaitingReview', 'AwaitingFocus', 'UnderRevision', 'Approved'].includes(s.status))
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  });
 
   /** Parsed structured analysis from AnalysisAgent */
   readonly analysis = computed<AnalysisResponse | null>(() => {
@@ -77,6 +93,36 @@ export class DashboardShellComponent {
   readonly hasStructuredData = computed(() => this.analysis() !== null);
 
   readonly activeSectionId = signal<string | null>(null);
+  readonly findingsFilter = signal<string>('ALL');
+
+  readonly filteredFindings = computed(() => {
+    const a = this.analysis();
+    if (!a?.keyFindings) return [];
+    const filter = this.findingsFilter();
+    if (filter === 'ALL') return a.keyFindings;
+    return a.keyFindings.filter(f => f.type === filter);
+  });
+
+  readonly findingTypes = computed(() => {
+    const a = this.analysis();
+    if (!a?.keyFindings) return [];
+    const types = new Set(a.keyFindings.map(f => f.type));
+    return ['ALL', ...Array.from(types)];
+  });
+
+  readonly findingTypeLabels: Record<string, string> = {
+    'ALL': 'Todos',
+    'NEWS': 'Noticias',
+    'FINANCIAL': 'Financiero',
+    'TECH': 'Tecnología',
+    'STRATEGIC': 'Estrategia',
+    'LINKEDIN': 'LinkedIn',
+    'MARKET': 'Mercado',
+  };
+
+  toggleFindingRelevance(finding: FindingCard): void {
+    finding.isRelevant = !(finding.isRelevant ?? true);
+  }
 
   getStakeholderColor(type: string): string {
     return STAKEHOLDER_COLORS[type] ?? '#6b7280';
@@ -102,6 +148,10 @@ export class DashboardShellComponent {
   scrollTo(id: string): void {
     this.activeSectionId.set(id);
     document.getElementById('section-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  getStatusLabel(status: string): string {
+    return SESSION_STATUS_MAP[status as keyof typeof SESSION_STATUS_MAP]?.label ?? status;
   }
 
   copyText(text: string): void {

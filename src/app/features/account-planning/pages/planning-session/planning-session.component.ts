@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -36,6 +36,7 @@ import { DashboardShellComponent } from './components/dashboard/dashboard-shell.
 })
 export class PlanningSessionComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly sessionService = inject(PlanningSessionService);
   private readonly chatService = inject(PlanningChatService);
   private readonly pollingService = inject(JobPollingService);
@@ -51,6 +52,7 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   readonly isReturningClient = signal(false);
   readonly researchResults = signal<ResearchResult[]>([]);
   readonly showFocusSelector = signal(false);
+  readonly clientSessions = signal<PlanningSession[]>([]);
   private autoStarted = false;
   private sessionId = '';
 
@@ -61,6 +63,12 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    // Auto-save chat history to localStorage
+    effect(() => {
+      const history = this.chatHistory();
+      if (history.length > 0) this.saveChatHistory();
+    });
+
     // Watch for job completion → reload session + load results
     effect(() => {
       const job = this.currentJob();
@@ -89,17 +97,41 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
 
   readonly chatHistory = signal<ChatMessage[]>([]);
 
+  private get chatStorageKey(): string {
+    return `chat_history_${this.sessionId}`;
+  }
+
+  private saveChatHistory(): void {
+    if (!this.sessionId) return;
+    localStorage.setItem(this.chatStorageKey, JSON.stringify(this.chatHistory()));
+  }
+
+  private restoreChatHistory(): void {
+    if (!this.sessionId) return;
+    const stored = localStorage.getItem(this.chatStorageKey);
+    if (stored) {
+      try {
+        this.chatHistory.set(JSON.parse(stored));
+      } catch { /* ignore corrupt data */ }
+    }
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.sessionId = id;
+    this.restoreChatHistory();
 
     this.sessionService.getById(id).pipe(
       switchMap(session => this.clientService.getById(session.clientId).pipe(
         tap(client => {
           this.client.set(client);
-          // TODO: check if client has previous investigations to set isReturningClient
-          // Auto-start chat if session is new
-          if (session.status === 'Queued' && !this.autoStarted) {
+          // Load all sessions for this client (for version selector)
+          this.sessionService.loadByClient(client.id).subscribe(sessions => {
+            this.clientSessions.set(sessions);
+            this.isReturningClient.set(sessions.length > 1);
+          });
+          // Auto-start chat if session is new and no restored history
+          if (session.status === 'Queued' && !this.autoStarted && this.chatHistory().length === 0) {
             this.autoStarted = true;
             setTimeout(() => this.sendAutoGreeting(session, client), 100);
           }
@@ -275,6 +307,10 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
     });
   }
 
+  goBack(): void {
+    this.router.navigate(['/account-planning']);
+  }
+
   onDefineFocus(): void {
     this.showFocusSelector.set(true);
     setTimeout(() => {
@@ -283,11 +319,37 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   }
 
   rejectClient(): void {
-    this.sendChat('No es la empresa correcta. Necesito buscar otra.');
+    const s = this.session();
+    if (!s) return;
+    // Transition back to Queued, then send message to agent
+    this.sessionService.rejectQuickSearch(s.id).subscribe(() => {
+      this.sendChat('No es la empresa correcta. ¿Puedes buscar otra?');
+    });
   }
 
   onViewPreviousResults(): void {
-    // TODO: navigate to dashboard of last analysis
+    const sessions = this.clientSessions();
+    const completed = sessions.find(s =>
+      ['AwaitingReview', 'AwaitingFocus', 'UnderRevision', 'Approved'].includes(s.status)
+      && s.id !== this.sessionId
+    );
+    if (completed) {
+      this.router.navigate(['/account-planning/sessions', completed.id]);
+    }
+  }
+
+  startNewInvestigation(): void {
+    const c = this.client();
+    if (!c) return;
+    this.sessionService.create(c.id).subscribe(session => {
+      this.router.navigate(['/account-planning/sessions', session.id]);
+    });
+  }
+
+  switchSession(sessionId: string): void {
+    if (sessionId !== this.sessionId) {
+      this.router.navigate(['/account-planning/sessions', sessionId]);
+    }
   }
 
   private buildClientMetadata(client: Client): Record<string, string> {

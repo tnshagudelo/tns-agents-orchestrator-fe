@@ -4,6 +4,33 @@
   margin: 0 auto;
 }
 
+// Back nav / breadcrumb
+.back-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 16px;
+
+  button {
+    color: #4f46e5;
+    font-size: 13px;
+    padding-left: 4px;
+  }
+
+  .breadcrumb-sep {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #ccc;
+  }
+
+  .breadcrumb-current {
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+  }
+}
+
 // Status bar (sticky)
 .status-bar {
   display: flex;

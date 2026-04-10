@@ -126,8 +126,19 @@ export interface AccountPlan {
 
 // ─── Analysis Dashboard (structured JSON from AnalysisAgent) ─────────────────
 
+export interface FindingCard {
+  title: string;
+  content: string;
+  type: string;
+  source: string;
+  sourceUrl?: string;
+  commercialInsight: string;
+  isRelevant?: boolean; // frontend-only, default true
+}
+
 export interface AnalysisResponse {
   clientCard: AnalysisClientCard;
+  keyFindings?: FindingCard[];
   stakeholders: StakeholderAnalysis[];
   opportunities: OpportunityCard[];
   swotAnalysis: SwotAnalysis;

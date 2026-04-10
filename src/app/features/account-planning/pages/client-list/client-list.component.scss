@@ -126,6 +126,14 @@
     color: #888;
   }
 
+  .status-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
   .actions-cell {
     display: flex;
     align-items: center;
@@ -204,4 +212,24 @@
   display: flex;
   justify-content: center;
   padding: 80px 0;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  :host { padding: 16px; }
+  .page-header { flex-direction: column; gap: 12px; }
+  .toolbar .search-field { max-width: 100%; }
+
+  .clients-table {
+    .client-avatar { display: none; }
+    .industry-chip { font-size: 11px; padding: 2px 6px; }
+    .country-cell mat-icon { display: none; }
+  }
+}
+
+@media (max-width: 480px) {
+  .clients-table th:nth-child(3),
+  .clients-table td:nth-child(3) {
+    display: none; // hide country column on very small screens
+  }
 }

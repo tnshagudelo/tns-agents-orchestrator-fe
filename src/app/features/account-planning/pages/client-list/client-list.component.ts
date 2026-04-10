@@ -13,8 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { ClientService } from '../../services/client.service';
 import { PlanningSessionService } from '../../services/planning-session.service';
-import { Client } from '../../models/account-planning.model';
-import { RelativeTimePipe } from '../../../../shared/pipes/relative-time.pipe';
+import { Client, PlanningSession } from '../../models/account-planning.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Pipe({ name: 'stripProtocol', standalone: true })
@@ -36,7 +35,7 @@ const AVATAR_COLORS = [
   imports: [
     FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatTableModule,
     MatMenuModule, MatProgressSpinnerModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, RelativeTimePipe, StripProtocolPipe,
+    MatTooltipModule, StripProtocolPipe,
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',
@@ -61,10 +60,32 @@ export class ClientListComponent implements OnInit {
     );
   });
 
-  readonly displayedColumns = ['name', 'industry', 'country', 'updatedAt', 'actions'];
+  readonly displayedColumns = ['name', 'industry', 'country', 'status', 'actions'];
+
+  /** Map clientId → latest session */
+  readonly latestSessions = signal<Record<string, PlanningSession>>({});
 
   ngOnInit(): void {
     this.clientService.loadAll().subscribe();
+    this.sessionService.loadMy().subscribe(sessions => {
+      const map: Record<string, PlanningSession> = {};
+      for (const s of sessions) {
+        if (!map[s.clientId] || s.updatedAt > map[s.clientId].updatedAt) {
+          map[s.clientId] = s;
+        }
+      }
+      this.latestSessions.set(map);
+    });
+  }
+
+  getClientStatus(clientId: string): { label: string; color: string; icon: string } {
+    const session = this.latestSessions()[clientId];
+    if (!session) return { label: 'Sin investigar', color: '#999', icon: 'fiber_new' };
+    if (session.status === 'Approved') return { label: 'Aprobado', color: '#059669', icon: 'verified' };
+    if (session.status === 'Failed') return { label: 'Error', color: '#dc2626', icon: 'error' };
+    if (['DeepSearching', 'GeneratingPortfolio', 'QuickSearching'].includes(session.status))
+      return { label: 'En progreso', color: '#d97706', icon: 'autorenew' };
+    return { label: 'En proceso', color: '#4f46e5', icon: 'pending' };
   }
 
   createClient(): void {
@@ -76,9 +97,16 @@ export class ClientListComponent implements OnInit {
   }
 
   startPlanning(client: Client): void {
-    this.sessionService.create(client.id).subscribe(session => {
-      this.router.navigate(['/account-planning/sessions', session.id]);
-    });
+    const existing = this.latestSessions()[client.id];
+    if (existing && existing.status !== 'Approved' && existing.status !== 'Failed') {
+      // Resume existing session
+      this.router.navigate(['/account-planning/sessions', existing.id]);
+    } else {
+      // Create new session
+      this.sessionService.create(client.id).subscribe(session => {
+        this.router.navigate(['/account-planning/sessions', session.id]);
+      });
+    }
   }
 
   deleteClient(client: Client): void {

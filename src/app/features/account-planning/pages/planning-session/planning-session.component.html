@@ -1,14 +1,27 @@
 @if (session(); as s) {
   <div class="session-container">
 
-    <!-- Status bar -->
+    <!-- Back nav -->
+    <nav class="back-nav">
+      <button mat-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Clientes
+      </button>
+      @if (client(); as c) {
+        <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+        <span class="breadcrumb-current">{{ c.name }}</span>
+      }
+    </nav>
+
+    <!-- Status bar (hidden during conversational states — the chat communicates status) -->
     @if (statusInfo(); as info) {
-      <div class="status-bar" [class]="'status-bar--' + info.color">
-        <mat-icon>{{ info.icon }}</mat-icon>
-        <span class="status-label">{{ info.label }}</span>
-        <span class="spacer"></span>
-        <mat-chip>{{ s.language | uppercase }}</mat-chip>
-      </div>
+      @if (!isConversationalState()) {
+        <div class="status-bar" [class]="'status-bar--' + info.color">
+          <mat-icon>{{ info.icon }}</mat-icon>
+          <span class="status-label">{{ info.label }}</span>
+          <span class="spacer"></span>
+          <mat-chip>{{ s.language | uppercase }}</mat-chip>
+        </div>
+      }
     }
 
     <!-- Search progress (deep search stepper) -->
@@ -134,7 +147,11 @@
               [client]="c"
               [results]="researchResults()"
               [sessionDate]="s.updatedAt"
+              [currentSessionId]="s.id"
+              [clientSessions]="clientSessions()"
               (defineFocus)="onDefineFocus()"
+              (sessionChanged)="switchSession($event)"
+              (newInvestigation)="startNewInvestigation()"
             />
           }
         }
