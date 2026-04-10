@@ -1,0 +1,155 @@
+.sidebar {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+// Header
+.client-header {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  .client-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .client-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    word-break: break-word;
+  }
+}
+
+// Details
+.client-details {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #999;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #333;
+}
+
+.detail-link {
+  font-size: 12px;
+  color: #4f46e5;
+  text-decoration: none;
+  word-break: break-all;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Description
+.client-description {
+  padding: 16px 20px;
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .toggle-btn {
+    padding: 0;
+    min-width: auto;
+    font-size: 12px;
+    color: #4f46e5;
+    height: 28px;
+  }
+}
+
+// Investigation status
+.investigation-status {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &--investigated {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  &--new {
+    background: #eef2ff;
+    color: #4f46e5;
+  }
+}
+
+.view-results-btn {
+  font-size: 13px;
+  width: 100%;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}

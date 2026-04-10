@@ -1,0 +1,87 @@
+<div class="sidebar">
+
+  <!-- Client header -->
+  <div class="client-header">
+    <div class="client-avatar" [style.background]="avatarColor()">
+      {{ initial() }}
+    </div>
+    <h3 class="client-name">{{ client().name }}</h3>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Details -->
+  <div class="client-details">
+    <div class="detail-row">
+      <mat-icon>category</mat-icon>
+      <div class="detail-content">
+        <span class="detail-label">Sector</span>
+        <span class="detail-value">{{ client().industry }}</span>
+      </div>
+    </div>
+    <div class="detail-row">
+      <mat-icon>public</mat-icon>
+      <div class="detail-content">
+        <span class="detail-label">País</span>
+        <span class="detail-value">{{ client().country }}</span>
+      </div>
+    </div>
+    @if (client().website) {
+      <div class="detail-row">
+        <mat-icon>language</mat-icon>
+        <div class="detail-content">
+          <span class="detail-label">Web</span>
+          <a class="detail-link" [href]="client().website" target="_blank" rel="noopener">
+            {{ client().website }}
+          </a>
+        </div>
+      </div>
+    }
+    @if (client().linkedInUrl) {
+      <div class="detail-row">
+        <mat-icon>work</mat-icon>
+        <div class="detail-content">
+          <span class="detail-label">LinkedIn</span>
+          <a class="detail-link" [href]="client().linkedInUrl" target="_blank" rel="noopener">
+            Ver perfil
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Description -->
+  @if (client().description) {
+    <mat-divider></mat-divider>
+    <div class="client-description">
+      <span class="detail-label">Descripción</span>
+      <p>{{ showFullDescription ? client().description : truncatedDescription() }}</p>
+      @if (needsTruncation()) {
+        <button mat-button class="toggle-btn" (click)="toggleDescription()">
+          {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
+        </button>
+      }
+    </div>
+  }
+
+  <mat-divider></mat-divider>
+
+  <!-- Investigation status -->
+  <div class="investigation-status">
+    @if (hasInvestigation()) {
+      <div class="status-badge status-badge--investigated">
+        <mat-icon>check_circle</mat-icon>
+        <span>Investigado {{ lastInvestigationDate() | relativeTime }}</span>
+      </div>
+      <button mat-stroked-button class="view-results-btn" (click)="viewPreviousResults.emit()">
+        <mat-icon>dashboard</mat-icon> Ver último análisis
+      </button>
+    } @else {
+      <div class="status-badge status-badge--new">
+        <mat-icon>fiber_new</mat-icon>
+        <span>Sin investigar</span>
+      </div>
+    }
+  </div>
+
+</div>

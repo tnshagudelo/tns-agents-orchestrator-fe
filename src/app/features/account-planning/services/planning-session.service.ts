@@ -62,6 +62,20 @@ export class PlanningSessionService extends BaseApiService {
     );
   }
 
+  startQuickSearch(sessionId: string, userIntent?: string): Observable<PlanningSession> {
+    return this.post<PlanningSession>(`/api/planning-sessions/${sessionId}/start-quick-search`, { userIntent }).pipe(
+      map(s => this.normalize(s)),
+      tap(s => this._currentSession.set(s))
+    );
+  }
+
+  completeQuickSearch(sessionId: string, quickSearchSummary: string): Observable<PlanningSession> {
+    return this.post<PlanningSession>(`/api/planning-sessions/${sessionId}/complete-quick-search`, { quickSearchSummary }).pipe(
+      map(s => this.normalize(s)),
+      tap(s => this._currentSession.set(s))
+    );
+  }
+
   confirmClient(sessionId: string): Observable<PlanningSessionWithJob> {
     return this.post<PlanningSessionWithJob>(`/api/planning-sessions/${sessionId}/confirm`, {}).pipe(
       map(r => ({ session: this.normalize(r.session), jobId: r.jobId })),

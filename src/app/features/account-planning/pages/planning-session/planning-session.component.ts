@@ -1,30 +1,34 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { UpperCasePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MarkdownComponent } from 'ngx-markdown';
 import { switchMap, tap } from 'rxjs';
 import { PlanningSessionService } from '../../services/planning-session.service';
 import { PlanningChatService } from '../../services/planning-chat.service';
 import { JobPollingService } from '../../services/job-polling.service';
 import { ClientService } from '../../services/client.service';
-import { SESSION_STATUS_MAP, Client } from '../../models/account-planning.model';
+import { SESSION_STATUS_MAP, Client, PlanningSession } from '../../models/account-planning.model';
+import { SessionChatComponent, ChatMessage } from './components/session-chat/session-chat.component';
+import { ClientSidebarComponent } from './components/client-sidebar/client-sidebar.component';
+import { ConfirmationCardComponent } from './components/confirmation-card/confirmation-card.component';
+import { SearchProgressComponent } from './components/search-progress/search-progress.component';
 
 @Component({
   selector: 'app-planning-session',
   standalone: true,
   imports: [
     FormsModule, UpperCasePipe, MatCardModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatProgressBarModule, MatChipsModule,
-    MatDividerModule, MarkdownComponent,
+    MatFormFieldModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule,
+    MatChipsModule, SessionChatComponent, ClientSidebarComponent,
+    ConfirmationCardComponent, SearchProgressComponent,
   ],
   templateUrl: './planning-session.component.html',
   styleUrl: './planning-session.component.scss',
@@ -43,6 +47,7 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   readonly isPolling = this.pollingService.isPolling;
 
   readonly client = signal<Client | null>(null);
+  readonly isReturningClient = signal(false);
   private autoStarted = false;
 
   readonly statusInfo = computed(() => {
@@ -51,26 +56,26 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
     return SESSION_STATUS_MAP[s.status] ?? null;
   });
 
-  chatInput = '';
+  // Form inputs
   linkedInInput = '';
   focusCompanyType = '';
   focusContactRole = '';
   regenerateLanguage = '';
 
-  readonly chatHistory = signal<{ role: string; content: string }[]>([]);
+  readonly chatHistory = signal<ChatMessage[]>([]);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
 
-    // Cargar sesión → cargar cliente → auto-iniciar chat si es sesión nueva
     this.sessionService.getById(id).pipe(
       switchMap(session => this.clientService.getById(session.clientId).pipe(
         tap(client => {
           this.client.set(client);
-          // Si la sesión es nueva (Queued) y no hemos auto-iniciado, enviar primer mensaje
+          // TODO: check if client has previous investigations to set isReturningClient
           if (session.status === 'Queued' && !this.autoStarted) {
             this.autoStarted = true;
-            this.sendAutoGreeting(client);
+            // Small delay to ensure signals are propagated before greeting
+            setTimeout(() => this.sendAutoGreeting(session, client), 100);
           }
         })
       ))
@@ -83,37 +88,43 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
   }
 
   /** Envía el primer mensaje automático con los datos del cliente */
-  private sendAutoGreeting(client: Client): void {
-    const s = this.session();
-    if (!s) return;
-
-    const message = `Inicio Account Planning para ${client.name}`;
+  private sendAutoGreeting(session: PlanningSession, client: Client): void {
+    const message = this.isReturningClient()
+      ? `Actualizar investigación de ${client.name}`
+      : `Inicio Account Planning para ${client.name}`;
 
     this.chatService.sendMessage(
       'IntentExtractionAgent',
-      s.conversationSessionId,
+      session.conversationSessionId,
       message,
       this.buildClientMetadata(client)
     ).subscribe({
       complete: () => {
+        const response = this.chatService.streamingContent();
         this.chatHistory.update(h => [...h, {
-          role: 'assistant',
-          content: this.chatService.streamingContent()
+          role: 'assistant' as const,
+          content: response
         }]);
+        this.chatService.resetContent();
+
+        // If the greeting itself triggers search (e.g., returning client flow)
+        if (this.isSearchTrigger(response)) {
+          this.triggerQuickSearch();
+        }
+      },
+      error: (err) => {
+        console.error('[PlanningSession] Auto-greeting failed:', err);
         this.chatService.resetContent();
       },
     });
   }
 
-  sendChat(): void {
+  sendChat(message: string): void {
     const s = this.session();
     const c = this.client();
-    if (!s || !this.chatInput.trim()) return;
+    if (!s || !message.trim()) return;
 
-    const message = this.chatInput.trim();
-    this.chatInput = '';
-
-    this.chatHistory.update(h => [...h, { role: 'user', content: message }]);
+    this.chatHistory.update(h => [...h, { role: 'user' as const, content: message }]);
 
     this.chatService.sendMessage(
       'IntentExtractionAgent',
@@ -122,11 +133,51 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
       c ? this.buildClientMetadata(c) : {}
     ).subscribe({
       complete: () => {
+        const response = this.chatService.streamingContent();
         this.chatHistory.update(h => [...h, {
-          role: 'assistant',
-          content: this.chatService.streamingContent()
+          role: 'assistant' as const,
+          content: response
         }]);
         this.chatService.resetContent();
+
+        // Detect if agent signaled to start the search
+        if (this.isSearchTrigger(response)) {
+          this.triggerQuickSearch();
+        }
+      },
+    });
+  }
+
+  /** Detects if the agent's response signals that the search should start */
+  private isSearchTrigger(response: string): boolean {
+    const lower = response.toLowerCase();
+    return lower.includes('iniciando la búsqueda') || lower.includes('iniciando la busqueda');
+  }
+
+  /** Triggers the quick search flow: transition state → call QuickResearchAgent → save result */
+  private triggerQuickSearch(): void {
+    const s = this.session();
+    const c = this.client();
+    if (!s || !c) return;
+
+    // 1. Transition to QuickSearching
+    this.sessionService.startQuickSearch(s.id, s.userIntent).pipe(
+      switchMap(() => {
+        // 2. Call QuickResearchAgent via SSE
+        return this.chatService.sendMessage(
+          'QuickResearchAgent',
+          s.conversationSessionId,
+          `Genera un resumen rápido de ${c.name} para confirmar que es el cliente correcto.`,
+          this.buildClientMetadata(c)
+        );
+      })
+    ).subscribe({
+      complete: () => {
+        const summary = this.chatService.streamingContent();
+        this.chatService.resetContent();
+
+        // 3. Save summary and transition to AwaitingConfirmation
+        this.sessionService.completeQuickSearch(s.id, summary).subscribe();
       },
     });
   }
@@ -184,6 +235,15 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
     this.sessionService.retry(s.id).subscribe(result => {
       this.pollingService.startPolling(result.jobId);
     });
+  }
+
+  rejectClient(): void {
+    // Send a message to the agent saying the client is not correct
+    this.sendChat('No es la empresa correcta. Necesito buscar otra.');
+  }
+
+  onViewPreviousResults(): void {
+    // TODO: navigate to dashboard of last analysis
   }
 
   private buildClientMetadata(client: Client): Record<string, string> {
