@@ -1,48 +1,42 @@
 # CLAUDE.md — tns-agents-orchestrator-fe
-# Ver reglas globales en: ../CLAUDE.md
-# Ver contratos en: ../tns-agents-docs/contracts/api-contracts.md y ../tns-agents-docs/contracts/shared-types.md
-# Ver arquitectura en: ../tns-agents-docs/architecture/ARCHITECTURE.md
-# Ver specs en: ../tns-agents-docs/specs/INDEX.md
-# Ver ADRs en: ../tns-agents-docs/adrs/INDEX.md
+# Reglas globales en: ../CLAUDE.md
 
-## Stack específico
-- Angular 21.2.x standalone (sin NgModules) | TypeScript ~5.9.2 | RxJS ~7.8.0
-- Angular Material 21.2.1 | ngx-markdown 21.1.0 | mermaid 11.13.0
-- Vitest 4.0.8 | Prettier 3.8.1 | npm 11.9.0
+## Stack
+- Angular 21.2.x standalone (sin NgModules) | TypeScript ~5.9 | RxJS ~7.8
+- Angular Material 21.2 | ngx-markdown 21.1 | mermaid 11.13
+- Vitest 4.0 | Prettier 3.8
+- i18n: TranslationService + TranslatePipe (`assets/i18n/es.json`, `en.json`)
 
-## Convenciones específicas del frontend
-- Componentes: `standalone: true` siempre. Sin `@NgModule`.
-- Archivos: kebab-case con sufijo (`proposal-workpad.component.ts`, `agent.service.ts`)
-- Clases: PascalCase (`ProposalWorkpadComponent`, `AgentService`)
-- Selectores: `app-` + kebab-case (`app-proposal-workpad`)
-- Estado: Angular Signals (`private _x = signal()` + `readonly x = this._x.asReadonly()`)
-- Estilos: SCSS, 2 espacios, single quotes
-- Features: cada uno en `features/{name}/` con pages/, components/, services/, models/
-- Lazy loading: cada feature exporta rutas en `{feature}.routes.ts`
+## Convenciones
+- Componentes: `standalone: true` siempre
+- Archivos: kebab-case con sufijo (`client-list.component.ts`)
+- Clases: PascalCase. Selectores: `app-` + kebab-case
+- Estado: Angular Signals (`signal()` + `asReadonly()`)
+- Estilos: SCSS, 2 espacios
+- Features: `features/{name}/` con pages/, components/, services/, models/
+- Lazy loading: `{feature}.routes.ts`
+- Traducciones: `{{ 'key' | translate }}` en templates
 
-## Restricciones importantes
-- NO llamadas HTTP fuera de services que extiendan `BaseApiService` (en `core/services/`)
-- NO `any` en TypeScript — strict mode habilitado
-- NO lógica de negocio en componentes — solo en services
+## Restricciones
+- NO llamadas HTTP fuera de services que extiendan `BaseApiService`
+- NO `any` en TypeScript — strict mode
+- NO logica de negocio en componentes — solo en services
 - NO imports entre features — solo de `shared/` y `core/`
-- SSE usa `fetch()` nativo, no HttpClient (ADR-005) — URL hardcoded a `https://localhost:7292`
-- Los tipos de respuesta del backend DEBEN coincidir con `../tns-agents-docs/contracts/shared-types.md`
+- SSE usa `fetch()` nativo, no HttpClient (ADR-005)
+- Tipos DEBEN coincidir con `../tns-agents-docs/contracts/shared-types.md`
 
-## Para agregar un nuevo feature
-1. Verifica el contrato en `../tns-agents-docs/contracts/api-contracts.md`
-2. Crea/verifica el tipo en `../tns-agents-docs/contracts/shared-types.md`
-3. Crea service en `features/{feature}/services/` extendiendo `BaseApiService`
-4. Crea componentes en `features/{feature}/pages/` (ruteados) y `components/` (reutilizables)
-5. Crea `features/{feature}/{feature}.routes.ts` con lazy loading
-6. Registra en `app.routes.ts` con `loadChildren`
-7. Actualiza el spec correspondiente en `../tns-agents-docs/specs/`
+## Agregar un feature
+1. Verifica contrato en `../tns-agents-docs/contracts/api-contracts.md`
+2. Crea/verifica tipos en `../tns-agents-docs/contracts/shared-types.md`
+3. Service en `features/{feature}/services/` extendiendo `BaseApiService`
+4. Componentes en `pages/` (ruteados) y `components/` (reutilizables)
+5. Rutas en `{feature}.routes.ts` con lazy loading
+6. Registra en `app.routes.ts`
+7. Actualiza el spec
 
-## Comandos de este repo
+## Comandos
 ```
-npm start                    # ng serve en localhost:4200
-npm test                     # vitest
-npm run build                # ng build producción
-npm run watch                # ng build --watch development
-ng generate component features/{feat}/pages/{name} --standalone
-ng generate service features/{feat}/services/{name}
+npm start          # ng serve localhost:4200
+npm test           # vitest
+npm run build      # build produccion
 ```
