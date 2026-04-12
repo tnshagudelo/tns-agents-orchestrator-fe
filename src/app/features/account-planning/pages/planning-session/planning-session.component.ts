@@ -79,6 +79,13 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
           if (session.status === 'AwaitingReview' || session.status === 'AwaitingFocus'
             || session.status === 'UnderRevision' || session.status === 'Approved') {
             this.loadResults();
+            // Reload client sessions for version selector
+            const c = this.client();
+            if (c) {
+              this.sessionService.loadByClient(c.id).subscribe(sessions => {
+                this.clientSessions.set(sessions);
+              });
+            }
           }
         });
       }

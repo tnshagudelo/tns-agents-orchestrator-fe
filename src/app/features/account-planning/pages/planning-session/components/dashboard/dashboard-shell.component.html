@@ -82,8 +82,8 @@
 
     <!-- Mini-nav -->
     <nav class="mini-nav">
-      <h4>Secciones</h4>
-      @for (item of [{id:'challenges',icon:'warning',label:'Retos'},{id:'techvision',icon:'visibility',label:'Visión tech'},{id:'findings',icon:'search',label:'Hallazgos'},{id:'stakeholders',icon:'people',label:'Personas clave'},{id:'purchasing',icon:'shopping_cart',label:'Qué compra'},{id:'opportunities',icon:'trending_up',label:'Oportunidades'},{id:'swot',icon:'grid_view',label:'DOFA'},{id:'sector',icon:'leaderboard',label:'Sector'},{id:'pvs',icon:'table_chart',label:'Dolor-Valor-Servicio'},{id:'proposal',icon:'lightbulb',label:'Propuesta'},{id:'questions',icon:'help',label:'Preguntas clave'},{id:'news',icon:'newspaper',label:'Noticias'},{id:'sources',icon:'link',label:'Fuentes'}]; track item.id) {
+      <h4>{{ 'dashboard.sectionsTitle' | translate }}</h4>
+      @for (item of navItems(); track item.id) {
         <button class="nav-item" [class.active]="activeSectionId() === item.id" (click)="scrollTo(item.id)">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span>{{ item.label }}</span>

@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, inject, input, output, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MarkdownComponent } from 'ngx-markdown';
 import { RelativeTimePipe } from '../../../../../../shared/pipes/relative-time.pipe';
 import { TranslatePipe } from '../../../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../../../core/i18n/translation.service';
 import {
   Client, ResearchResult, AnalysisResponse, FindingCard, PlanningSession,
   SESSION_STATUS_MAP,
@@ -147,6 +148,26 @@ export class DashboardShellComponent {
   }
 
   readonly activeSectionId = signal<string | null>(null);
+
+  readonly navItems = computed(() => {
+    // Read i18n version signal to re-evaluate on language change
+    this.i18n.version();
+    return [
+      { id: 'challenges', icon: 'warning', label: this.i18n.get('dashboard.sections.challenges') },
+      { id: 'techvision', icon: 'visibility', label: this.i18n.get('dashboard.sections.techvision') },
+      { id: 'findings', icon: 'search', label: this.i18n.get('dashboard.sections.findings') },
+      { id: 'stakeholders', icon: 'people', label: this.i18n.get('dashboard.sections.stakeholders') },
+      { id: 'purchasing', icon: 'shopping_cart', label: this.i18n.get('dashboard.sections.purchasing') },
+      { id: 'opportunities', icon: 'trending_up', label: this.i18n.get('dashboard.sections.opportunities') },
+      { id: 'swot', icon: 'grid_view', label: this.i18n.get('dashboard.sections.swot') },
+      { id: 'sector', icon: 'leaderboard', label: this.i18n.get('dashboard.sections.sector') },
+      { id: 'pvs', icon: 'table_chart', label: this.i18n.get('dashboard.sections.pvs') },
+      { id: 'proposal', icon: 'lightbulb', label: this.i18n.get('dashboard.sections.proposal') },
+      { id: 'questions', icon: 'help', label: this.i18n.get('dashboard.sections.questions') },
+      { id: 'news', icon: 'newspaper', label: this.i18n.get('dashboard.sections.news') },
+      { id: 'sources', icon: 'link', label: this.i18n.get('dashboard.sections.sources') },
+    ];
+  });
   readonly findingsFilter = signal<string>('ALL');
 
   /** Stakeholders grouped by hierarchy level */
@@ -220,8 +241,26 @@ export class DashboardShellComponent {
     document.getElementById('section-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  private readonly i18n = inject(TranslationService);
+
+  private readonly statusKeys: Record<string, string> = {
+    'Queued': 'session.status.queued',
+    'QuickSearching': 'session.status.quickSearching',
+    'QuickSearchDone': 'session.status.quickSearchDone',
+    'AwaitingConfirmation': 'session.status.awaitingConfirmation',
+    'DeepSearching': 'session.status.deepSearching',
+    'AwaitingLinkedInInput': 'session.status.awaitingLinkedIn',
+    'AwaitingReview': 'session.status.awaitingReview',
+    'AwaitingFocus': 'session.status.awaitingFocus',
+    'GeneratingPortfolio': 'session.status.generatingPortfolio',
+    'UnderRevision': 'session.status.underRevision',
+    'Approved': 'session.status.approved',
+    'Failed': 'session.status.failed',
+  };
+
   getStatusLabel(status: string): string {
-    return SESSION_STATUS_MAP[status as keyof typeof SESSION_STATUS_MAP]?.label ?? status;
+    const key = this.statusKeys[status];
+    return key ? this.i18n.get(key) : status;
   }
 
   /** Clean JSON from LLM response — removes markdown code blocks, text around JSON */
