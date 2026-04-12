@@ -213,6 +213,10 @@
                       <span class="source-badge source-linkedin">
                         <mat-icon>person_search</mat-icon> LinkedIn
                       </span>
+                    } @else if (s.source === 'LLM') {
+                      <span class="source-badge source-llm" matTooltip="Cargo inferido por IA — no se encontró persona específica">
+                        <mat-icon>psychology</mat-icon> Inferido
+                      </span>
                     }
                     @if (s.dataDate) {
                       <span class="data-date">{{ 'dashboard.stakeholders.dataDate' | translate }}: {{ s.dataDate }}</span>
