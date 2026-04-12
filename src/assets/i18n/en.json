@@ -149,28 +149,57 @@
     "failed": "Processing error"
   },
   "dashboard": {
-    "resultsTitle": "Research results",
     "newInvestigation": "New investigation",
     "previousVersions": "Previous versions",
     "generatePortfolio": "Generate portfolio",
     "sections": {
+      "challenges": "Key challenges",
+      "techvision": "Tech vision",
       "findings": "Key findings",
       "stakeholders": "Key people",
+      "purchasing": "What they buy / Who from",
       "opportunities": "Business opportunities",
       "swot": "SWOT Analysis",
       "sector": "Sector comparison",
       "pvs": "Pain-Value-Service",
       "proposal": "Strategic proposal",
+      "questions": "Key questions",
       "news": "Recent news",
       "sources": "Sources consulted"
     },
+    "challenges": {
+      "strategic": "Strategic",
+      "operational": "Operational / Technology",
+      "customerExperience": "Customer experience",
+      "regulatory": "Regulatory / Risk"
+    },
+    "techvision": {
+      "current": "What they do today",
+      "future": "Where they should go"
+    },
     "findings": {
       "all": "All",
-      "commercial": "Commercial insight"
+      "insight": "Commercial insight",
+      "source": "Source"
     },
     "stakeholders": {
       "painPoints": "Pain points",
-      "approach": "Approach"
+      "approach": "How to approach",
+      "interests": "Interests",
+      "dataDate": "Info from",
+      "hierarchy": {
+        "STRATEGIC_DECISOR": "Strategic decisor",
+        "TECH_DECISOR": "Tech decisor",
+        "INFLUENCER": "Influencer",
+        "GATEKEEPER": "Gatekeeper",
+        "FINANCIAL_DECISOR": "Financial decisor"
+      }
+    },
+    "purchasing": {
+      "technology": "Technology",
+      "services": "Services",
+      "vendors": "Current vendors",
+      "opportunity": "T&S opportunity"
     },
     "pvs": {
       "pain": "Client's pain",
@@ -194,7 +223,12 @@
     "internationalAlert": {
       "title": "International client"
     },
-    "copyTable": "Copy"
+    "copyTable": "Copy",
+    "errorTitle": "Error processing analysis",
+    "errorMessage": "The agent did not generate data in the expected format. Try a new investigation.",
+    "noAnalysisTitle": "Analysis not available",
+    "noAnalysisMessage": "The investigation was completed but no analysis was generated. Start a new investigation.",
+    "loading": "Loading results..."
   },
   "sidebar": {
     "sector": "Industry",

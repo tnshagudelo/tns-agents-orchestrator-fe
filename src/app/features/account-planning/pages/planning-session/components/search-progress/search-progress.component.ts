@@ -1,17 +1,13 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, signal, effect } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BackgroundJobStatus_Response } from '../../../../models/account-planning.model';
 
-interface SearchPhase {
-  id: string;
-  label: string;
-  icon: string;
-  status: 'pending' | 'active' | 'completed';
+interface ActivityEntry {
+  message: string;
+  time: Date;
+  done: boolean;
 }
-
-/** Must match the currentStep strings sent by DeepResearchWorker */
-const PHASE_ORDER = ['WEB_SEARCH', 'RAG_SEARCH', 'ANALYSIS', 'COMPLETING'];
 
 @Component({
   selector: 'app-search-progress',
@@ -24,39 +20,31 @@ export class SearchProgressComponent {
   readonly job = input.required<BackgroundJobStatus_Response>();
   readonly clientName = input<string>('');
 
-  readonly phases = computed<SearchPhase[]>(() => {
-    const currentStep = this.job().currentStep ?? '';
-    const currentIndex = PHASE_ORDER.indexOf(currentStep);
+  /** Activity log — accumulates as steps change */
+  readonly activityLog = signal<ActivityEntry[]>([]);
+  private lastStep = '';
 
-    return [
-      { id: 'WEB_SEARCH', label: 'Investigación', icon: 'travel_explore' },
-      { id: 'RAG_SEARCH', label: 'Base de conocimiento', icon: 'psychology' },
-      { id: 'ANALYSIS', label: 'Análisis estratégico', icon: 'analytics' },
-    ].map((phase, i) => ({
-      ...phase,
-      status: i < currentIndex ? 'completed' as const
-        : i === currentIndex ? 'active' as const
-        : 'pending' as const,
-    }));
-  });
-
-  readonly progressLabel = computed(() => {
-    const step = this.job().currentStep;
-    switch (step) {
-      case 'PREPARING': return 'Preparando investigación...';
-      case 'WEB_SEARCH': return 'Investigando la empresa en fuentes públicas...';
-      case 'RAG_SEARCH': return 'Consultando base de conocimiento interna...';
-      case 'ANALYSIS': return 'Analizando hallazgos y generando insights estratégicos...';
-      case 'COMPLETING': return 'Finalizando...';
-      default: return 'Procesando...';
-    }
-  });
+  constructor() {
+    effect(() => {
+      const step = this.job().currentStep ?? '';
+      if (step && step !== this.lastStep) {
+        // Mark previous as done
+        this.activityLog.update(log => {
+          const updated = log.map(e => ({ ...e, done: true }));
+          updated.push({ message: step, time: new Date(), done: false });
+          return updated;
+        });
+        this.lastStep = step;
+      }
+    });
+  }
 
   readonly estimatedTime = computed(() => {
     const progress = this.job().progress;
     if (progress >= 90) return 'Casi listo...';
-    if (progress >= 65) return 'Menos de 1 minuto';
-    if (progress >= 40) return '~1-2 minutos restantes';
-    return '~2-3 minutos restantes';
+    if (progress >= 80) return 'Menos de 1 minuto';
+    if (progress >= 55) return '~1-2 minutos';
+    if (progress >= 30) return '~2-3 minutos';
+    return '~3-5 minutos';
   });
 }

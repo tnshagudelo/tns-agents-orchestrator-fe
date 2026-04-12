@@ -139,16 +139,45 @@ export interface FindingCard {
 export interface AnalysisResponse {
   clientCard: AnalysisClientCard;
   keyFindings?: FindingCard[];
+  challenges?: ChallengesSection;
+  techVision?: TechVisionSection;
+  purchasingProfile?: PurchasingProfile;
   stakeholders: StakeholderAnalysis[];
   opportunities: OpportunityCard[];
   swotAnalysis: SwotAnalysis;
   sectorComparison: SectorComparison;
   painValueServiceMap: PainValueService[];
   strategicProposal: StrategicProposal;
+  keyQuestions?: KeyQuestion[];
+  keyMessage?: string;
   recentNews: NewsItem[];
   sources: SourceReference[];
   internationalAlert: InternationalAlert;
   decisionStructure: DecisionStructure;
+}
+
+export interface ChallengesSection {
+  strategic: string[];
+  operational: string[];
+  customerExperience: string[];
+  regulatory: string[];
+}
+
+export interface TechVisionSection {
+  currentState: string[];
+  futureState: string[];
+}
+
+export interface PurchasingProfile {
+  technology: string[];
+  services: string[];
+  currentVendors: string[];
+  opportunity: string;
+}
+
+export interface KeyQuestion {
+  area: string;
+  question: string;
 }
 
 export interface AnalysisClientCard {
@@ -167,11 +196,13 @@ export interface StakeholderAnalysis {
   name: string;
   role: string;
   type: string;
+  level?: number; // 1=C-level, 2=Director, 3=Manager, 4=Specialist
   relevance: string;
   painPoints: string[];
   interests: string[];
   approach: string;
   linkedinUrl?: string;
+  dataDate?: string; // When this info was found (e.g., "2026-03")
 }
 
 export interface OpportunityCard {

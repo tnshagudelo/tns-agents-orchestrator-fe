@@ -67,6 +67,8 @@ export class SettingsPageComponent implements OnInit {
       next: (result) => {
         this.testResults[name] = result;
         this.testing[name] = false;
+        this.configService.loadUsage().subscribe();
+        this.configService.loadSearchProviders().subscribe();
         this.cdr.markForCheck();
       },
       error: () => {

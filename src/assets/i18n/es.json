@@ -149,28 +149,57 @@
     "failed": "Error en el procesamiento"
   },
   "dashboard": {
-    "resultsTitle": "Resultados de investigación",
     "newInvestigation": "Nueva investigación",
     "previousVersions": "Versiones anteriores",
     "generatePortfolio": "Generar portafolio",
     "sections": {
+      "challenges": "Principales retos",
+      "techvision": "Visión tecnológica",
       "findings": "Hallazgos clave",
       "stakeholders": "Personas clave",
+      "purchasing": "Qué compra / A quién le compra",
       "opportunities": "Oportunidades comerciales",
       "swot": "Análisis DOFA",
       "sector": "Comparativa de sector",
       "pvs": "Dolor-Valor-Servicio",
       "proposal": "Propuesta estratégica",
+      "questions": "Preguntas clave",
       "news": "Noticias recientes",
       "sources": "Fuentes consultadas"
     },
+    "challenges": {
+      "strategic": "Estratégicos",
+      "operational": "Operativos / Tecnológicos",
+      "customerExperience": "Experiencia del cliente",
+      "regulatory": "Regulatorios / Riesgo"
+    },
+    "techvision": {
+      "current": "Qué hace hoy",
+      "future": "Hacia dónde debería ir"
+    },
     "findings": {
       "all": "Todos",
-      "commercial": "Insight comercial"
+      "insight": "Insight comercial",
+      "source": "Fuente"
     },
     "stakeholders": {
-      "painPoints": "Pain points",
-      "approach": "Approach"
+      "painPoints": "Puntos de dolor",
+      "approach": "Cómo abordarlo",
+      "interests": "Intereses",
+      "dataDate": "Info desde",
+      "hierarchy": {
+        "STRATEGIC_DECISOR": "Decisor estratégico",
+        "TECH_DECISOR": "Decisor técnico",
+        "INFLUENCER": "Influenciador",
+        "GATEKEEPER": "Gatekeeper",
+        "FINANCIAL_DECISOR": "Decisor financiero"
+      }
+    },
+    "purchasing": {
+      "technology": "Tecnología",
+      "services": "Servicios",
+      "vendors": "Proveedores actuales",
+      "opportunity": "Oportunidad T&S"
     },
     "pvs": {
       "pain": "Dolor del cliente",
@@ -194,7 +223,12 @@
     "internationalAlert": {
       "title": "Cliente internacional"
     },
-    "copyTable": "Copiar"
+    "copyTable": "Copiar",
+    "errorTitle": "Error al procesar el análisis",
+    "errorMessage": "El agente no generó datos en el formato esperado. Intenta una nueva investigación.",
+    "noAnalysisTitle": "Análisis no disponible",
+    "noAnalysisMessage": "La investigación se completó pero no se generó el análisis. Inicia una nueva investigación.",
+    "loading": "Cargando resultados..."
   },
   "sidebar": {
     "sector": "Sector",

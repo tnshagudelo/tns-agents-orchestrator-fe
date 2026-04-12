@@ -9,6 +9,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MarkdownComponent } from 'ngx-markdown';
 import { RelativeTimePipe } from '../../../../../../shared/pipes/relative-time.pipe';
+import { TranslatePipe } from '../../../../../../core/i18n/translate.pipe';
 import {
   Client, ResearchResult, AnalysisResponse, FindingCard, PlanningSession,
   SESSION_STATUS_MAP,
@@ -48,7 +49,7 @@ const HORIZON_LABELS: Record<string, string> = {
   imports: [
     MatExpansionModule, MatIconModule, MatButtonModule,
     MatTooltipModule, MatChipsModule, MatDividerModule, MatMenuModule,
-    MarkdownComponent, RelativeTimePipe,
+    MarkdownComponent, RelativeTimePipe, TranslatePipe,
   ],
   templateUrl: './dashboard-shell.component.html',
   styleUrl: './dashboard-shell.component.scss',
@@ -72,28 +73,97 @@ export class DashboardShellComponent {
       .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   });
 
-  /** Parsed structured analysis from AnalysisAgent */
+  /** Merge 3 analysis parts from DB into one AnalysisResponse */
   readonly analysis = computed<AnalysisResponse | null>(() => {
     const results = this.results();
-    const structured = results.find(r => r.category === 'analysis-structured');
-    if (!structured) return null;
+    if (results.length === 0) return null;
+
+    // Try 3-part pipeline first (new)
+    const part1 = this.parseResult(results, 'analysis-part1');
+    const part2 = this.parseResult(results, 'analysis-part2');
+    const part3 = this.parseResult(results, 'analysis-part3');
+
+    if (part1 || part2 || part3) {
+      return {
+        // Part 1: Profile
+        clientCard: part1?.clientCard ?? { name: '', industry: '', country: '', estimatedSize: '', summary: '' },
+        challenges: part1?.challenges,
+        techVision: part1?.techVision,
+        purchasingProfile: part1?.purchasingProfile,
+        decisionStructure: part1?.decisionStructure ?? { model: '', keyInfluencers: '', approvalProcess: '' },
+        internationalAlert: part1?.internationalAlert ?? { isInternational: false, languages: ['es'] },
+        // Part 2: Intelligence
+        keyFindings: part2?.keyFindings ?? [],
+        stakeholders: part2?.stakeholders ?? [],
+        swotAnalysis: part2?.swotAnalysis ?? { strengths: [], weaknesses: [], opportunities: [], threats: [] },
+        sectorComparison: part2?.sectorComparison ?? { position: '', competitors: [], trends: [], differentiators: [] },
+        recentNews: part2?.recentNews ?? [],
+        sources: part2?.sources ?? [],
+        // Part 3: Strategy
+        opportunities: part3?.opportunities ?? [],
+        painValueServiceMap: part3?.painValueServiceMap ?? [],
+        strategicProposal: part3?.strategicProposal ?? { title: '', summary: '', keyBenefits: [], matchedServices: [] },
+        keyQuestions: part3?.keyQuestions ?? [],
+        keyMessage: part3?.keyMessage ?? '',
+      } as AnalysisResponse;
+    }
+
+    // Fallback: try legacy single-JSON format
+    const legacy = results.find(r => r.category === 'analysis-structured')
+      ?? results.find(r => r.category === 'analysis');
+    if (!legacy) return null;
     try {
-      return JSON.parse(structured.snippet) as AnalysisResponse;
+      return JSON.parse(this.cleanJsonString(legacy.snippet)) as AnalysisResponse;
     } catch {
       return null;
     }
   });
 
-  /** Fallback: raw deep research markdown */
-  readonly rawResearch = computed(() => {
-    return this.results().find(r => r.category === 'deep-research')?.snippet ?? '';
+  readonly resultsLoaded = computed(() => this.results().length > 0);
+
+  readonly hasParseError = computed(() => {
+    if (!this.resultsLoaded()) return false;
+    const hasAny = this.results().some(r =>
+      r.category.startsWith('analysis-part') || r.category === 'analysis-structured' || r.category === 'analysis');
+    return hasAny && this.analysis() === null;
   });
 
-  /** Whether we have structured data or fallback to markdown */
-  readonly hasStructuredData = computed(() => this.analysis() !== null);
+  readonly hasNoAnalysis = computed(() => {
+    if (!this.resultsLoaded()) return false;
+    return !this.results().some(r =>
+      r.category.startsWith('analysis-part') || r.category === 'analysis-structured' || r.category === 'analysis');
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private parseResult(results: ResearchResult[], category: string): any | null {
+    const r = results.find(x => x.category === category);
+    if (!r) return null;
+    try {
+      return JSON.parse(this.cleanJsonString(r.snippet));
+    } catch {
+      console.error(`[Dashboard] Parse failed for ${category}:`, r.snippet.substring(0, 200));
+      return null;
+    }
+  }
 
   readonly activeSectionId = signal<string | null>(null);
   readonly findingsFilter = signal<string>('ALL');
+
+  /** Stakeholders grouped by hierarchy level */
+  readonly stakeholdersByLevel = computed(() => {
+    const a = this.analysis();
+    if (!a?.stakeholders) return [];
+    const sorted = [...a.stakeholders].sort((x, y) => (x.level ?? 4) - (y.level ?? 4));
+    const groups: { level: number; label: string; people: typeof sorted }[] = [];
+    const levelLabels: Record<number, string> = { 1: 'C-Level / Alta dirección', 2: 'Directores', 3: 'Gerentes', 4: 'Especialistas' };
+    for (const s of sorted) {
+      const lvl = s.level ?? 4;
+      let group = groups.find(g => g.level === lvl);
+      if (!group) { group = { level: lvl, label: levelLabels[lvl] ?? `Nivel ${lvl}`, people: [] }; groups.push(group); }
+      group.people.push(s);
+    }
+    return groups;
+  });
 
   readonly filteredFindings = computed(() => {
     const a = this.analysis();
@@ -152,6 +222,27 @@ export class DashboardShellComponent {
 
   getStatusLabel(status: string): string {
     return SESSION_STATUS_MAP[status as keyof typeof SESSION_STATUS_MAP]?.label ?? status;
+  }
+
+  /** Clean JSON from LLM response — removes markdown code blocks, text around JSON */
+  private cleanJsonString(raw: string): string {
+    let s = raw.trim();
+    if (s.includes('```')) {
+      const jsonStart = s.indexOf('```json');
+      const altStart = s.indexOf('```{');
+      const start = jsonStart >= 0 ? jsonStart : altStart;
+      if (start >= 0) {
+        const blockStart = s.indexOf('\n', start);
+        if (blockStart >= 0) {
+          const blockEnd = s.indexOf('```', blockStart);
+          if (blockEnd > blockStart) s = s.substring(blockStart + 1, blockEnd).trim();
+        }
+      }
+    }
+    const firstBrace = s.indexOf('{');
+    const lastBrace = s.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) s = s.substring(firstBrace, lastBrace + 1);
+    return s;
   }
 
   copyText(text: string): void {
