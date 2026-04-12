@@ -1,4 +1,4 @@
-import { Component, input, computed, signal, effect } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BackgroundJobStatus_Response } from '../../../../models/account-planning.model';
@@ -20,24 +20,17 @@ export class SearchProgressComponent {
   readonly job = input.required<BackgroundJobStatus_Response>();
   readonly clientName = input<string>('');
 
-  /** Activity log — accumulates as steps change */
-  readonly activityLog = signal<ActivityEntry[]>([]);
-  private lastStep = '';
+  /** Activity log — built from stepLog persisted in DB (survives F5) */
+  readonly activityLog = computed<ActivityEntry[]>(() => {
+    const stepLog = this.job().stepLog ?? [];
+    const currentStep = this.job().currentStep;
 
-  constructor() {
-    effect(() => {
-      const step = this.job().currentStep ?? '';
-      if (step && step !== this.lastStep) {
-        // Mark previous as done
-        this.activityLog.update(log => {
-          const updated = log.map(e => ({ ...e, done: true }));
-          updated.push({ message: step, time: new Date(), done: false });
-          return updated;
-        });
-        this.lastStep = step;
-      }
-    });
-  }
+    return stepLog.map((entry, i) => ({
+      message: entry.message,
+      time: new Date(entry.timestamp),
+      done: i < stepLog.length - 1 || currentStep !== entry.message,
+    }));
+  });
 
   readonly estimatedTime = computed(() => {
     const progress = this.job().progress;

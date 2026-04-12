@@ -72,9 +72,9 @@
         <mat-icon class="upload-icon">cloud_upload</mat-icon>
         <p class="drop-title">Arrastra tus archivos aquí</p>
         <p class="drop-subtitle">o haz click para seleccionar</p>
-        <p class="drop-hint">Formatos permitidos: .md, .txt · Múltiples archivos</p>
+        <p class="drop-hint">Formatos permitidos: .md, .txt, .pdf, .docx · Múltiples archivos</p>
       </div>
-      <input #fileInput type="file" accept=".md,.txt" multiple hidden (change)="onFileInput($event)" />
+      <input #fileInput type="file" accept=".md,.txt,.pdf,.docx" multiple hidden (change)="onFileInput($event)" />
 
       <!-- Lista de archivos seleccionados -->
       @if (pendingFiles().length > 0) {

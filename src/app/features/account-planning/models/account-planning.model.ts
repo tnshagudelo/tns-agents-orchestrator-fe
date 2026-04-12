@@ -92,9 +92,16 @@ export interface BackgroundJobStatus_Response {
   progress: number;
   currentStep?: string;
   errorMessage?: string;
+  stepLog: JobStepLogEntry[];
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;
+}
+
+export interface JobStepLogEntry {
+  progress: number;
+  message: string;
+  timestamp: string;
 }
 
 // ─── Research Result ──────────────────────────────────────────────────────────
@@ -203,6 +210,8 @@ export interface StakeholderAnalysis {
   approach: string;
   linkedinUrl?: string;
   dataDate?: string; // When this info was found (e.g., "2026-03")
+  source?: 'RAG' | 'WEB' | 'LINKEDIN' | 'LLM';
+  sourceFile?: string; // RAG file name if source=RAG
 }
 
 export interface OpportunityCard {

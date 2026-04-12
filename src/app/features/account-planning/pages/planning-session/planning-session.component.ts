@@ -144,6 +144,10 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
             this.autoStarted = true;
             setTimeout(() => this.sendAutoGreeting(session, client), 100);
           }
+          // Resume polling if session is processing (survives F5)
+          if (['DeepSearching', 'GeneratingPortfolio'].includes(session.status)) {
+            this.pollingService.resumeIfActive(session.id);
+          }
           // Load results if session already has investigation data
           if (['AwaitingReview', 'AwaitingFocus', 'GeneratingPortfolio',
                'UnderRevision', 'Approved'].includes(session.status)) {

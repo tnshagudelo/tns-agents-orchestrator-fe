@@ -201,6 +201,19 @@
                     <span class="type-badge" [style.background]="getStakeholderColor(s.type) + '18'" [style.color]="getStakeholderColor(s.type)">
                       {{ 'dashboard.stakeholders.hierarchy.' + s.type | translate }}
                     </span>
+                    @if (s.source === 'RAG') {
+                      <span class="source-badge source-rag" [matTooltip]="s.sourceFile ? 'Fuente: ' + s.sourceFile : 'Base de conocimiento interna'">
+                        <mat-icon>library_books</mat-icon> Conocimiento interno
+                      </span>
+                    } @else if (s.source === 'WEB') {
+                      <span class="source-badge source-web">
+                        <mat-icon>language</mat-icon> Web
+                      </span>
+                    } @else if (s.source === 'LINKEDIN') {
+                      <span class="source-badge source-linkedin">
+                        <mat-icon>person_search</mat-icon> LinkedIn
+                      </span>
+                    }
                     @if (s.dataDate) {
                       <span class="data-date">{{ 'dashboard.stakeholders.dataDate' | translate }}: {{ s.dataDate }}</span>
                     }
