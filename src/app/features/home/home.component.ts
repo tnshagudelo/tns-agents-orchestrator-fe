@@ -2,11 +2,12 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [MatIconModule, MatButtonModule],
+  imports: [MatIconModule, MatButtonModule, TranslatePipe],
   templateUrl: './home.component.html',
   styles: [`
     .home {
@@ -220,53 +221,53 @@ export class HomeComponent {
   private readonly router = inject(Router);
 
   readonly methodSteps = [
-    { title: 'Refinamiento', desc: 'Equipo + cliente alinean la necesidad', color: 'blue', ai: false, loopNext: false, pending: false },
-    { title: 'Spec con IA', desc: 'Claude genera el spec técnico', color: 'purple', ai: true, loopNext: true, pending: false },
-    { title: 'Revisión QA', desc: 'QA valida alcance y casos borde', color: 'purple', ai: false, loopNext: false, pending: true },
-    { title: 'Implementación', desc: 'Desarrollo por fases con Claude Code', color: 'indigo', ai: true, loopNext: false, pending: false },
-    { title: 'Entrega', desc: 'Pruebas, CI/CD y validación QA', color: 'emerald', ai: false, loopNext: false, pending: true },
+    { titleKey: 'home.steps.refinement', descKey: 'home.steps.refinementDesc', color: 'blue', ai: false, loopNext: false, pending: false },
+    { titleKey: 'home.steps.specAi', descKey: 'home.steps.specAiDesc', color: 'purple', ai: true, loopNext: true, pending: false },
+    { titleKey: 'home.steps.qaReview', descKey: 'home.steps.qaReviewDesc', color: 'purple', ai: false, loopNext: false, pending: true },
+    { titleKey: 'home.steps.implementation', descKey: 'home.steps.implementationDesc', color: 'indigo', ai: true, loopNext: false, pending: false },
+    { titleKey: 'home.steps.delivery', descKey: 'home.steps.deliveryDesc', color: 'emerald', ai: false, loopNext: false, pending: true },
   ];
 
   readonly modules = [
     {
-      title: 'Account Planning',
-      desc: 'Perfilamiento inteligente de clientes con búsqueda web, análisis profundo y generación de portafolio comercial.',
+      titleKey: 'home.modules.accountPlanningTitle',
+      descKey: 'home.modules.accountPlanningDesc',
       icon: 'business_center',
       route: '/account-planning',
       accent: 'pink',
-      tags: ['Búsqueda web', 'LLM', 'Dashboard ejecutivo'],
+      tagKeys: ['home.modules.accountPlanningTag1', 'home.modules.accountPlanningTag2', 'home.modules.accountPlanningTag3'],
     },
     {
-      title: 'Agente PM',
-      desc: 'Asistente de gestión de proyectos que organiza tareas, prioriza y da seguimiento al equipo.',
+      titleKey: 'home.modules.pmAgentTitle',
+      descKey: 'home.modules.pmAgentDesc',
       icon: 'hub',
       route: '/projectmanageragent',
       accent: 'blue',
-      tags: ['Gestión', 'Orquestación', 'Seguimiento'],
+      tagKeys: ['home.modules.pmAgentTag1', 'home.modules.pmAgentTag2', 'home.modules.pmAgentTag3'],
     },
     {
-      title: 'Propuestas',
-      desc: 'Generación y revisión colaborativa de propuestas comerciales con flujo de aprobación multi-rol.',
+      titleKey: 'home.modules.proposalsTitle',
+      descKey: 'home.modules.proposalsDesc',
       icon: 'description',
       route: '/proposals',
       accent: 'teal',
-      tags: ['Colaboración', 'Multi-rol', 'Aprobación'],
+      tagKeys: ['home.modules.proposalsTag1', 'home.modules.proposalsTag2', 'home.modules.proposalsTag3'],
     },
     {
-      title: 'Conocimiento',
-      desc: 'Base de conocimiento organizacional alimentada por documentos, con búsqueda semántica.',
+      titleKey: 'home.modules.knowledgeTitle',
+      descKey: 'home.modules.knowledgeDesc',
       icon: 'psychology',
       route: '/knowledge',
       accent: 'amber',
-      tags: ['RAG', 'Documentos', 'Búsqueda semántica'],
+      tagKeys: ['home.modules.knowledgeTag1', 'home.modules.knowledgeTag2', 'home.modules.knowledgeTag3'],
     },
     {
-      title: 'Metodología',
-      desc: 'Guía interactiva de la metodología Design Docs + Context Engineering para desarrollo con IA.',
+      titleKey: 'home.modules.methodologyTitle',
+      descKey: 'home.modules.methodologyDesc',
       icon: 'auto_stories',
       route: '/dev-methodology',
       accent: 'indigo',
-      tags: ['Design Docs', 'Context Engineering', 'Guía'],
+      tagKeys: ['home.modules.methodologyTag1', 'home.modules.methodologyTag2', 'home.modules.methodologyTag3'],
     },
   ];
 

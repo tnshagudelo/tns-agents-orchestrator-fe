@@ -5,28 +5,24 @@
     <div class="hero-glow"></div>
     <span class="hero-badge">
       <mat-icon>auto_awesome</mat-icon>
-      DESIGN DOCS + CONTEXT ENGINEERING
+      {{ 'home.badge' | translate }}
     </span>
-    <h1>Orquestador de Agentes</h1>
-    <p class="hero-lead">
-      Portal de inteligencia artificial de <strong>Tech and Solve</strong> — cada módulo
-      es una <strong>orquestación agéntica</strong> diseñada, especificada e implementada
-      con IA usando nuestra metodología de desarrollo.
-    </p>
+    <h1>{{ 'home.title' | translate }}</h1>
+    <p class="hero-lead" [innerHTML]="'home.lead' | translate"></p>
     <div class="hero-stats">
       <div class="stat">
         <span class="stat-value">100%</span>
-        <span class="stat-label">Generado con IA</span>
+        <span class="stat-label">{{ 'home.statAi' | translate }}</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-value">{{ modules.length }}</span>
-        <span class="stat-label">Módulos agénticos</span>
+        <span class="stat-label">{{ 'home.statModules' | translate }}</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
         <span class="stat-value">5</span>
-        <span class="stat-label">Pasos del flujo</span>
+        <span class="stat-label">{{ 'home.statSteps' | translate }}</span>
       </div>
     </div>
   </section>
@@ -34,14 +30,11 @@
   <!-- Como funciona -->
   <section class="method-section">
     <h2 class="section-title">
-      <mat-icon>psychology</mat-icon> Cómo se construyó este portal
+      <mat-icon>psychology</mat-icon> {{ 'home.methodTitle' | translate }}
     </h2>
-    <p class="section-desc">
-      Cada línea de código pasó por un flujo riguroso donde la IA genera,
-      el equipo valida y la calidad se garantiza antes de implementar.
-    </p>
+    <p class="section-desc">{{ 'home.methodDesc' | translate }}</p>
     <div class="method-flow">
-      @for (step of methodSteps; track step.title; let i = $index) {
+      @for (step of methodSteps; track step.titleKey; let i = $index) {
         <div class="method-step" [class.method-step--pending]="step.pending">
           <div class="method-step-number" [class]="step.pending ? 'step-color--pending' : 'step-color--' + step.color">
             @if (step.pending) {
@@ -51,14 +44,14 @@
             }
           </div>
           <div class="method-step-content">
-            <span class="method-step-title">{{ step.title }}</span>
-            <span class="method-step-desc">{{ step.desc }}</span>
+            <span class="method-step-title">{{ step.titleKey | translate }}</span>
+            <span class="method-step-desc">{{ step.descKey | translate }}</span>
           </div>
           @if (step.ai) {
             <span class="method-ai-tag"><mat-icon>auto_awesome</mat-icon> IA</span>
           }
           @if (step.pending) {
-            <span class="method-pending-tag">Pendiente</span>
+            <span class="method-pending-tag">{{ 'home.pending' | translate }}</span>
           }
         </div>
         @if (i < methodSteps.length - 1) {
@@ -73,7 +66,7 @@
     <div class="method-cta">
       <button mat-stroked-button (click)="navigateTo('/dev-methodology')">
         <mat-icon>auto_stories</mat-icon>
-        Conoce la metodología completa
+        {{ 'home.methodCta' | translate }}
       </button>
     </div>
   </section>
@@ -81,12 +74,9 @@
   <!-- Modulos -->
   <section class="modules-section">
     <h2 class="section-title">
-      <mat-icon>hub</mat-icon> Módulos del portal
+      <mat-icon>hub</mat-icon> {{ 'home.modulesTitle' | translate }}
     </h2>
-    <p class="section-desc">
-      Cada módulo es una orquestación agéntica independiente — un flujo de IA especializado
-      que resuelve un problema de negocio concreto.
-    </p>
+    <p class="section-desc">{{ 'home.modulesDesc' | translate }}</p>
     <div class="modules-grid">
       @for (mod of modules; track mod.route) {
         <div class="module-card" [class]="'module-card--' + mod.accent"
@@ -96,12 +86,12 @@
             <mat-icon>{{ mod.icon }}</mat-icon>
           </div>
           <div class="module-info">
-            <h3>{{ mod.title }}</h3>
-            <p>{{ mod.desc }}</p>
+            <h3>{{ mod.titleKey | translate }}</h3>
+            <p>{{ mod.descKey | translate }}</p>
           </div>
           <div class="module-tags">
-            @for (tag of mod.tags; track tag) {
-              <span class="module-tag">{{ tag }}</span>
+            @for (tag of mod.tagKeys; track tag) {
+              <span class="module-tag">{{ tag | translate }}</span>
             }
           </div>
           <mat-icon class="module-arrow">arrow_forward</mat-icon>
@@ -114,10 +104,7 @@
   <section class="home-footer">
     <div class="footer-content">
       <mat-icon>verified</mat-icon>
-      <p>
-        Construido por <strong>Tech and Solve</strong> con la metodología
-        Design Docs + Context Engineering — donde la IA no adivina, ejecuta con contexto.
-      </p>
+      <p [innerHTML]="'home.footerText' | translate"></p>
     </div>
   </section>
 
