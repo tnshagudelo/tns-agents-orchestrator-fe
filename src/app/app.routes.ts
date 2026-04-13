@@ -4,7 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'account-planning',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
   {
@@ -13,6 +13,11 @@ export const routes: Routes = [
       import('./layout/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     canActivate: [authGuard],
     children: [
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./features/home/home.component').then(m => m.HomeComponent),
+      },
       {
         path: 'account-planning',
         loadChildren: () =>
@@ -34,9 +39,9 @@ export const routes: Routes = [
           import('./features/knowledge/knowledge.routes').then(m => m.KNOWLEDGE_ROUTES),
       },
       {
-        path: 'claude-framework',
+        path: 'dev-methodology',
         loadChildren: () =>
-          import('./features/claude-framework/claude-framework.routes').then(m => m.CLAUDE_FRAMEWORK_ROUTES),
+          import('./features/dev-methodology/dev-methodology.routes').then(m => m.DEV_METHODOLOGY_ROUTES),
       },
       {
         path: 'settings',
@@ -52,6 +57,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: 'home',
   },
 ];

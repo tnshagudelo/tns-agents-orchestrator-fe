@@ -77,25 +77,111 @@ import { ModeOption, ProjectMode } from '../../models/framework.types';
     .company-table td { padding: 8px 14px; border: 1px solid #e2e8f0; }
     .company-table tr:hover td { background: #f8fafc; }
 
-    /* Flow */
+    /* Flow timeline */
     .flow-section { margin-bottom: 28px; }
-    .flow-steps {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 10px;
+    .flow-timeline { max-width: 680px; }
+
+    .flow-card {
+      border-radius: 10px; border: 1px solid #e5e7eb;
+      background: #fafafa; cursor: pointer; transition: all 0.15s ease;
+      &:hover { border-color: #c7d2fe; background: #fefefe; }
     }
-    .flow-step {
-      display: flex; flex-direction: column; align-items: center;
-      text-align: center; padding: 14px 10px; border-radius: 10px;
-      background: #f8f7ff; border: 1px solid #e8e4f3;
+    .flow-card--active { border-color: #818cf8; box-shadow: 0 2px 12px rgba(99,102,241,0.1); }
+    .flow-card--spec { border-left: 3px solid #a78bfa; }
+
+    .flow-card-header {
+      display: flex; align-items: center; gap: 12px; padding: 14px 16px;
     }
+    .flow-card-title { flex: 1; }
+    .flow-label { font-weight: 600; font-size: 0.85rem; color: #1a1a2e; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .flow-expand { color: rgba(0,0,0,0.3); font-size: 20px; width: 20px; height: 20px; }
+
     .flow-number {
-      width: 26px; height: 26px; border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: #3f51b5; color: white;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.72rem; font-weight: 700; margin-bottom: 6px;
+      font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
     }
-    .flow-label { font-weight: 600; font-size: 0.8rem; margin-bottom: 3px; }
-    .flow-desc { font-size: 0.72rem; color: rgba(0,0,0,0.5); line-height: 1.4; }
+    .flow-number--spec { background: #7c3aed; }
+
+    .flow-participants {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+    }
+    .participant {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 1px 8px; border-radius: 10px;
+      font-size: 0.68rem; font-weight: 500;
+      mat-icon { font-size: 12px; width: 12px; height: 12px; }
+    }
+    .participant--team { background: #dbeafe; color: #1e40af; }
+    .participant--client { background: #fef3c7; color: #92400e; }
+    .participant--ai { background: #f3e8ff; color: #7c3aed; }
+    .participant--qa { background: #fce7f3; color: #9d174d; }
+
+    .flow-ai-badge {
+      display: inline-flex; align-items: center; gap: 2px;
+      padding: 1px 8px; border-radius: 10px;
+      background: #f3e8ff; color: #7c3aed;
+      font-size: 0.65rem; font-weight: 600;
+      mat-icon { font-size: 11px; width: 11px; height: 11px; }
+    }
+
+    .flow-card-body {
+      padding: 0 16px 16px 56px;
+      animation: fadeIn 0.2s ease;
+      p { margin: 0 0 10px; font-size: 0.8rem; color: rgba(0,0,0,0.6); line-height: 1.6; }
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .flow-card-outcome {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 6px;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      font-size: 0.76rem; color: #166534;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; color: #16a34a; flex-shrink: 0; }
+    }
+    .flow-card-example {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 6px; margin-bottom: 10px;
+      background: #f8f7ff; border: 1px solid #e8e4f3;
+      font-size: 0.76rem; color: #4338ca;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; color: #6366f1; flex-shrink: 0; }
+    }
+    .flow-card-pipeline {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pipeline-step {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px; border-radius: 8px;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      font-size: 0.76rem; font-weight: 500; color: #334155;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; color: #64748b; }
+    }
+    .pipeline-arrow { font-size: 14px; width: 14px; height: 14px; color: #94a3b8; }
+
+    .flow-connector {
+      width: 2px; height: 16px; background: #d1d5db; margin: 0 auto;
+    }
+    .flow-connector--short { height: 8px; }
+
+    .flow-group {
+      border: 2px dashed #c4b5fd; border-radius: 14px;
+      padding: 12px 12px 16px;
+      background: rgba(139,92,246,0.02);
+    }
+    .flow-group-label {
+      display: flex; align-items: center; gap: 6px; justify-content: center;
+      font-size: 0.72rem; font-weight: 600; color: #7c3aed;
+      margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
+    .flow-loop-hint {
+      display: flex; align-items: center; gap: 4px; justify-content: center;
+      font-size: 0.68rem; color: #a78bfa; font-style: italic;
+      margin: 4px 0;
+      mat-icon { font-size: 12px; width: 12px; height: 12px; }
+    }
 
     /* How to generate a Design Doc */
     .how-section { margin-bottom: 28px; }
@@ -273,15 +359,9 @@ export class ModeSelectorComponent {
     { name: 'Startups', calls: 'Tech Spec', ref: 'Versión ligera y pragmática' },
   ];
 
-  // ── Flujo de trabajo ────────────────────────────────────────────────────────
+  // ── Flujo de trabajo T&S ─────────────────────────────────────────────────────
 
-  readonly flowSteps = [
-    { label: 'HU / Necesidad', desc: 'Defines qué quieres lograr' },
-    { label: 'Design Doc', desc: 'El agente genera el plan técnico' },
-    { label: 'Revisión', desc: 'Tú apruebas o ajustas' },
-    { label: 'Implementar', desc: 'El agente codifica según el doc' },
-    { label: 'Actualizar', desc: 'El doc refleja lo implementado' },
-  ];
+  activeFlowStep = -1;
 
   // ── Cómo se genera un Design Doc ─────────────────────────────────────────────
 
@@ -408,6 +488,6 @@ NO implementes nada — solo el plan. Espera mi aprobación.`;
 
   select(mode: ProjectMode): void {
     this.state.selectMode(mode);
-    this.router.navigate(['/claude-framework/tech']);
+    this.router.navigate(['/dev-methodology/tech']);
   }
 }

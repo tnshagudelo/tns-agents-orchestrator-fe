@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-export const CLAUDE_FRAMEWORK_ROUTES: Routes = [
+export const DEV_METHODOLOGY_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>

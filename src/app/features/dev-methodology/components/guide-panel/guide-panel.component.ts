@@ -85,11 +85,11 @@ export class GuidePanelComponent {
   goToModes(): void {
     this.state.mode.set(null);
     this.state.techId.set(null);
-    this.router.navigate(['/claude-framework']);
+    this.router.navigate(['/dev-methodology']);
   }
 
   goToTech(): void {
     this.state.techId.set(null);
-    this.router.navigate(['/claude-framework/tech']);
+    this.router.navigate(['/dev-methodology/tech']);
   }
 }

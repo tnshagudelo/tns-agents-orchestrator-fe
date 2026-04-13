@@ -1,0 +1,124 @@
+<div class="home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <span class="hero-badge">
+      <mat-icon>auto_awesome</mat-icon>
+      DESIGN DOCS + CONTEXT ENGINEERING
+    </span>
+    <h1>Orquestador de Agentes</h1>
+    <p class="hero-lead">
+      Portal de inteligencia artificial de <strong>Tech and Solve</strong> — cada módulo
+      es una <strong>orquestación agéntica</strong> diseñada, especificada e implementada
+      con IA usando nuestra metodología de desarrollo.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-value">100%</span>
+        <span class="stat-label">Generado con IA</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">{{ modules.length }}</span>
+        <span class="stat-label">Módulos agénticos</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">5</span>
+        <span class="stat-label">Pasos del flujo</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona -->
+  <section class="method-section">
+    <h2 class="section-title">
+      <mat-icon>psychology</mat-icon> Cómo se construyó este portal
+    </h2>
+    <p class="section-desc">
+      Cada línea de código pasó por un flujo riguroso donde la IA genera,
+      el equipo valida y la calidad se garantiza antes de implementar.
+    </p>
+    <div class="method-flow">
+      @for (step of methodSteps; track step.title; let i = $index) {
+        <div class="method-step" [class.method-step--pending]="step.pending">
+          <div class="method-step-number" [class]="step.pending ? 'step-color--pending' : 'step-color--' + step.color">
+            @if (step.pending) {
+              <mat-icon>hourglass_empty</mat-icon>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+          <div class="method-step-content">
+            <span class="method-step-title">{{ step.title }}</span>
+            <span class="method-step-desc">{{ step.desc }}</span>
+          </div>
+          @if (step.ai) {
+            <span class="method-ai-tag"><mat-icon>auto_awesome</mat-icon> IA</span>
+          }
+          @if (step.pending) {
+            <span class="method-pending-tag">Pendiente</span>
+          }
+        </div>
+        @if (i < methodSteps.length - 1) {
+          <div class="method-connector">
+            @if (step.loopNext) {
+              <mat-icon class="method-loop-icon">sync</mat-icon>
+            }
+          </div>
+        }
+      }
+    </div>
+    <div class="method-cta">
+      <button mat-stroked-button (click)="navigateTo('/dev-methodology')">
+        <mat-icon>auto_stories</mat-icon>
+        Conoce la metodología completa
+      </button>
+    </div>
+  </section>
+
+  <!-- Modulos -->
+  <section class="modules-section">
+    <h2 class="section-title">
+      <mat-icon>hub</mat-icon> Módulos del portal
+    </h2>
+    <p class="section-desc">
+      Cada módulo es una orquestación agéntica independiente — un flujo de IA especializado
+      que resuelve un problema de negocio concreto.
+    </p>
+    <div class="modules-grid">
+      @for (mod of modules; track mod.route) {
+        <div class="module-card" [class]="'module-card--' + mod.accent"
+             (click)="navigateTo(mod.route)" tabindex="0"
+             (keydown.enter)="navigateTo(mod.route)">
+          <div class="module-icon-wrap" [class]="'icon-bg--' + mod.accent">
+            <mat-icon>{{ mod.icon }}</mat-icon>
+          </div>
+          <div class="module-info">
+            <h3>{{ mod.title }}</h3>
+            <p>{{ mod.desc }}</p>
+          </div>
+          <div class="module-tags">
+            @for (tag of mod.tags; track tag) {
+              <span class="module-tag">{{ tag }}</span>
+            }
+          </div>
+          <mat-icon class="module-arrow">arrow_forward</mat-icon>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <section class="home-footer">
+    <div class="footer-content">
+      <mat-icon>verified</mat-icon>
+      <p>
+        Construido por <strong>Tech and Solve</strong> con la metodología
+        Design Docs + Context Engineering — donde la IA no adivina, ejecuta con contexto.
+      </p>
+    </div>
+  </section>
+
+</div>

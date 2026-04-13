@@ -62,10 +62,11 @@ export class SidebarComponent {
   collapsed = input(false);
 
   readonly navItems: NavItem[] = [
+    { label: 'Inicio', icon: 'home', route: '/home' },
     { label: 'Account Planning', icon: 'business_center', route: '/account-planning' },
     { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
     { label: 'Propuestas', icon: 'description', route: '/proposals' },
     { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
-    { label: 'Como trabajamos', icon: 'auto_stories', route: '/claude-framework' },
+    { label: 'Como trabajamos', icon: 'auto_stories', route: '/dev-methodology' },
   ];
 }

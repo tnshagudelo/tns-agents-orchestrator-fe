@@ -93,11 +93,11 @@ export class TechSelectorComponent {
 
   select(techId: TechId): void {
     this.state.selectTech(techId);
-    this.router.navigate(['/claude-framework/guide']);
+    this.router.navigate(['/dev-methodology/guide']);
   }
 
   goBack(): void {
     this.state.goBack();
-    this.router.navigate(['/claude-framework']);
+    this.router.navigate(['/dev-methodology']);
   }
 }
