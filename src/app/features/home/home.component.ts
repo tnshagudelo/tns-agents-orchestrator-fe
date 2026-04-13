@@ -138,6 +138,14 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
       position: absolute; top: -6px;
       font-size: 12px; width: 12px; height: 12px; color: #a78bfa;
     }
+    .method-note {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 14px 16px; border-radius: 10px; margin-top: 14px;
+      background: #f8f7ff; border: 1px solid #e8e4f3;
+      > mat-icon { color: #6366f1; flex-shrink: 0; margin-top: 1px; font-size: 18px; width: 18px; height: 18px; }
+      p { margin: 0; font-size: 0.78rem; color: rgba(0,0,0,0.55); line-height: 1.6; }
+    }
+
     .method-cta {
       margin-top: 18px;
       button {

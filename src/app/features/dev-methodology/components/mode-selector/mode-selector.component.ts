@@ -79,6 +79,39 @@ import { ModeOption, ProjectMode } from '../../models/framework.types';
 
     /* Flow timeline */
     .flow-section { margin-bottom: 28px; }
+    .flow-sprint-wrapper {
+      border: 2px solid #c7d2fe; border-radius: 14px;
+      padding: 0 14px 16px; position: relative; max-width: 710px;
+      background: rgba(99,102,241,0.02); margin-bottom: 14px;
+    }
+    .flow-sprint-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 14px; border-radius: 20px;
+      background: #3f51b5; color: white;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+      position: relative; top: -14px; left: 8px;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
+    .flow-sprint-review {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: 8px; margin-top: 12px;
+      background: #dbeafe; border: 1px solid #93c5fd;
+      > mat-icon { color: #1e40af; flex-shrink: 0; }
+      strong { display: block; font-size: 0.8rem; color: #1e40af; }
+      span { display: block; font-size: 0.7rem; color: #3b82f6; line-height: 1.4; margin-top: 2px; }
+    }
+    .flow-sprint-review-loop {
+      margin-left: auto; color: #3b82f6; font-size: 18px; width: 18px; height: 18px;
+    }
+    .flow-qa-note {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 14px 16px; border-radius: 10px; margin-top: 14px; max-width: 710px;
+      background: #fdf2f8; border: 1px solid #fbcfe8;
+      > mat-icon { color: #db2777; flex-shrink: 0; margin-top: 2px; }
+      strong { font-size: 0.82rem; color: #9d174d; display: block; margin-bottom: 2px; }
+      p { margin: 0; font-size: 0.75rem; color: #be185d; line-height: 1.5; }
+    }
     .flow-timeline { max-width: 680px; }
 
     .flow-card {

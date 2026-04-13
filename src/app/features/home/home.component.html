@@ -27,12 +27,13 @@
     </div>
   </section>
 
-  <!-- Como funciona -->
+  <!-- Como se construyo -->
   <section class="method-section">
     <h2 class="section-title">
       <mat-icon>psychology</mat-icon> {{ 'home.methodTitle' | translate }}
     </h2>
     <p class="section-desc">{{ 'home.methodDesc' | translate }}</p>
+
     <div class="method-flow">
       @for (step of methodSteps; track step.titleKey; let i = $index) {
         <div class="method-step" [class.method-step--pending]="step.pending">
@@ -63,6 +64,12 @@
         }
       }
     </div>
+
+    <div class="method-note">
+      <mat-icon>info</mat-icon>
+      <p [innerHTML]="'home.methodNote' | translate"></p>
+    </div>
+
     <div class="method-cta">
       <button mat-stroked-button (click)="navigateTo('/dev-methodology')">
         <mat-icon>auto_stories</mat-icon>
