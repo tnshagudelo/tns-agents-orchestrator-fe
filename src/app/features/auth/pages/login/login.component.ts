@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -82,6 +82,7 @@ import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const
 export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly users = MOCK_USERS;
 
@@ -93,8 +94,9 @@ export class LoginComponent {
       roles: [mockUser.proposalRole],
       proposalRole: mockUser.proposalRole,
     };
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/home';
     this.authService.loginWithUser(user).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigateByUrl(returnUrl),
     });
   }
 }

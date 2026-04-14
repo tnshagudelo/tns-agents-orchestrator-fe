@@ -1,0 +1,24 @@
+<!-- Info banner -->
+<div class="info-banner">
+  <mat-icon>info</mat-icon>
+  <span>Los textos entre <strong>[corchetes]</strong> son parámetros que debes reemplazar con datos de tu proyecto. Estos prompts están diseñados para que el agente use las specs como contexto.</span>
+</div>
+
+<!-- Prompts list -->
+<div class="prompts-list">
+  @for (prompt of prompts(); track prompt.id) {
+    <mat-card class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-meta">
+          <span class="prompt-label">{{ prompt.label }}</span>
+          <span class="prompt-when">{{ prompt.when }}</span>
+        </div>
+        <button mat-stroked-button (click)="copy(prompt.text, prompt.id)">
+          <mat-icon>{{ clipboard.isCopied(prompt.id) ? 'check' : 'content_copy' }}</mat-icon>
+          {{ clipboard.isCopied(prompt.id) ? 'Copiado' : 'Copiar' }}
+        </button>
+      </div>
+      <pre class="prompt-text">{{ prompt.text }}</pre>
+    </mat-card>
+  }
+</div>

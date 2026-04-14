@@ -1,0 +1,34 @@
+<div class="search-progress">
+
+  <!-- Header -->
+  <div class="progress-header">
+    <div class="header-icon">
+      <mat-icon class="spin">autorenew</mat-icon>
+    </div>
+    <div class="header-text">
+      <h3>Generando plan de cuenta</h3>
+      <p>Investigando <strong>{{ clientName() }}</strong></p>
+    </div>
+    <div class="progress-stats">
+      <span class="progress-pct">{{ job().progress }}%</span>
+      <span class="progress-time">{{ estimatedTime() }}</span>
+    </div>
+  </div>
+
+  <mat-progress-bar mode="determinate" [value]="job().progress" class="main-progress"></mat-progress-bar>
+
+  <!-- Activity log -->
+  <div class="activity-log">
+    @for (entry of activityLog(); track entry.time) {
+      <div class="log-entry" [class.done]="entry.done">
+        @if (entry.done) {
+          <mat-icon class="log-icon log-icon--done">check_circle</mat-icon>
+        } @else {
+          <mat-icon class="log-icon log-icon--active spin-slow">sync</mat-icon>
+        }
+        <span class="log-message">{{ entry.message }}</span>
+      </div>
+    }
+  </div>
+
+</div>

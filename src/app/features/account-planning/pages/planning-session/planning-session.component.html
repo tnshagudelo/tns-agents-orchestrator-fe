@@ -1,0 +1,230 @@
+@if (session(); as s) {
+  <div class="session-container">
+
+    <!-- Back nav -->
+    <nav class="back-nav">
+      <button mat-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> {{ 'session.backToClients' | translate }}
+      </button>
+      @if (client(); as c) {
+        <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+        <span class="breadcrumb-current">{{ c.name }}</span>
+      }
+    </nav>
+
+    <!-- Status bar (hidden during conversational states — the chat communicates status) -->
+    @if (statusInfo(); as info) {
+      @if (!isConversationalState()) {
+        <div class="status-bar" [class]="'status-bar--' + info.color">
+          <mat-icon>{{ info.icon }}</mat-icon>
+          <span class="status-label">{{ info.label }}</span>
+          <span class="spacer"></span>
+        </div>
+      }
+    }
+
+    <!-- Search progress (deep search stepper) -->
+    @if (s.status === 'DeepSearching' && isPolling() && currentJob(); as job) {
+      <app-search-progress
+        [job]="job"
+        [clientName]="client()?.name ?? ''"
+      />
+    }
+
+    <!-- Generic polling progress (portfolio generation, etc.) -->
+    @if (s.status !== 'DeepSearching' && isPolling() && currentJob(); as job) {
+      <div class="progress-card">
+        <div class="progress-header-simple">
+          <mat-icon class="spin">autorenew</mat-icon>
+          <span>{{ job.currentStep ?? 'Procesando...' }}</span>
+          <span class="spacer"></span>
+          <span class="progress-pct">{{ job.progress }}%</span>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="job.progress"></mat-progress-bar>
+      </div>
+    }
+
+    <!-- Main layout: content + sidebar -->
+    <div class="main-layout">
+
+      <!-- Left: main content area -->
+      <div class="content-area">
+
+        <!-- Chat panel (conversational states) -->
+        @if (s.status === 'Queued' || s.status === 'QuickSearching' || s.status === 'QuickSearchDone' || s.status === 'AwaitingConfirmation') {
+          <app-session-chat
+            [messages]="chatHistory()"
+            [streamingContent]="streamingContent()"
+            [isStreaming]="isStreaming()"
+            [clientName]="client()?.name ?? ''"
+            [isReturningClient]="isReturningClient()"
+            [lastInvestigationDate]="null"
+            [showConfirmation]="false"
+            [hideInput]="s.status === 'AwaitingConfirmation' || s.status === 'QuickSearchDone' || s.status === 'QuickSearching'"
+            (messageSent)="sendChat($event)"
+            (clientConfirmed)="confirmClient()"
+          />
+        }
+
+        <!-- Confirmation card (quick search result) -->
+        @if ((s.status === 'AwaitingConfirmation' || s.status === 'QuickSearchDone') && s.quickSearchSummary) {
+          <app-confirmation-card
+            [summary]="s.quickSearchSummary"
+            [clientName]="client()?.name ?? ''"
+            (confirmed)="confirmClient()"
+            (rejected)="rejectClient()"
+          />
+        }
+
+        <!-- LinkedIn fallback -->
+        @if (s.status === 'AwaitingLinkedInInput') {
+          <mat-card class="action-card">
+            <mat-card-content>
+              <div class="action-card-header">
+                <div class="action-icon-wrapper action-icon--warn">
+                  <mat-icon>person_search</mat-icon>
+                </div>
+                <div>
+                  <h3>{{ 'session.linkedin.title' | translate }}</h3>
+                  <p>{{ 'session.linkedin.subtitle' | translate }}</p>
+                </div>
+              </div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>{{ 'session.linkedin.placeholder' | translate }}</mat-label>
+                <textarea matInput [(ngModel)]="linkedInInput" rows="6"
+                  [placeholder]="'session.linkedin.placeholder' | translate"></textarea>
+              </mat-form-field>
+              <div class="action-card-actions">
+                <button mat-raised-button color="primary" (click)="submitLinkedIn()" [disabled]="!linkedInInput.trim()">
+                  <mat-icon>send</mat-icon> {{ 'session.linkedin.submit' | translate }}
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Focus selector (ABOVE dashboard so it's visible immediately) -->
+        @if ((s.status === 'AwaitingReview' || s.status === 'AwaitingFocus') && showFocusSelector()) {
+          <mat-card class="action-card focus-card-highlight" id="focus-selector">
+            <mat-card-content>
+              <div class="action-card-header">
+                <div class="action-icon-wrapper action-icon--accent">
+                  <mat-icon>center_focus_strong</mat-icon>
+                </div>
+                <div>
+                  <h3>{{ 'session.focus.title' | translate }}</h3>
+                  <p>{{ 'session.focus.subtitle' | translate }}</p>
+                </div>
+              </div>
+              <div class="focus-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'session.focus.companyType' | translate }}</mat-label>
+                  <input matInput [(ngModel)]="focusCompanyType" placeholder="Ej: Aseguradora enterprise" />
+                  <mat-icon matPrefix>business</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'session.focus.contactRole' | translate }}</mat-label>
+                  <input matInput [(ngModel)]="focusContactRole" placeholder="Ej: CTO, Director TI" />
+                  <mat-icon matPrefix>person</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="action-card-actions">
+                <button mat-button (click)="showFocusSelector.set(false)">{{ 'common.cancel' | translate }}</button>
+                <button mat-raised-button color="primary" (click)="setFocus()"
+                  [disabled]="!focusCompanyType.trim() || !focusContactRole.trim()">
+                  <mat-icon>auto_awesome</mat-icon> {{ 'session.focus.generate' | translate }}
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Dashboard (post-investigation states) -->
+        @if (s.status === 'AwaitingReview' || s.status === 'AwaitingFocus' || s.status === 'GeneratingPortfolio' || s.status === 'UnderRevision' || s.status === 'Approved') {
+          @if (client(); as c) {
+            <app-dashboard-shell
+              [client]="c"
+              [results]="researchResults()"
+              [sessionDate]="s.updatedAt"
+              [currentSessionId]="s.id"
+              [clientSessions]="clientSessions()"
+              (defineFocus)="onDefineFocus()"
+              (sessionChanged)="switchSession($event)"
+              (newInvestigation)="startNewInvestigation()"
+            />
+          }
+        }
+
+        <!-- Portfolio review actions (on top of dashboard) -->
+        @if (s.status === 'UnderRevision') {
+          <mat-card class="action-card">
+            <mat-card-content>
+              <div class="action-card-header">
+                <div class="action-icon-wrapper action-icon--primary">
+                  <mat-icon>description</mat-icon>
+                </div>
+                <div>
+                  <h3>{{ 'session.portfolio.title' | translate }}</h3>
+                  <p>{{ 'session.portfolio.subtitle' | translate }}</p>
+                </div>
+              </div>
+              <div class="action-card-actions">
+                <button mat-raised-button color="primary" (click)="approve()">
+                  <mat-icon>check_circle</mat-icon> {{ 'common.approve' | translate }}
+                </button>
+                <mat-form-field appearance="outline" class="lang-field">
+                  <mat-label>{{ 'session.portfolio.languageLabel' | translate }}</mat-label>
+                  <input matInput [(ngModel)]="regenerateLanguage" placeholder="es, en, pt" />
+                </mat-form-field>
+                <button mat-stroked-button (click)="regenerate()">
+                  <mat-icon>refresh</mat-icon> {{ 'session.portfolio.regenerate' | translate }}
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Approved banner -->
+        @if (s.status === 'Approved') {
+          <div class="result-banner result-banner--success">
+            <mat-icon>verified</mat-icon>
+            <span>{{ 'session.approved' | translate }}</span>
+          </div>
+        }
+
+        <!-- Failed -->
+        @if (s.status === 'Failed') {
+          <div class="result-banner result-banner--error">
+            <mat-icon>error</mat-icon>
+            <div>
+              <span>{{ 'session.failed' | translate }}</span>
+              <button mat-stroked-button color="warn" (click)="retry()">
+                <mat-icon>refresh</mat-icon> {{ 'common.retry' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <!-- Right: client sidebar (only in conversational states) -->
+      @if (isConversationalState()) {
+        @if (client(); as c) {
+          <div class="sidebar-area">
+            <app-client-sidebar
+              [client]="c"
+              [lastInvestigationDate]="null"
+              (viewPreviousResults)="onViewPreviousResults()"
+            />
+          </div>
+        }
+      }
+
+    </div>
+  </div>
+} @else {
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+}

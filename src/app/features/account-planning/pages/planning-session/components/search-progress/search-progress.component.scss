@@ -1,0 +1,91 @@
+.search-progress {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border-top: 3px solid #4f46e5;
+}
+
+.progress-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px 16px;
+
+  .header-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: #eef2ff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    mat-icon { font-size: 22px; width: 22px; height: 22px; color: #4f46e5; }
+  }
+
+  .header-text {
+    flex: 1;
+    h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: #1a1a2e; }
+    p { margin: 0; font-size: 13px; color: #888; }
+  }
+
+  .progress-stats {
+    display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;
+  }
+  .progress-pct { font-size: 28px; font-weight: 700; color: #4f46e5; line-height: 1; }
+  .progress-time { font-size: 12px; color: #999; margin-top: 4px; }
+}
+
+.main-progress {
+  margin: 0 24px;
+  ::ng-deep .mdc-linear-progress__bar-inner { border-color: #4f46e5; }
+}
+
+// Activity log
+.activity-log {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #333;
+  animation: fadeIn 0.3s ease-out;
+
+  &.done {
+    color: #059669;
+    background: #f0fdf4;
+  }
+
+  &:not(.done) {
+    color: #4f46e5;
+    background: #eef2ff;
+    font-weight: 500;
+  }
+}
+
+.log-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+
+  &--done { color: #059669; }
+  &--active { color: #4f46e5; }
+}
+
+.log-message { flex: 1; }
+
+// Animations
+.spin { animation: spin 1s linear infinite; }
+.spin-slow { animation: spin 2s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

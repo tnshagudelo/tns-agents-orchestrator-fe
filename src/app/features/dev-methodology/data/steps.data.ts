@@ -1,0 +1,211 @@
+import { ProjectMode, Step, TechId } from '../models/framework.types';
+import { getTechnology } from './technologies.data';
+
+export function getSteps(mode: ProjectMode, techId: TechId): Step[] {
+  const tech = getTechnology(techId);
+  if (!tech) return [];
+
+  const stepsMap: Record<ProjectMode, Step[]> = {
+    new: [
+      {
+        id: 'new-1',
+        title: 'Define la arquitectura antes de escribir código',
+        description: 'Lo primero en un proyecto nuevo NO es código — es un Design Doc. Describe: qué problema resuelve, qué stack usarás, cómo se estructura la solución, y qué decisiones técnicas estás tomando. Pídele al agente que te ayude a generarlo.',
+        tip: 'Prompt: "Necesito diseñar [descripción]. Genera un ARCHITECTURE.md con: stack, estructura de carpetas, decisiones clave y diagrama de componentes."',
+        command: 'mkdir -p docs && touch docs/ARCHITECTURE.md',
+        tag: 'spec',
+      },
+      {
+        id: 'new-2',
+        title: 'Crea CLAUDE.md en la raíz del proyecto',
+        description: 'Este archivo le dice al agente QUIÉN es tu proyecto: stack, comandos y reglas. El agente lo lee automáticamente al iniciar cada sesión. Mantenlo conciso (máx 40 líneas) — los detalles van en docs/.',
+        tip: 'Sin CLAUDE.md el agente inventa convenciones. Con él, las respeta.',
+        command: 'touch CLAUDE.md',
+        tag: 'context',
+      },
+      {
+        id: 'new-3',
+        title: 'Crea docs/specs/ para design docs por módulo',
+        description: 'Cada módulo o dominio de negocio tiene su propio design doc. El índice (index.md) le dice al agente QUÉ doc leer según la tarea, sin cargar todos. Un design doc describe: qué hace el módulo, entidades, endpoints, decisiones y deuda técnica.',
+        tip: 'Un index.md bien escrito reduce el consumo de tokens hasta un 70%. El agente solo lee los docs que necesita.',
+        command: 'mkdir -p docs/specs && touch docs/specs/index.md',
+        tag: 'spec',
+      },
+      {
+        id: 'new-4',
+        title: 'Escribe tu primer design doc (antes de codificar)',
+        description: 'Toma tu primera HU o feature. En vez de pedirle al agente que la implemente directamente, pídele primero que genere el design doc: archivos a crear, endpoints, entidades, decisiones técnicas. Tú lo revisas y apruebas.',
+        tip: 'El design doc es el contrato entre tú y el agente. Si lo tiene, genera código alineado. Si no lo tiene, adivina.',
+        command: `touch docs/specs/${tech.id === 'angular' || tech.id === 'react' || tech.id === 'vue' || tech.id === 'nextjs' ? 'auth.md' : 'api.md'}`,
+        tag: 'spec',
+      },
+      {
+        id: 'new-5',
+        title: 'Valida que el agente entiende el contexto',
+        description: 'Abre el agente y pídele que resuma lo que sabe del proyecto. Si explica bien el stack, las convenciones y los módulos — tu contexto funciona.',
+        tip: 'Prompt: "Resume qué sabes de este proyecto: stack, convenciones, módulos y restricciones."',
+        command: 'claude',
+        tag: 'validate',
+      },
+      {
+        id: 'new-6',
+        title: 'Implementa basándote en el design doc',
+        description: `Ahora sí — pídele al agente que implemente según el design doc aprobado. Como ya leyó CLAUDE.md y el doc del módulo, seguirá las convenciones automáticamente.`,
+        tip: 'No le digas CÓMO hacer las cosas (eso ya está en el design doc). Dile QUÉ quieres que haga.',
+        tag: 'context',
+      },
+      {
+        id: 'new-7',
+        title: 'Actualiza los design docs con lo implementado',
+        description: 'Si durante la implementación algo cambió respecto al plan original (un endpoint extra, una decisión diferente), actualiza el design doc. El doc debe reflejar el estado REAL del proyecto.',
+        tip: 'Regla de oro: si el proyecto cambia y el doc no, el agente genera código basado en información vieja.',
+        tag: 'spec',
+      },
+    ],
+    existing: [
+      {
+        id: 'ext-1',
+        title: 'Abre Claude Code y pídele que analice el proyecto',
+        description: 'El agente explora la estructura, dependencias y patrones existentes. Usa esto como base para crear tus archivos de contexto.',
+        tip: 'Prompt: "Analiza la estructura de este proyecto, sus dependencias y patrones. Dame un resumen."',
+        command: 'claude',
+        tag: 'context',
+      },
+      {
+        id: 'ext-2',
+        title: 'Crea CLAUDE.md basado en lo que descubrió',
+        description: 'Toma el análisis del agente, edítalo con las convenciones reales de tu equipo, y guárdalo como CLAUDE.md. Este archivo es la fuente de verdad rápida.',
+        tip: 'CLAUDE.md debe caber en una pantalla. Si es muy largo, mueve detalles a docs/specs/.',
+        command: 'touch CLAUDE.md',
+        tag: 'context',
+      },
+      {
+        id: 'ext-3',
+        title: 'Crea docs/specs/ con índice y specs por módulo',
+        description: 'Divide el conocimiento del proyecto en design docs: uno por dominio o módulo. El index.md mapea cada doc a su área para que el agente no cargue todo.',
+        tip: 'Empieza con 3-4 specs de los módulos más críticos. Puedes agregar más después.',
+        command: 'mkdir -p docs/specs && touch docs/specs/index.md',
+        tag: 'spec',
+      },
+      {
+        id: 'ext-4',
+        title: 'Valida el contexto con una tarea real',
+        description: 'Pide al agente una tarea que ya hiciste antes (un bug fix, un feature). Si genera algo similar a lo que tú hiciste, el contexto funciona.',
+        tip: 'Si el resultado es muy distinto a lo esperado, revisa qué specs le faltan al agente.',
+        tag: 'validate',
+      },
+      {
+        id: 'ext-5',
+        title: 'Establece la rutina de actualización',
+        description: 'Cada vez que hagas un cambio importante (nuevo módulo, nuevo patrón, nueva dependencia), actualiza CLAUDE.md y la spec afectada.',
+        tip: 'Agrega al Definition of Done de tu equipo: "Actualizar specs si el cambio afecta la arquitectura."',
+        tag: 'spec',
+      },
+    ],
+    migration: [
+      {
+        id: 'mig-1',
+        title: 'Actualiza CLAUDE.md con la versión destino',
+        description: 'Antes de migrar, edita CLAUDE.md con las versiones nuevas, comandos actualizados y cualquier convención que cambie con la migración.',
+        tip: 'El agente necesita saber A DÓNDE va la migración, no solo de dónde viene. Actualiza CLAUDE.md antes de empezar.',
+        command: 'code CLAUDE.md',
+        tag: 'context',
+      },
+      {
+        id: 'mig-2',
+        title: 'Crea una spec de migración',
+        description: 'Crea migration.md con: versión origen, versión destino, breaking changes conocidos, módulos afectados y orden de migración.',
+        tip: 'Esta spec es temporal — la eliminas cuando la migración termine.',
+        command: 'touch docs/specs/migration.md',
+        tag: 'spec',
+      },
+      {
+        id: 'mig-3',
+        title: 'Actualiza index.md con la spec de migración',
+        description: 'Agrega la entrada de migration.md al índice para que el agente la encuentre cuando trabaje en tareas de la migración.',
+        tag: 'spec',
+      },
+      {
+        id: 'mig-4',
+        title: 'Migra módulo por módulo con el agente',
+        description: `Pide al agente que migre un solo módulo a la vez. El contexto de las specs le dice las restricciones de ${tech.name} y el orden correcto.`,
+        tip: 'Después de migrar cada módulo, corre los tests antes de continuar con el siguiente.',
+        command: tech.commands['test'],
+        tag: 'validate',
+      },
+      {
+        id: 'mig-5',
+        title: 'Actualiza las specs con el estado post-migración',
+        description: 'Las specs deben reflejar la nueva realidad. Actualiza versiones, patrones y elimina migration.md cuando todo esté completo.',
+        tip: 'Un proyecto migrado con specs desactualizadas es peor que uno sin specs — genera confusión.',
+        tag: 'spec',
+      },
+    ],
+    'multi-repo': [
+      {
+        id: 'multi-1',
+        title: 'Crea el directorio raíz del workspace',
+        description: 'El directorio raíz NO es un repo git. Es el punto donde abres el agente para trabajar con ambos repos a la vez. Aquí vive el CLAUDE.md global y la carpeta docs/ compartida.',
+        tip: 'El agente lee automáticamente el CLAUDE.md del directorio donde lo abres. Si lo abres en la raíz, ve el contexto global + los CLAUDE.md de cada repo.',
+        command: 'mkdir -p mi-workspace && cd mi-workspace',
+        tag: 'context',
+      },
+      {
+        id: 'multi-2',
+        title: 'Clona los repos dentro del workspace',
+        description: 'Cada repo se clona como subdirectorio. Mantienen su .git independiente, su propio CLAUDE.md y sus propias convenciones.',
+        tip: 'Puedes tener 2, 3 o más repos. El patrón funciona igual: raíz orquesta, repos ejecutan.',
+        command: 'git clone <url-backend> mi-backend && git clone <url-frontend> mi-frontend',
+        tag: 'context',
+      },
+      {
+        id: 'multi-3',
+        title: 'Crea el CLAUDE.md global en la raíz',
+        description: 'Define: qué repos hay, stack de cada uno, reglas cross-repo (ej: "backend primero, validar build antes de tocar frontend"), y dónde está la documentación compartida. Este archivo es el orquestador — los CLAUDE.md de cada repo son los ejecutores.',
+        tip: 'El CLAUDE.md global NO repite lo que ya dice cada repo. Solo agrega: estructura del workspace, protocolo cross-repo, reglas de commits, y punteros a docs/.',
+        command: 'touch CLAUDE.md',
+        tag: 'context',
+      },
+      {
+        id: 'multi-4',
+        title: 'Crea CLAUDE.md en cada repo',
+        description: 'Cada repo tiene su propio CLAUDE.md con: stack específico, comandos (build, test, run), convenciones de código, restricciones, y referencia al global: "Ver reglas globales en: ../CLAUDE.md".',
+        tip: 'Si abres Claude Code dentro de un solo repo (ej: fix rápido), el agente ve solo ese CLAUDE.md local. Si abres desde la raíz, ve todos.',
+        tag: 'context',
+      },
+      {
+        id: 'multi-5',
+        title: 'Crea docs/ en la raíz con documentación compartida',
+        description: 'docs/ contiene: ARCHITECTURE.md (diagramas, decisiones de diseño), specs/ (contratos API, tipos compartidos), OPEN_QUESTIONS.md (decisiones pendientes) y SYSTEM_SPEC_INDEX.md (índice de specs).',
+        tip: 'docs/ es la memoria del proyecto. Regla: cada tarea que cambia la arquitectura debe actualizar el spec correspondiente antes de cerrar.',
+        command: 'mkdir -p docs/specs',
+        tag: 'spec',
+      },
+      {
+        id: 'multi-6',
+        title: 'Define el protocolo cross-repo en el CLAUDE.md global',
+        description: 'Cuando una tarea toca ambos repos, el agente necesita un protocolo: 1) Leer contratos API, 2) Backend primero, 3) Validar build, 4) Frontend después, 5) Actualizar spec al terminar. Sin esto, genera contratos incompatibles.',
+        tip: 'Ejemplo real: sin protocolo, el agente crea un endpoint que retorna camelCase pero el frontend espera PascalCase. El protocolo lo previene.',
+        tag: 'context',
+      },
+      {
+        id: 'multi-7',
+        title: 'Define reglas de commit por repo',
+        description: 'NUNCA hacer git commit desde la raíz (no es un repo). Los commits van con "git -C <repo> commit". Cada repo tiene su propio historial, branches y convenciones de mensajes.',
+        tip: 'Agrega esto al CLAUDE.md global para que el agente no intente commitear desde la raíz.',
+        command: 'git -C mi-backend add . && git -C mi-backend commit -m "tipo(scope): descripcion"',
+        tag: 'context',
+      },
+      {
+        id: 'multi-8',
+        title: 'Valida que el agente entiende la estructura',
+        description: 'Abre el agente en la raíz y pídele que resuma: qué repos hay, qué hace cada uno, cuáles son las reglas cross-repo y dónde está la documentación.',
+        tip: 'Prompt: "Resume la estructura de este workspace: repos, stack de cada uno, reglas cross-repo y dónde está la documentación."',
+        command: 'claude',
+        tag: 'validate',
+      },
+    ],
+  };
+
+  return stepsMap[mode];
+}

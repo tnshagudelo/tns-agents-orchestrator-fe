@@ -4,7 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
   {
@@ -14,24 +14,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
+        path: 'home',
         loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+          import('./features/home/home.component').then(m => m.HomeComponent),
       },
       {
-        path: 'agents',
+        path: 'account-planning',
         loadChildren: () =>
-          import('./features/agents/agents.routes').then(m => m.AGENTS_ROUTES),
-      },
-      {
-        path: 'orchestration',
-        loadChildren: () =>
-          import('./features/orchestration/orchestration.routes').then(m => m.ORCHESTRATION_ROUTES),
-      },
-      {
-        path: 'monitoring',
-        loadChildren: () =>
-          import('./features/monitoring/monitoring.routes').then(m => m.MONITORING_ROUTES),
+          import('./features/account-planning/account-planning.routes').then(m => m.ACCOUNT_PLANNING_ROUTES),
       },
       {
         path: 'projectmanageragent',
@@ -44,19 +34,14 @@ export const routes: Routes = [
           import('./features/proposals/proposals.routes').then(m => m.PROPOSALS_ROUTES),
       },
       {
-        path: 'sessions',
-        loadChildren: () =>
-          import('./features/sessions/sessions.routes').then(m => m.SESSIONS_ROUTES),
-      },
-      {
         path: 'knowledge',
         loadChildren: () =>
           import('./features/knowledge/knowledge.routes').then(m => m.KNOWLEDGE_ROUTES),
       },
       {
-        path: 'claude-framework',
+        path: 'dev-methodology',
         loadChildren: () =>
-          import('./features/claude-framework/claude-framework.routes').then(m => m.CLAUDE_FRAMEWORK_ROUTES),
+          import('./features/dev-methodology/dev-methodology.routes').then(m => m.DEV_METHODOLOGY_ROUTES),
       },
       {
         path: 'settings',
@@ -72,6 +57,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: 'home',
   },
 ];

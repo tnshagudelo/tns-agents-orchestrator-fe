@@ -1,0 +1,28 @@
+<div class="page-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Modos
+    </button>
+    <mat-icon class="separator">chevron_right</mat-icon>
+    <mat-chip class="mode-chip">{{ modeLabel() }}</mat-chip>
+  </div>
+
+  <div class="page-header">
+    <h1>Selecciona la tecnología</h1>
+    <span class="subtitle">Elige el stack de tu proyecto para adaptar los pasos y prompts</span>
+  </div>
+
+  <div class="tech-grid">
+    @for (tech of technologies; track tech.id) {
+      <mat-card class="tech-card" (click)="select(tech.id)" tabindex="0"
+                (keydown.enter)="select(tech.id)">
+        <div class="tech-badge" [style.background]="tech.badgeBg" [style.color]="tech.badgeColor">
+          {{ tech.badge }}
+        </div>
+        <h3>{{ tech.name }}</h3>
+        <span class="tech-stack">{{ tech.stack }}</span>
+      </mat-card>
+    }
+  </div>
+</div>

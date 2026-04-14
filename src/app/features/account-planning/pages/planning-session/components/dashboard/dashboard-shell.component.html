@@ -1,0 +1,492 @@
+<div class="dashboard">
+
+  <!-- ═══ HEADER (siempre visible, con datos si hay análisis) ═══ -->
+  <div class="exec-header" id="section-header">
+    <div class="exec-header-top">
+      @if (analysis(); as aHeader) {
+        <div class="company-avatar" [style.background]="getStakeholderColor('STRATEGIC_DECISOR')">
+          {{ aHeader.clientCard.name.charAt(0) }}
+        </div>
+        <div class="company-info">
+          <h1>{{ aHeader.clientCard.name }}</h1>
+          <div class="company-tags">
+            <span class="tag tag--industry">{{ aHeader.clientCard.industry }}</span>
+            <span class="tag tag--size">{{ aHeader.clientCard.estimatedSize }}</span>
+            <span class="tag tag--country">{{ aHeader.clientCard.country }}</span>
+          </div>
+          <p class="exec-summary">{{ aHeader.clientCard.summary }}</p>
+        </div>
+      } @else {
+        <h1>{{ client().name }}</h1>
+      }
+    </div>
+
+    <div class="header-actions">
+      @if (otherSessions().length > 0) {
+        <button mat-stroked-button [matMenuTriggerFor]="versionMenu">
+          <mat-icon>history</mat-icon> {{ 'dashboard.previousVersions' | translate }}
+        </button>
+        <mat-menu #versionMenu="matMenu">
+          @for (s of otherSessions(); track s.id) {
+            <button mat-menu-item (click)="sessionChanged.emit(s.id)">
+              <mat-icon>{{ s.status === 'Approved' ? 'verified' : 'description' }}</mat-icon>
+              {{ getStatusLabel(s.status) }} — {{ s.updatedAt | relativeTime }}
+            </button>
+          }
+        </mat-menu>
+      }
+      <button mat-stroked-button (click)="newInvestigation.emit()">
+        <mat-icon>refresh</mat-icon> {{ 'dashboard.newInvestigation' | translate }}
+      </button>
+      <button mat-raised-button color="primary" (click)="defineFocus.emit()">
+        <mat-icon>auto_awesome</mat-icon> {{ 'dashboard.generatePortfolio' | translate }}
+      </button>
+    </div>
+  </div>
+
+@if (analysis(); as a) {
+
+    <!-- Stat cards -->
+    @if (getMetricEntries(a.clientCard.keyMetrics).length > 0) {
+      <div class="stat-cards">
+        @for (metric of getMetricEntries(a.clientCard.keyMetrics); track metric.key) {
+          <div class="stat-card">
+            <span class="stat-value">{{ metric.value }}</span>
+            <span class="stat-label">{{ metric.key }}</span>
+          </div>
+        }
+        @if (a.clientCard.founded) {
+          <div class="stat-card">
+            <span class="stat-value">{{ a.clientCard.founded }}</span>
+            <span class="stat-label">Fundación</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Links & specialties -->
+    <div class="company-meta">
+      @if (client().website) {
+        <a [href]="client().website" target="_blank" class="meta-link">
+          <mat-icon>language</mat-icon> {{ client().website }}
+        </a>
+      }
+      @if (client().linkedInUrl) {
+        <a [href]="client().linkedInUrl" target="_blank" class="meta-link">
+          <mat-icon>work</mat-icon> LinkedIn
+        </a>
+      }
+    </div>
+
+  <div class="dashboard-body">
+
+    <!-- Mini-nav -->
+    <nav class="mini-nav">
+      <h4>{{ 'dashboard.sectionsTitle' | translate }}</h4>
+      @for (item of navItems(); track item.id) {
+        <button class="nav-item" [class.active]="activeSectionId() === item.id" (click)="scrollTo(item.id)">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <!-- Sections -->
+    <div class="sections">
+
+      <!-- ═══ RETOS PRINCIPALES ═══ -->
+      @if (a.challenges) {
+        <section id="section-challenges" class="section">
+          <h2><mat-icon>warning</mat-icon> {{ 'dashboard.sections.challenges' | translate }}</h2>
+          <div class="challenges-grid">
+            <div class="challenge-card">
+              <h4><mat-icon>business</mat-icon> {{ 'dashboard.challenges.strategic' | translate }}</h4>
+              <ul>@for (c of a.challenges.strategic; track c) { <li>{{ c }}</li> }</ul>
+            </div>
+            <div class="challenge-card">
+              <h4><mat-icon>settings</mat-icon> {{ 'dashboard.challenges.operational' | translate }}</h4>
+              <ul>@for (c of a.challenges.operational; track c) { <li>{{ c }}</li> }</ul>
+            </div>
+            <div class="challenge-card">
+              <h4><mat-icon>person</mat-icon> {{ 'dashboard.challenges.customerExperience' | translate }}</h4>
+              <ul>@for (c of a.challenges.customerExperience; track c) { <li>{{ c }}</li> }</ul>
+            </div>
+            <div class="challenge-card">
+              <h4><mat-icon>gavel</mat-icon> {{ 'dashboard.challenges.regulatory' | translate }}</h4>
+              <ul>@for (c of a.challenges.regulatory; track c) { <li>{{ c }}</li> }</ul>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ═══ VISIÓN TECNOLÓGICA ═══ -->
+      @if (a.techVision) {
+        <section id="section-techvision" class="section">
+          <h2><mat-icon>visibility</mat-icon> {{ 'dashboard.sections.techvision' | translate }}</h2>
+          <div class="techvision-grid">
+            <div class="techvision-card techvision--current">
+              <h4>{{ 'dashboard.techvision.current' | translate }}</h4>
+              <ul>@for (item of a.techVision.currentState; track item) { <li>{{ item }}</li> }</ul>
+            </div>
+            <div class="techvision-card techvision--future">
+              <h4>{{ 'dashboard.techvision.future' | translate }}</h4>
+              <ul>@for (item of a.techVision.futureState; track item) { <li>{{ item }}</li> }</ul>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ═══ HALLAZGOS CLAVE ═══ -->
+      @if (a.keyFindings && a.keyFindings.length > 0) {
+        <section id="section-findings" class="section">
+          <div class="section-header-row">
+            <h2><mat-icon>search</mat-icon> {{ 'dashboard.sections.findings' | translate }}</h2>
+            <div class="findings-filters">
+              @for (type of findingTypes(); track type) {
+                <button class="filter-chip" [class.active]="findingsFilter() === type"
+                  (click)="findingsFilter.set(type)">
+                  {{ findingTypeLabels[type] || type }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="findings-list">
+            @for (f of filteredFindings(); track f.title) {
+              <div class="finding-card" [class.irrelevant]="f.isRelevant === false">
+                <div class="finding-header">
+                  <span class="finding-type-badge">{{ findingTypeLabels[f.type] || f.type }}</span>
+                  <button mat-icon-button class="relevance-toggle"
+                    [matTooltip]="(f.isRelevant ?? true) ? 'Marcar como irrelevante' : 'Marcar como relevante'"
+                    (click)="toggleFindingRelevance(f)">
+                    <mat-icon>{{ (f.isRelevant ?? true) ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+                </div>
+                <h4>{{ f.title }}</h4>
+                <p>{{ f.content }}</p>
+                <div class="finding-insight">
+                  <mat-icon>lightbulb</mat-icon>
+                  <span>{{ f.commercialInsight }}</span>
+                </div>
+                @if (f.source) {
+                  <span class="finding-source">
+                    {{ f.source }}
+                    @if (f.sourceUrl) { — <a [href]="f.sourceUrl" target="_blank">ver fuente</a> }
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ═══ ZONA 2: Personas clave (jerarquía) ═══ -->
+      <section id="section-stakeholders" class="section">
+        <h2><mat-icon>people</mat-icon> {{ 'dashboard.sections.stakeholders' | translate }}</h2>
+        @for (group of stakeholdersByLevel(); track group.level) {
+          <div class="hierarchy-group">
+            <h4 class="hierarchy-label">{{ group.label }}</h4>
+            <div class="stakeholders-grid">
+              @for (s of group.people; track s.name) {
+                <div class="stakeholder-card">
+                  <div class="stakeholder-header">
+                    <div class="stakeholder-avatar" [style.background]="getStakeholderColor(s.type)">
+                      {{ s.name.charAt(0) }}
+                    </div>
+                    <div>
+                      <div class="stakeholder-name">{{ s.name }}</div>
+                      <div class="stakeholder-role">{{ s.role }}</div>
+                    </div>
+                  </div>
+                  <div class="stakeholder-meta">
+                    <span class="type-badge" [style.background]="getStakeholderColor(s.type) + '18'" [style.color]="getStakeholderColor(s.type)">
+                      {{ 'dashboard.stakeholders.hierarchy.' + s.type | translate }}
+                    </span>
+                    @if (s.source === 'RAG') {
+                      <span class="source-badge source-rag" [matTooltip]="s.sourceFile ? 'Fuente: ' + s.sourceFile : 'Base de conocimiento interna'">
+                        <mat-icon>library_books</mat-icon> Conocimiento interno
+                      </span>
+                    } @else if (s.source === 'WEB') {
+                      <span class="source-badge source-web">
+                        <mat-icon>language</mat-icon> Web
+                      </span>
+                    } @else if (s.source === 'LINKEDIN') {
+                      <span class="source-badge source-linkedin">
+                        <mat-icon>person_search</mat-icon> LinkedIn
+                      </span>
+                    } @else if (s.source === 'LLM') {
+                      <span class="source-badge source-llm" matTooltip="Cargo inferido por IA — no se encontró persona específica">
+                        <mat-icon>psychology</mat-icon> Inferido
+                      </span>
+                    }
+                    @if (s.dataDate) {
+                      <span class="data-date">{{ 'dashboard.stakeholders.dataDate' | translate }}: {{ s.dataDate }}</span>
+                    }
+                  </div>
+                  @if (s.painPoints && s.painPoints.length > 0) {
+                    <div class="stakeholder-section">
+                      <span class="section-label">{{ 'dashboard.stakeholders.painPoints' | translate }}</span>
+                      <ul>@for (p of s.painPoints; track p) { <li>{{ p }}</li> }</ul>
+                    </div>
+                  }
+                  @if (s.interests && s.interests.length > 0) {
+                    <div class="stakeholder-chips">
+                      @for (i of s.interests; track i) { <span class="chip">{{ i }}</span> }
+                    </div>
+                  }
+                  <p class="stakeholder-approach"><strong>{{ 'dashboard.stakeholders.approach' | translate }}:</strong> {{ s.approach }}</p>
+                  @if (s.linkedinUrl) {
+                    <a [href]="s.linkedinUrl" target="_blank" class="linkedin-link">
+                      <mat-icon>open_in_new</mat-icon> LinkedIn
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- ═══ QUÉ COMPRA ═══ -->
+      @if (a.purchasingProfile) {
+        <section id="section-purchasing" class="section">
+          <h2><mat-icon>shopping_cart</mat-icon> {{ 'dashboard.sections.purchasing' | translate }}</h2>
+          <div class="sector-grid">
+            <div class="sector-card"><h4>Tecnología</h4><ul>@for (t of a.purchasingProfile.technology; track t) { <li>{{ t }}</li> }</ul></div>
+            <div class="sector-card"><h4>Servicios</h4><ul>@for (s of a.purchasingProfile.services; track s) { <li>{{ s }}</li> }</ul></div>
+            <div class="sector-card"><h4>Proveedores actuales</h4><ul>@for (v of a.purchasingProfile.currentVendors; track v) { <li>{{ v }}</li> }</ul></div>
+            <div class="sector-card"><h4>Oportunidad T&S</h4><p>{{ a.purchasingProfile.opportunity }}</p></div>
+          </div>
+        </section>
+      }
+
+      <!-- ═══ Oportunidades ═══ -->
+      <section id="section-opportunities" class="section">
+        <h2><mat-icon>trending_up</mat-icon> {{ 'dashboard.sections.opportunities' | translate }}</h2>
+        <div class="opportunities-list">
+          @for (o of a.opportunities; track o.title) {
+            <div class="opportunity-card" [style.border-left-color]="getPriorityColor(o.priority)">
+              <div class="opp-header">
+                <h3>{{ o.title }}</h3>
+                <div class="opp-badges">
+                  <span class="badge" [style.background]="getPriorityColor(o.priority)" style="color:#fff">{{ o.priority }}</span>
+                  <span class="badge badge--outline">{{ getHorizonLabel(o.horizon) }}</span>
+                </div>
+              </div>
+              <p>{{ o.description }}</p>
+              <p class="opp-rationale"><mat-icon>psychology</mat-icon> {{ o.rationale }}</p>
+              <div class="opp-services">
+                @for (s of o.matchedServices; track s) {
+                  <span class="chip chip--primary">{{ s }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ═══ ZONA 3b: DOFA ═══ -->
+      <section id="section-swot" class="section">
+        <h2><mat-icon>grid_view</mat-icon> {{ 'dashboard.sections.swot' | translate }}</h2>
+        <div class="swot-grid">
+          <div class="swot-quadrant swot--strengths">
+            <h4>Fortalezas</h4>
+            @for (item of a.swotAnalysis.strengths; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--weaknesses">
+            <h4>Debilidades</h4>
+            @for (item of a.swotAnalysis.weaknesses; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--opportunities">
+            <h4>Oportunidades</h4>
+            @for (item of a.swotAnalysis.opportunities; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+          <div class="swot-quadrant swot--threats">
+            <h4>Amenazas</h4>
+            @for (item of a.swotAnalysis.threats; track item.title) {
+              <div class="swot-item"><strong>{{ item.title }}</strong><br>{{ item.description }}</div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ Sector ═══ -->
+      <section id="section-sector" class="section">
+        <h2><mat-icon>leaderboard</mat-icon> {{ 'dashboard.sections.sector' | translate }}</h2>
+        <div class="sector-grid">
+          <div class="sector-card">
+            <h4>Posición</h4>
+            <p>{{ a.sectorComparison.position }}</p>
+            @if (a.sectorComparison.marketShare) {
+              <p class="market-share">Participación: {{ a.sectorComparison.marketShare }}</p>
+            }
+          </div>
+          <div class="sector-card">
+            <h4>Competidores</h4>
+            <ul>
+              @for (c of a.sectorComparison.competitors; track c) { <li>{{ c }}</li> }
+            </ul>
+          </div>
+          <div class="sector-card">
+            <h4>Tendencias del sector</h4>
+            <ul>
+              @for (t of a.sectorComparison.trends; track t) { <li>{{ t }}</li> }
+            </ul>
+          </div>
+          <div class="sector-card">
+            <h4>Diferenciadores</h4>
+            <ul>
+              @for (d of a.sectorComparison.differentiators; track d) { <li>{{ d }}</li> }
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ZONA 4: Pain-Value-Service ═══ -->
+      <section id="section-pvs" class="section">
+        <div class="section-header-row">
+          <h2><mat-icon>table_chart</mat-icon> {{ 'dashboard.sections.pvs' | translate }}</h2>
+          <button mat-stroked-button (click)="copyPainValueTable()" matTooltip="Copiar tabla">
+            <mat-icon>content_copy</mat-icon> Copiar
+          </button>
+        </div>
+        <table class="pvs-table">
+          <thead>
+            <tr>
+              <th>{{ 'dashboard.pvs.pain' | translate }}</th>
+              <th>{{ 'dashboard.pvs.value' | translate }}</th>
+              <th>{{ 'dashboard.pvs.service' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of a.painValueServiceMap; track row.pain) {
+              <tr>
+                <td>{{ row.pain }}</td>
+                <td>{{ row.value }}</td>
+                <td><span class="chip chip--primary">{{ row.service }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ═══ ZONA 5: Propuesta estratégica ═══ -->
+      <section id="section-proposal" class="section">
+        <h2><mat-icon>lightbulb</mat-icon> {{ 'dashboard.sections.proposal' | translate }}</h2>
+        <div class="proposal-card">
+          <h3>{{ a.strategicProposal.title }}</h3>
+          <markdown [data]="a.strategicProposal.summary"></markdown>
+          <div class="proposal-benefits">
+            <h4>{{ 'dashboard.proposal.keyBenefits' | translate }}</h4>
+            <ul>
+              @for (b of a.strategicProposal.keyBenefits; track b) { <li>{{ b }}</li> }
+            </ul>
+          </div>
+          <div class="proposal-services">
+            @for (s of a.strategicProposal.matchedServices; track s) {
+              <span class="chip chip--primary">{{ s }}</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ PREGUNTAS CLAVE ═══ -->
+      @if (a.keyQuestions && a.keyQuestions.length > 0) {
+        <section id="section-questions" class="section">
+          <h2><mat-icon>help</mat-icon> {{ 'dashboard.sections.questions' | translate }}</h2>
+          <div class="questions-list">
+            @for (q of a.keyQuestions; track q.area) {
+              <div class="question-item">
+                <span class="question-area">{{ q.area }}</span>
+                <p>{{ q.question }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ═══ MENSAJE CLAVE ═══ -->
+      @if (a.keyMessage) {
+        <div class="key-message">
+          <mat-icon>format_quote</mat-icon>
+          <blockquote>{{ a.keyMessage }}</blockquote>
+        </div>
+      }
+
+      <!-- ═══ Noticias ═══ -->
+      @if (a.recentNews.length > 0) {
+        <section id="section-news" class="section">
+          <h2><mat-icon>newspaper</mat-icon> {{ 'dashboard.sections.news' | translate }}</h2>
+          @for (n of a.recentNews; track n.title) {
+            <div class="news-item">
+              <div class="news-header">
+                <strong>{{ n.title }}</strong>
+                @if (n.date) { <span class="news-date">{{ n.date }}</span> }
+              </div>
+              <p>{{ n.summary }}</p>
+              <span class="news-source">{{ n.source }}</span>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ═══ Fuentes ═══ -->
+      <section id="section-sources" class="section">
+        <h2><mat-icon>link</mat-icon> {{ 'dashboard.sections.sources' | translate }}</h2>
+        <table class="sources-table">
+          <thead><tr><th>Fuente</th><th>Tipo</th><th>URL</th></tr></thead>
+          <tbody>
+            @for (s of a.sources; track s.name) {
+              <tr>
+                <td>{{ s.name }}</td>
+                <td><span class="chip">{{ s.type }}</span></td>
+                <td>@if (s.url) { <a [href]="s.url" target="_blank">{{ s.url }}</a> } @else { — }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ═══ Alerta internacional ═══ -->
+      @if (a.internationalAlert.isInternational) {
+        <div class="international-alert">
+          <mat-icon>translate</mat-icon>
+          <div>
+            <strong>Cliente internacional</strong>
+            <p>Idiomas: {{ a.internationalAlert.languages.join(', ') }}</p>
+            @if (a.internationalAlert.recommendation) {
+              <p>{{ a.internationalAlert.recommendation }}</p>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+} @else if (hasParseError()) {
+  <div class="error-state">
+    <div class="error-icon-wrapper"><mat-icon>warning</mat-icon></div>
+    <h3>Error al procesar el análisis</h3>
+    <p>El agente no generó datos en el formato esperado. Intenta una nueva investigación.</p>
+    <button mat-raised-button color="primary" (click)="newInvestigation.emit()"><mat-icon>refresh</mat-icon> Nueva investigación</button>
+  </div>
+} @else if (hasNoAnalysis()) {
+  <div class="error-state">
+    <div class="error-icon-wrapper"><mat-icon>info</mat-icon></div>
+    <h3>Análisis no disponible</h3>
+    <p>La investigación se completó pero no se generó el análisis. Inicia una nueva investigación.</p>
+    <button mat-raised-button color="primary" (click)="newInvestigation.emit()"><mat-icon>refresh</mat-icon> Nueva investigación</button>
+  </div>
+} @else {
+  <div class="error-state">
+    <mat-icon class="spin">autorenew</mat-icon>
+    <p>Cargando resultados...</p>
+  </div>
+}
+
+</div>

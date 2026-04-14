@@ -1,0 +1,306 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "copy": "Copiar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "approve": "Aprobar",
+    "language": "Idioma",
+    "search": "Buscar",
+    "saveChanges": "Guardar cambios",
+    "createClient": "Crear cliente"
+  },
+  "clients": {
+    "title": "Clientes",
+    "subtitle": "Gestiona tus clientes y lanza procesos de Account Planning",
+    "new": "Nuevo cliente",
+    "createFirst": "Crear primer cliente",
+    "emptyTitle": "Sin clientes aún",
+    "emptyMessage": "Agrega tu primer cliente para comenzar a generar Account Plannings con inteligencia artificial.",
+    "searchPlaceholder": "Buscar por nombre, sector o país...",
+    "count": "{{count}} cliente(s)",
+    "columns": {
+      "company": "Empresa",
+      "industry": "Sector",
+      "country": "País",
+      "status": "Estado",
+      "actions": ""
+    },
+    "status": {
+      "notInvestigated": "Sin investigar",
+      "inProgress": "En proceso",
+      "approved": "Aprobado",
+      "error": "Error"
+    },
+    "actions": {
+      "startPlanning": "Iniciar planning",
+      "continuePlanning": "Continuar planning"
+    },
+    "deleteConfirm": {
+      "title": "Eliminar cliente",
+      "message": "¿Estás seguro de que deseas eliminar \"{{name}}\"? Esta acción no se puede deshacer."
+    }
+  },
+  "clientForm": {
+    "newTitle": "Nuevo cliente",
+    "editTitle": "Editar cliente",
+    "newSubtitle": "Ingresa los datos básicos del cliente para iniciar su Account Planning.",
+    "editSubtitle": "Actualiza la información del cliente.",
+    "sections": {
+      "main": "Información principal",
+      "digital": "Presencia digital",
+      "context": "Contexto adicional"
+    },
+    "fields": {
+      "name": "Nombre de la empresa",
+      "namePlaceholder": "Ej: Bancolombia",
+      "industry": "Sector / Industria",
+      "industryPlaceholder": "Ej: Banca y Finanzas",
+      "country": "País",
+      "countryPlaceholder": "Ej: Colombia",
+      "website": "Sitio web",
+      "websitePlaceholder": "https://ejemplo.com",
+      "linkedin": "LinkedIn URL",
+      "linkedInUrl": "LinkedIn URL",
+      "linkedinPlaceholder": "https://linkedin.com/company/...",
+      "linkedInUrlPlaceholder": "https://linkedin.com/company/...",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Contexto adicional sobre el cliente que pueda ayudar en la investigación..."
+    },
+    "saveNew": "Crear cliente",
+    "saveEdit": "Guardar cambios"
+  },
+  "session": {
+    "backToClients": "Clientes",
+    "status": {
+      "queued": "En cola",
+      "quickSearching": "Búsqueda rápida...",
+      "quickSearchDone": "Búsqueda rápida lista",
+      "awaitingConfirmation": "Esperando confirmación",
+      "deepSearching": "Investigación profunda...",
+      "awaitingLinkedIn": "Datos LinkedIn requeridos",
+      "awaitingReview": "Listo para revisión",
+      "awaitingFocus": "Definir enfoque",
+      "generatingPortfolio": "Generando portafolio...",
+      "underRevision": "En revisión",
+      "approved": "Aprobado",
+      "failed": "Error"
+    },
+    "chat": {
+      "placeholder": "Describe la necesidad comercial...",
+      "you": "Tú",
+      "agent": "Agente",
+      "welcomeTitle": "Account Planning Assistant",
+      "welcomeNew": "Describe la necesidad comercial para <strong>{{name}}</strong> y comenzaré la investigación.",
+      "welcomeReturning": "Este cliente fue investigado anteriormente. ¿Deseas actualizar la investigación o consultar los resultados?"
+    },
+    "confirmation": {
+      "title": "Resultado de búsqueda rápida",
+      "subtitle": "Verifica que esta sea la empresa correcta antes de continuar.",
+      "confirm": "Confirmar e investigar",
+      "reject": "No es esta empresa"
+    },
+    "searchProgress": {
+      "title": "Investigación profunda en curso",
+      "subtitle": "Investigando <strong>{{name}}</strong> en múltiples fuentes",
+      "phases": {
+        "webSearch": "Investigación",
+        "rag": "Base de conocimiento",
+        "analysis": "Análisis estratégico"
+      },
+      "preparing": "Preparando investigación...",
+      "webSearching": "Investigando la empresa en fuentes públicas...",
+      "ragSearching": "Consultando base de conocimiento interna...",
+      "analyzing": "Analizando hallazgos y generando insights estratégicos...",
+      "completing": "Finalizando...",
+      "almostReady": "Casi listo...",
+      "lessThanMinute": "Menos de 1 minuto",
+      "fewMinutes": "~1-2 minutos restantes",
+      "severalMinutes": "~2-3 minutos restantes"
+    },
+    "linkedin": {
+      "title": "Datos de LinkedIn requeridos",
+      "subtitle": "No fue posible obtener datos de LinkedIn automáticamente. Pega el contenido del perfil de la empresa.",
+      "placeholder": "Pega aquí el contenido del perfil de LinkedIn...",
+      "submit": "Enviar y continuar"
+    },
+    "focus": {
+      "title": "Definir enfoque del portafolio",
+      "subtitle": "Personaliza el portafolio según el tipo de empresa y el rol del interlocutor.",
+      "companyType": "Tipo de empresa",
+      "companyTypePlaceholder": "Ej: Aseguradora enterprise",
+      "contactRole": "Rol del interlocutor",
+      "contactRolePlaceholder": "Ej: CTO, Director TI",
+      "generate": "Generar portafolio"
+    },
+    "portfolio": {
+      "title": "Portafolio generado",
+      "subtitle": "Revisa el portafolio. Puedes aprobarlo o regenerarlo con otro enfoque o idioma.",
+      "regenerate": "Regenerar",
+      "languageLabel": "Idioma"
+    },
+    "approved": "Planning aprobado",
+    "failed": "Error en el procesamiento"
+  },
+  "dashboard": {
+    "newInvestigation": "Nueva investigación",
+    "previousVersions": "Versiones anteriores",
+    "generatePortfolio": "Generar portafolio",
+    "sectionsTitle": "Secciones",
+    "sections": {
+      "challenges": "Principales retos",
+      "techvision": "Visión tecnológica",
+      "findings": "Hallazgos clave",
+      "stakeholders": "Personas clave",
+      "purchasing": "Qué compra / A quién le compra",
+      "opportunities": "Oportunidades comerciales",
+      "swot": "Análisis DOFA",
+      "sector": "Comparativa de sector",
+      "pvs": "Dolor-Valor-Servicio",
+      "proposal": "Propuesta estratégica",
+      "questions": "Preguntas clave",
+      "news": "Noticias recientes",
+      "sources": "Fuentes consultadas"
+    },
+    "challenges": {
+      "strategic": "Estratégicos",
+      "operational": "Operativos / Tecnológicos",
+      "customerExperience": "Experiencia del cliente",
+      "regulatory": "Regulatorios / Riesgo"
+    },
+    "techvision": {
+      "current": "Qué hace hoy",
+      "future": "Hacia dónde debería ir"
+    },
+    "findings": {
+      "all": "Todos",
+      "insight": "Insight comercial",
+      "source": "Fuente"
+    },
+    "stakeholders": {
+      "painPoints": "Puntos de dolor",
+      "approach": "Cómo abordarlo",
+      "interests": "Intereses",
+      "dataDate": "Info desde",
+      "hierarchy": {
+        "STRATEGIC_DECISOR": "Decisor estratégico",
+        "TECH_DECISOR": "Decisor técnico",
+        "INFLUENCER": "Influenciador",
+        "GATEKEEPER": "Gatekeeper",
+        "FINANCIAL_DECISOR": "Decisor financiero"
+      }
+    },
+    "purchasing": {
+      "technology": "Tecnología",
+      "services": "Servicios",
+      "vendors": "Proveedores actuales",
+      "opportunity": "Oportunidad T&S"
+    },
+    "pvs": {
+      "pain": "Dolor del cliente",
+      "value": "Valor que aporta T&S",
+      "service": "Servicio"
+    },
+    "proposal": {
+      "keyBenefits": "Beneficios clave"
+    },
+    "sector": {
+      "position": "Posición",
+      "competitors": "Competidores",
+      "trends": "Tendencias del sector",
+      "differentiators": "Diferenciadores"
+    },
+    "sources": {
+      "source": "Fuente",
+      "type": "Tipo",
+      "url": "URL"
+    },
+    "internationalAlert": {
+      "title": "Cliente internacional"
+    },
+    "copyTable": "Copiar",
+    "errorTitle": "Error al procesar el análisis",
+    "errorMessage": "El agente no generó datos en el formato esperado. Intenta una nueva investigación.",
+    "noAnalysisTitle": "Análisis no disponible",
+    "noAnalysisMessage": "La investigación se completó pero no se generó el análisis. Inicia una nueva investigación.",
+    "loading": "Cargando resultados..."
+  },
+  "home": {
+    "badge": "DESIGN DOCS + CONTEXT ENGINEERING",
+    "title": "Orquestador de Agentes",
+    "lead": "Portal de inteligencia artificial de <strong>Tech and Solve</strong> — cada módulo es una <strong>orquestación agéntica</strong> diseñada, especificada e implementada con IA usando nuestra metodología de desarrollo.",
+    "statAi": "Generado con IA",
+    "statModules": "Módulos agénticos",
+    "statSteps": "Pasos del flujo",
+    "methodTitle": "Cómo se construyó este portal",
+    "methodDesc": "Este portal se construyó refinando la metodología mientras se implementaba. Los pasos marcados como pendientes aún no se aplicaron en esta versión.",
+    "methodNote": "Este portal se construyó iterando sobre el método: refinamiento con el equipo, specs generados con IA e implementación por fases con Claude Code. La <strong>revisión QA</strong> y el <strong>ciclo de pruebas formal</strong> se incorporarán en la siguiente fase. Consulta <strong>Cómo trabajamos</strong> para ver el marco de trabajo completo con sprints y entregas al cliente.",
+    "methodCta": "Ver marco de trabajo completo",
+    "modulesTitle": "Módulos del portal",
+    "modulesDesc": "Cada módulo es una orquestación agéntica independiente — un flujo de IA especializado que resuelve un problema de negocio concreto.",
+    "footerText": "Construido por <strong>Tech and Solve</strong> con la metodología Design Docs + Context Engineering — donde la IA no adivina, ejecuta con contexto.",
+    "pending": "Pendiente",
+    "sprintLabel": "Sprint — Ciclo de entrega",
+    "sprintReviewTitle": "Demo / Review con cliente",
+    "sprintReviewDesc": "El cliente valida el incremento, da feedback y se planifica el siguiente sprint.",
+    "qaAgentTitle": "Agente QA — Generación de casos de prueba",
+    "qaAgentDesc": "Contamos con un agente de IA que genera casos de prueba a partir del spec aprobado, <strong>agilizando tareas repetitivas</strong> de certificación. Esto permite que la velocidad de desarrollo con IA se mantenga en todo el ciclo.",
+    "steps": {
+      "refinement": "Refinamiento",
+      "refinementDesc": "Equipo + cliente alinean la necesidad",
+      "specAi": "Spec con IA",
+      "specAiDesc": "Claude genera el spec técnico",
+      "qaReview": "Revisión QA",
+      "qaReviewDesc": "QA valida alcance y casos borde",
+      "implementation": "Implementación",
+      "implementationDesc": "Desarrollo por fases con Claude Code",
+      "delivery": "Entrega",
+      "deliveryDesc": "Pruebas, CI/CD y validación QA"
+    },
+    "modules": {
+      "accountPlanningTitle": "Account Planning",
+      "accountPlanningDesc": "Perfilamiento inteligente de clientes con búsqueda web, análisis profundo y generación de portafolio comercial.",
+      "accountPlanningTag1": "Búsqueda web",
+      "accountPlanningTag2": "LLM",
+      "accountPlanningTag3": "Dashboard ejecutivo",
+      "pmAgentTitle": "Agente PM",
+      "pmAgentDesc": "Asistente de gestión de proyectos que organiza tareas, prioriza y da seguimiento al equipo.",
+      "pmAgentTag1": "Gestión",
+      "pmAgentTag2": "Orquestación",
+      "pmAgentTag3": "Seguimiento",
+      "proposalsTitle": "Propuestas",
+      "proposalsDesc": "Generación y revisión colaborativa de propuestas comerciales con flujo de aprobación multi-rol.",
+      "proposalsTag1": "Colaboración",
+      "proposalsTag2": "Multi-rol",
+      "proposalsTag3": "Aprobación",
+      "knowledgeTitle": "Conocimiento",
+      "knowledgeDesc": "Base de conocimiento organizacional alimentada por documentos, con búsqueda semántica.",
+      "knowledgeTag1": "RAG",
+      "knowledgeTag2": "Documentos",
+      "knowledgeTag3": "Búsqueda semántica",
+      "methodologyTitle": "Metodología",
+      "methodologyDesc": "Guía interactiva de la metodología Design Docs + Context Engineering para desarrollo con IA.",
+      "methodologyTag1": "Design Docs",
+      "methodologyTag2": "Context Engineering",
+      "methodologyTag3": "Guía"
+    }
+  },
+  "sidebar": {
+    "sector": "Sector",
+    "country": "País",
+    "web": "Web",
+    "linkedin": "LinkedIn",
+    "description": "Descripción",
+    "showMore": "Ver más",
+    "showLess": "Ver menos",
+    "investigated": "Investigado",
+    "notInvestigated": "Sin investigar",
+    "viewLastAnalysis": "Ver último análisis"
+  }
+}

@@ -1,0 +1,86 @@
+<nav class="breadcrumb">
+  <a (click)="cancel()">{{ 'session.backToClients' | translate }}</a>
+  <mat-icon>chevron_right</mat-icon>
+  <span class="current">{{ isEdit ? ('clientForm.editTitle' | translate) : ('clientForm.newTitle' | translate) }}</span>
+</nav>
+
+<div class="form-header">
+  <h2>{{ isEdit ? ('clientForm.editTitle' | translate) : ('clientForm.newTitle' | translate) }}</h2>
+  <p>{{ isEdit ? ('clientForm.editSubtitle' | translate) : ('clientForm.newSubtitle' | translate) }}</p>
+</div>
+
+<mat-card class="form-card">
+  <mat-card-content>
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>business</mat-icon> {{ 'clientForm.sections.main' | translate }}
+      </div>
+      <div class="form-row single">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.name' | translate }}</mat-label>
+          <input matInput [(ngModel)]="form.name" required [placeholder]="'clientForm.fields.namePlaceholder' | translate" />
+          <mat-icon matPrefix>apartment</mat-icon>
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.industry' | translate }}</mat-label>
+          <input matInput [(ngModel)]="form.industry" required [placeholder]="'clientForm.fields.industryPlaceholder' | translate" />
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.country' | translate }}</mat-label>
+          <input matInput [(ngModel)]="form.country" required [placeholder]="'clientForm.fields.countryPlaceholder' | translate" />
+          <mat-icon matPrefix>public</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>link</mat-icon> {{ 'clientForm.sections.digital' | translate }}
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.website' | translate }}</mat-label>
+          <input matInput [(ngModel)]="form.website" [placeholder]="'clientForm.fields.websitePlaceholder' | translate" />
+          <mat-icon matPrefix>language</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.linkedInUrl' | translate }}</mat-label>
+          <input matInput [(ngModel)]="form.linkedInUrl" [placeholder]="'clientForm.fields.linkedInUrlPlaceholder' | translate" />
+          <mat-icon matPrefix>work</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="section">
+      <div class="section-title">
+        <mat-icon>notes</mat-icon> {{ 'clientForm.sections.context' | translate }}
+      </div>
+      <div class="form-row single">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'clientForm.fields.description' | translate }}</mat-label>
+          <textarea matInput [(ngModel)]="form.description" rows="3"
+            [placeholder]="'clientForm.fields.descriptionPlaceholder' | translate"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-button (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+      <button mat-raised-button color="primary" class="save-btn"
+        (click)="save()"
+        [disabled]="!form.name || !form.industry || !form.country">
+        <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
+        {{ isEdit ? ('common.saveChanges' | translate) : ('common.createClient' | translate) }}
+      </button>
+    </div>
+
+  </mat-card-content>
+</mat-card>

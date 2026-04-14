@@ -1,0 +1,33 @@
+<div class="confirmation-card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="header-icon">
+      <mat-icon>manage_search</mat-icon>
+    </div>
+    <div class="header-text">
+      <h3>Resultado de búsqueda rápida</h3>
+      <p>Verifica que esta sea la empresa correcta antes de continuar.</p>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Summary content -->
+  <div class="card-body">
+    <markdown [data]="summary()"></markdown>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Actions -->
+  <div class="card-actions">
+    <button mat-stroked-button (click)="rejected.emit()">
+      <mat-icon>close</mat-icon> No es esta empresa
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmed.emit()">
+      <mat-icon>check</mat-icon> Confirmar e investigar
+    </button>
+  </div>
+
+</div>
