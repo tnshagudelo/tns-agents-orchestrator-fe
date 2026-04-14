@@ -12,8 +12,9 @@ import { PromptsTabComponent } from '../prompts-tab/prompts-tab.component';
 import { ClaudeMdTabComponent } from '../claude-md-tab/claude-md-tab.component';
 import { SpecsTabComponent } from '../specs-tab/specs-tab.component';
 import { ConventionsTabComponent } from '../conventions-tab/conventions-tab.component';
+import { SkillsTabComponent } from '../skills-tab/skills-tab.component';
 
-const TAB_MAP: TabId[] = ['steps', 'prompts', 'claudemd', 'specs', 'conventions'];
+const TAB_MAP: TabId[] = ['steps', 'claudemd', 'specs', 'conventions', 'prompts', 'skills'];
 
 @Component({
   selector: 'app-guide-panel',
@@ -21,7 +22,7 @@ const TAB_MAP: TabId[] = ['steps', 'prompts', 'claudemd', 'specs', 'conventions'
   imports: [
     MatIconModule, MatButtonModule, MatChipsModule, MatTabsModule,
     StepsTabComponent, PromptsTabComponent, ClaudeMdTabComponent,
-    SpecsTabComponent, ConventionsTabComponent,
+    SpecsTabComponent, ConventionsTabComponent, SkillsTabComponent,
   ],
   templateUrl: './guide-panel.component.html',
   styles: [`

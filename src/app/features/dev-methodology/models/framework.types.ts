@@ -5,7 +5,7 @@ export type TechId = 'angular' | 'react' | 'vue' | 'nestjs'
 
 export type StepTag = 'context' | 'spec' | 'validate';
 
-export type TabId = 'steps' | 'prompts' | 'claudemd' | 'specs' | 'conventions';
+export type TabId = 'steps' | 'prompts' | 'claudemd' | 'specs' | 'conventions' | 'skills';
 
 export interface Technology {
   id: TechId;
@@ -40,6 +40,15 @@ export interface SpecFile {
   name: string;
   purpose: string;
   example: string;
+}
+
+export interface SkillDefinition {
+  id: string;
+  name: string;
+  command: string;
+  description: string;
+  when: string;
+  example?: string;
 }
 
 export interface ModeOption {
