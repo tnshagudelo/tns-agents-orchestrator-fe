@@ -2,24 +2,14 @@
   <div class="login-content">
     <div class="login-header">
       <img src="tns-logo.svg?v=2" alt="TNS Agents" class="login-logo" />
-      <p>Selecciona tu perfil para continuar</p>
+      <p>Inicia sesión con tu cuenta de GitHub</p>
     </div>
 
-    <div class="user-cards">
-      @for (user of users; track user.id) {
-        <button class="user-card" (click)="loginAs(user)">
-          <div class="user-avatar" [class]="'avatar-' + user.proposalRole">
-            <mat-icon>{{ user.icon }}</mat-icon>
-          </div>
-          <div class="user-info">
-            <span class="user-name">{{ user.name }}</span>
-            <span class="user-role">{{ user.roleLabel }}</span>
-          </div>
-          <mat-icon class="arrow">arrow_forward</mat-icon>
-        </button>
-      }
-    </div>
+    <button class="github-button" (click)="loginWithGitHub()">
+      <mat-icon>code</mat-icon>
+      Continuar con GitHub
+    </button>
 
-    <p class="login-hint">Ambiente de desarrollo — autenticación simulada</p>
+    <p class="login-hint">Solo cuentas del equipo Tech and Solve</p>
   </div>
 </div>

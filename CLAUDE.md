@@ -20,6 +20,15 @@
 - Features: cada uno en `features/{name}/` con pages/, components/, services/, models/
 - Lazy loading: cada feature exporta rutas en `{feature}.routes.ts`
 
+## Auth — cómo funciona
+- Login vía GitHub OAuth: `LoginComponent` redirige a `https://localhost:7018/api/auth/github/login`
+- Callback: `AuthCallbackComponent` en `/auth/callback` captura `?token=JWT` y llama `AuthService.loginWithToken()`
+- `AuthService` (`core/auth/auth.service.ts`): decodifica JWT, valida expiración via claim `exp`, auto-logout
+- `AuthInterceptor` (`core/interceptors/auth.interceptor.ts`): adjunta `Authorization: Bearer <token>` en todas las requests HTTP
+- Token y user info en localStorage bajo claves `auth_token` y `auth_user`
+- `AuthGuard` (`core/guards/auth.guard.ts`): protege todas las rutas bajo el layout principal
+- NO hay mock users — el login es exclusivamente vía GitHub OAuth
+
 ## Restricciones importantes
 - NO llamadas HTTP fuera de services que extiendan `BaseApiService` (en `core/services/`)
 - NO `any` en TypeScript — strict mode habilitado

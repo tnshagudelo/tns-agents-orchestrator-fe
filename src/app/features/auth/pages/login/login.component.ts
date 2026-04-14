@@ -1,11 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../../../core/auth/auth.service';
-import { User } from '../../../../shared/models';
-import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -37,42 +34,24 @@ import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const
         0 0 60px rgba(98, 0, 234, 0.12);
     }
 
-    .user-cards { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-
-    .user-card {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.06); backdrop-filter: blur(8px);
-      cursor: pointer; transition: all 0.2s; width: 100%; text-align: left;
-      color: white;
+    .github-button {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 28px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+      cursor: pointer; transition: all 0.2s;
+      color: white; font-size: 1rem; font-weight: 500;
+      width: 100%; justify-content: center;
 
       &:hover {
-        background: rgba(255,255,255,0.12);
-        border-color: rgba(218,108,207,0.4);
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(218,108,207,0.5);
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(0,0,0,0.3);
       }
+
+      mat-icon { font-size: 1.4rem; width: 1.4rem; height: 1.4rem; }
     }
-
-    .user-avatar {
-      width: 48px; height: 48px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      mat-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
-
-      &.avatar-builder  { background: rgba(218,108,207,0.2); color: #da6ccf; }
-      &.avatar-reviewer { background: rgba(186,117,23,0.2);  color: #f0b429; }
-      &.avatar-approver { background: rgba(59,109,17,0.2);   color: #6dd400; }
-    }
-
-    .user-info {
-      display: flex; flex-direction: column; flex: 1; gap: 2px;
-    }
-    .user-name { font-size: 1rem; font-weight: 600; }
-    .user-role { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
-
-    .arrow { color: rgba(255,255,255,0.3); transition: color 0.2s; }
-    .user-card:hover .arrow { color: #da6ccf; }
 
     .login-hint {
       font-size: 0.72rem; color: rgba(255,255,255,0.3); margin: 0;
@@ -80,21 +59,7 @@ import { MOCK_USERS, MockUser } from '../../../proposals/models/mock-users.const
   `],
 })
 export class LoginComponent {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
-  readonly users = MOCK_USERS;
-
-  loginAs(mockUser: MockUser): void {
-    const user: User = {
-      id: mockUser.id,
-      username: mockUser.name,
-      email: mockUser.email,
-      roles: [mockUser.proposalRole],
-      proposalRole: mockUser.proposalRole,
-    };
-    this.authService.loginWithUser(user).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
-    });
+  loginWithGitHub(): void {
+    window.location.href = `${environment.apiUrl}/api/auth/github/login`;
   }
 }

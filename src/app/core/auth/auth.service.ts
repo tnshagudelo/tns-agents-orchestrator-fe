@@ -1,6 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
 import { AuthState, User } from '../../shared/models';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -20,15 +19,24 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._state().isAuthenticated);
   readonly currentUser = computed(() => this._state().user);
 
-  /** Login directo con un objeto User (para mock users) */
-  loginWithUser(user: User): Observable<User> {
-    this._state.update(s => ({ ...s, isLoading: true }));
-    const token = `mock-jwt-${user.id}-${Date.now()}`;
-    const userWithToken = { ...user, token };
+  /** Inicia sesión con un JWT real emitido por el backend tras GitHub OAuth */
+  loginWithToken(token: string): void {
+    const claims = this.decodeToken(token);
+    if (!claims || this.isTokenExpired(token)) {
+      this.logout();
+      return;
+    }
+    const user: User = {
+      id: String(claims['sub'] ?? ''),
+      username: String(claims['github_login'] ?? claims['sub'] ?? ''),
+      email: String(claims['email'] ?? ''),
+      roles: [],
+      proposalRole: 'builder',
+      token,
+    };
     localStorage.setItem(AUTH_TOKEN_KEY, token);
-    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userWithToken));
-    this._state.set({ user: userWithToken, isAuthenticated: true, isLoading: false });
-    return of(userWithToken);
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    this._state.set({ user, isAuthenticated: true, isLoading: false });
   }
 
   logout(): void {
@@ -46,12 +54,33 @@ export class AuthService {
     const token = this.getToken();
     const raw = localStorage.getItem(AUTH_USER_KEY);
     if (token && raw) {
+      if (this.isTokenExpired(token)) {
+        this.logout();
+        return;
+      }
       try {
         const user: User = JSON.parse(raw);
         this._state.set({ user, isAuthenticated: true, isLoading: false });
       } catch {
         this.logout();
       }
+    }
+  }
+
+  isTokenExpired(token: string): boolean {
+    const claims = this.decodeToken(token);
+    if (!claims || typeof claims['exp'] !== 'number') return true;
+    return Date.now() / 1000 > (claims['exp'] as number);
+  }
+
+  private decodeToken(token: string): Record<string, unknown> | null {
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+      return null;
     }
   }
 }
