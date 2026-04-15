@@ -1,0 +1,178 @@
+<!-- Info banner -->
+<div class="info-banner">
+  <mat-icon>terminal</mat-icon>
+  <span>Los <strong>skills</strong> son comandos predefinidos que automatizan tareas repetitivas en Claude Code.
+  Escríbelos directamente en el prompt del agente para ejecutar flujos estandarizados.</span>
+</div>
+
+<!-- Skills list -->
+<div class="skills-list">
+  @for (skill of skills(); track skill.id) {
+    <div class="skill-card" [class.skill-card--expanded]="expandedSkill === skill.id"
+         (click)="toggleSkill(skill.id)" tabindex="0"
+         (keydown.enter)="toggleSkill(skill.id)">
+
+      <div class="skill-header">
+        <div class="skill-command-badge">
+          <mat-icon>terminal</mat-icon>
+          <code>{{ skill.command }}</code>
+        </div>
+        <span class="skill-name">{{ skill.name }}</span>
+        <mat-icon class="skill-expand">{{ expandedSkill === skill.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </div>
+
+      <p class="skill-desc">{{ skill.description }}</p>
+
+      @if (expandedSkill === skill.id) {
+        <div class="skill-details">
+          <div class="skill-when">
+            <mat-icon>schedule</mat-icon>
+            <span><strong>Cuándo usarlo:</strong> {{ skill.when }}</span>
+          </div>
+
+          @if (skill.example) {
+            <div class="skill-example">
+              <div class="skill-example-header">
+                <mat-icon>code</mat-icon>
+                <span>Ejemplo</span>
+                <button mat-icon-button class="skill-copy" (click)="copy(skill.example!, skill.id, $event)">
+                  <mat-icon>{{ clipboard.isCopied(skill.id) ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+              <code class="skill-example-code">{{ skill.example }}</code>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+</div>
+
+<!-- Donde se configuran -->
+<div class="setup-section">
+  <h3 class="setup-title"><mat-icon>settings</mat-icon> Dónde se configuran los skills</h3>
+
+  <div class="setup-grid">
+    <!-- Built-in -->
+    <div class="setup-card">
+      <div class="setup-card-header setup-card-header--builtin">
+        <mat-icon>verified</mat-icon>
+        <span>Built-in</span>
+      </div>
+      <p>Vienen incluidos con Claude Code. No requieren configuración.</p>
+      <div class="setup-commands">
+        <code>/context</code>
+        <code>/clear</code>
+        <code>/compact</code>
+        <code>/commit</code>
+        <code>/fix</code>
+        <code>/simplify</code>
+      </div>
+      <div class="setup-note">
+        <mat-icon>check_circle</mat-icon>
+        <span>Disponibles automáticamente al instalar Claude Code</span>
+      </div>
+    </div>
+
+    <!-- Proyecto -->
+    <div class="setup-card">
+      <div class="setup-card-header setup-card-header--project">
+        <mat-icon>folder</mat-icon>
+        <span>Del proyecto</span>
+      </div>
+      <p>Se guardan en el repositorio. Todo el equipo los comparte vía Git.</p>
+      <div class="setup-path">
+        <code>.claude/commands/nombre.md</code>
+      </div>
+      <div class="setup-invocation">
+        <mat-icon>arrow_forward</mat-icon>
+        <span>Se invocan con <code>/project:nombre</code></span>
+      </div>
+      <div class="setup-note">
+        <mat-icon>group</mat-icon>
+        <span>Se versionan con el código — todos usan los mismos skills</span>
+      </div>
+    </div>
+
+    <!-- Personales -->
+    <div class="setup-card">
+      <div class="setup-card-header setup-card-header--personal">
+        <mat-icon>person</mat-icon>
+        <span>Personales</span>
+      </div>
+      <p>Solo para ti, disponibles en todos tus proyectos.</p>
+      <div class="setup-path">
+        <code>~/.claude/commands/nombre.md</code>
+      </div>
+      <div class="setup-invocation">
+        <mat-icon>arrow_forward</mat-icon>
+        <span>Se invocan con <code>/user:nombre</code></span>
+      </div>
+      <div class="setup-note">
+        <mat-icon>laptop</mat-icon>
+        <span>Solo existen en tu máquina — no se comparten con el equipo</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Como crear uno -->
+<div class="setup-section">
+  <h3 class="setup-title"><mat-icon>add_circle</mat-icon> Cómo crear un skill</h3>
+
+  <div class="setup-steps">
+    <div class="setup-step">
+      <span class="setup-step-number">1</span>
+      <div>
+        <strong>Crea el archivo</strong>
+        <p>Crea un archivo <code>.md</code> en la carpeta de commands.</p>
+        <div class="setup-path">
+          <code>.claude/commands/feature.md</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <span class="setup-step-number">2</span>
+      <div>
+        <strong>Escribe el prompt</strong>
+        <p>El contenido del archivo es el prompt que el agente ejecutará. Usa <code>$ARGUMENTS</code> para recibir parámetros.</p>
+        <div class="setup-example-block">
+          <div class="setup-example-block-header">
+            <mat-icon>description</mat-icon> feature.md
+          </div>
+          <pre class="setup-example-block-code">Lee docs/specs/index.md y CLAUDE.md.
+
+Implementa la funcionalidad descrita en: $ARGUMENTS
+
+Sigue las convenciones del proyecto.
+Genera tests para los casos principales.
+NO modifiques archivos fuera del alcance del spec.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <span class="setup-step-number">3</span>
+      <div>
+        <strong>Úsalo</strong>
+        <p>Invócalo desde Claude Code pasando los argumentos:</p>
+        <div class="setup-path">
+          <code>/project:feature docs/specs/notifications.md</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tip -->
+<div class="skill-tip">
+  <mat-icon>tips_and_updates</mat-icon>
+  <div>
+    <strong>Tip: comparte los skills con tu equipo</strong>
+    <p>Agrega <code>.claude/commands/</code> al repositorio.
+    Cuando un nuevo desarrollador clone el proyecto, tendrá los mismos skills
+    disponibles sin configuración adicional.</p>
+  </div>
+</div>

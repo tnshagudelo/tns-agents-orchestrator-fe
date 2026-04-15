@@ -52,6 +52,11 @@ export class KnowledgeManagerComponent implements OnInit {
   );
 
   readonly categories = [
+    { value: 'catalogo-servicios',    label: 'Catálogo de Servicios' },
+    { value: 'casos-exito',           label: 'Casos de Éxito' },
+    { value: 'datos-clientes',        label: 'Datos de Clientes' },
+    { value: 'informes-industria',    label: 'Informes de Industria' },
+    { value: 'planes-aprobados',      label: 'Planes Aprobados' },
     { value: 'gobierno-arquitectura', label: 'Gobierno de Arquitectura' },
     { value: 'integraciones',         label: 'Integraciones' },
     { value: 'seguridad',             label: 'Seguridad' },
@@ -59,10 +64,11 @@ export class KnowledgeManagerComponent implements OnInit {
   ];
 
   readonly suggestions = [
+    'casos de éxito en seguros',
+    'servicios de automatización',
+    'contactos clientes banca',
+    'catálogo de servicios T&S',
     'tecnologías autorizadas',
-    'nomenclatura tablas',
-    'cómo integrar servicios',
-    'seguridad APIs',
   ];
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
@@ -106,7 +112,8 @@ export class KnowledgeManagerComponent implements OnInit {
 
   // ── Gestión de archivos ───────────────────────────────────────────────────
   private processFiles(files: File[]): void {
-    const allowed = files.filter(f => f.name.endsWith('.md') || f.name.endsWith('.txt'));
+    const allowedExtensions = ['.md', '.txt', '.pdf', '.docx'];
+    const allowed = files.filter(f => allowedExtensions.some(ext => f.name.toLowerCase().endsWith(ext)));
     const newFiles: UploadedFile[] = allowed.map(f => ({
       file: f,
       id: crypto.randomUUID(),
@@ -221,7 +228,11 @@ export class KnowledgeManagerComponent implements OnInit {
   }
 
   fileIcon(name: string): string {
-    return name.endsWith('.md') ? 'description' : 'article';
+    const lower = name.toLowerCase();
+    if (lower.endsWith('.pdf')) return 'picture_as_pdf';
+    if (lower.endsWith('.docx')) return 'draft';
+    if (lower.endsWith('.md')) return 'description';
+    return 'article';
   }
 
   statusLabel(status: UploadedFile['status']): string {

@@ -149,28 +149,58 @@
     "failed": "Processing error"
   },
   "dashboard": {
-    "resultsTitle": "Research results",
     "newInvestigation": "New investigation",
     "previousVersions": "Previous versions",
     "generatePortfolio": "Generate portfolio",
+    "sectionsTitle": "Sections",
     "sections": {
+      "challenges": "Key challenges",
+      "techvision": "Tech vision",
       "findings": "Key findings",
       "stakeholders": "Key people",
+      "purchasing": "What they buy / Who from",
       "opportunities": "Business opportunities",
       "swot": "SWOT Analysis",
       "sector": "Sector comparison",
       "pvs": "Pain-Value-Service",
       "proposal": "Strategic proposal",
+      "questions": "Key questions",
       "news": "Recent news",
       "sources": "Sources consulted"
     },
+    "challenges": {
+      "strategic": "Strategic",
+      "operational": "Operational / Technology",
+      "customerExperience": "Customer experience",
+      "regulatory": "Regulatory / Risk"
+    },
+    "techvision": {
+      "current": "What they do today",
+      "future": "Where they should go"
+    },
     "findings": {
       "all": "All",
-      "commercial": "Commercial insight"
+      "insight": "Commercial insight",
+      "source": "Source"
     },
     "stakeholders": {
       "painPoints": "Pain points",
-      "approach": "Approach"
+      "approach": "How to approach",
+      "interests": "Interests",
+      "dataDate": "Info from",
+      "hierarchy": {
+        "STRATEGIC_DECISOR": "Strategic decisor",
+        "TECH_DECISOR": "Tech decisor",
+        "INFLUENCER": "Influencer",
+        "GATEKEEPER": "Gatekeeper",
+        "FINANCIAL_DECISOR": "Financial decisor"
+      }
+    },
+    "purchasing": {
+      "technology": "Technology",
+      "services": "Services",
+      "vendors": "Current vendors",
+      "opportunity": "T&S opportunity"
     },
     "pvs": {
       "pain": "Client's pain",
@@ -194,7 +224,72 @@
     "internationalAlert": {
       "title": "International client"
     },
-    "copyTable": "Copy"
+    "copyTable": "Copy",
+    "errorTitle": "Error processing analysis",
+    "errorMessage": "The agent did not generate data in the expected format. Try a new investigation.",
+    "noAnalysisTitle": "Analysis not available",
+    "noAnalysisMessage": "The investigation was completed but no analysis was generated. Start a new investigation.",
+    "loading": "Loading results..."
+  },
+  "home": {
+    "badge": "DESIGN DOCS + CONTEXT ENGINEERING",
+    "title": "Agents Orchestrator",
+    "lead": "Artificial intelligence portal by <strong>Tech and Solve</strong> — each module is an <strong>agentic orchestration</strong> designed, specified and implemented with AI using our development methodology.",
+    "statAi": "AI Generated",
+    "statModules": "Agentic modules",
+    "statSteps": "Workflow steps",
+    "methodTitle": "How this portal was built",
+    "methodDesc": "This portal was built by refining the methodology while implementing it. Steps marked as pending were not yet applied in this version.",
+    "methodNote": "This portal was built iterating on the method: team refinement, AI-generated specs, and phased implementation with Claude Code. <strong>QA review</strong> and the <strong>formal testing cycle</strong> will be incorporated in the next phase. See <strong>How we work</strong> for the full framework with sprints and client deliveries.",
+    "methodCta": "See full framework",
+    "modulesTitle": "Portal modules",
+    "modulesDesc": "Each module is an independent agentic orchestration — a specialized AI flow that solves a specific business problem.",
+    "footerText": "Built by <strong>Tech and Solve</strong> with the Design Docs + Context Engineering methodology — where AI doesn't guess, it executes with context.",
+    "pending": "Pending",
+    "sprintLabel": "Sprint — Delivery cycle",
+    "sprintReviewTitle": "Demo / Review with client",
+    "sprintReviewDesc": "The client validates the increment, provides feedback, and the next sprint is planned.",
+    "qaAgentTitle": "QA Agent — Test case generation",
+    "qaAgentDesc": "We have an AI agent that generates test cases from the approved spec, <strong>speeding up repetitive tasks</strong> in certification. This ensures the development speed gained with AI is maintained throughout the entire cycle.",
+    "steps": {
+      "refinement": "Refinement",
+      "refinementDesc": "Team + client align on the need",
+      "specAi": "Spec with AI",
+      "specAiDesc": "Claude generates the technical spec",
+      "qaReview": "QA Review",
+      "qaReviewDesc": "QA validates scope and edge cases",
+      "implementation": "Implementation",
+      "implementationDesc": "Phased development with Claude Code",
+      "delivery": "Delivery",
+      "deliveryDesc": "Testing, CI/CD and QA validation"
+    },
+    "modules": {
+      "accountPlanningTitle": "Account Planning",
+      "accountPlanningDesc": "Intelligent client profiling with web search, deep analysis, and commercial portfolio generation.",
+      "accountPlanningTag1": "Web search",
+      "accountPlanningTag2": "LLM",
+      "accountPlanningTag3": "Executive dashboard",
+      "pmAgentTitle": "PM Agent",
+      "pmAgentDesc": "Project management assistant that organizes tasks, prioritizes, and tracks team progress.",
+      "pmAgentTag1": "Management",
+      "pmAgentTag2": "Orchestration",
+      "pmAgentTag3": "Tracking",
+      "proposalsTitle": "Proposals",
+      "proposalsDesc": "Collaborative generation and review of commercial proposals with multi-role approval flow.",
+      "proposalsTag1": "Collaboration",
+      "proposalsTag2": "Multi-role",
+      "proposalsTag3": "Approval",
+      "knowledgeTitle": "Knowledge",
+      "knowledgeDesc": "Organizational knowledge base powered by documents, with semantic search.",
+      "knowledgeTag1": "RAG",
+      "knowledgeTag2": "Documents",
+      "knowledgeTag3": "Semantic search",
+      "methodologyTitle": "Methodology",
+      "methodologyDesc": "Interactive guide to the Design Docs + Context Engineering methodology for AI development.",
+      "methodologyTag1": "Design Docs",
+      "methodologyTag2": "Context Engineering",
+      "methodologyTag3": "Guide"
+    }
   },
   "sidebar": {
     "sector": "Industry",

@@ -2,8 +2,7 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm",
-    "analytics": false
+    "packageManager": "npm"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -76,7 +75,31 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "buildTarget": "tns-agents-orchestrator-fe:build:development",
+            "runner": "vitest",
+            "runnerConfig": true,
+            "coverage": true,
+            "coverageReporters": ["text-summary", "html", "json-summary"],
+            "coverageInclude": ["src/**/*.ts"],
+            "coverageExclude": [
+              "src/**/*.spec.ts",
+              "src/**/*.d.ts",
+              "src/main.ts",
+              "src/app/app.config.ts",
+              "src/app/app.routes.ts",
+              "src/app/**/*.routes.ts",
+              "src/app/**/models/**",
+              "src/app/**/*.model.ts",
+              "src/app/**/*.types.ts",
+              "src/app/**/*.const.ts",
+              "src/app/**/*.data.ts",
+              "src/app/**/index.ts",
+              "src/environments/**"
+            ]
+          }
         }
       }
     }

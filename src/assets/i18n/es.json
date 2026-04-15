@@ -149,28 +149,58 @@
     "failed": "Error en el procesamiento"
   },
   "dashboard": {
-    "resultsTitle": "Resultados de investigación",
     "newInvestigation": "Nueva investigación",
     "previousVersions": "Versiones anteriores",
     "generatePortfolio": "Generar portafolio",
+    "sectionsTitle": "Secciones",
     "sections": {
+      "challenges": "Principales retos",
+      "techvision": "Visión tecnológica",
       "findings": "Hallazgos clave",
       "stakeholders": "Personas clave",
+      "purchasing": "Qué compra / A quién le compra",
       "opportunities": "Oportunidades comerciales",
       "swot": "Análisis DOFA",
       "sector": "Comparativa de sector",
       "pvs": "Dolor-Valor-Servicio",
       "proposal": "Propuesta estratégica",
+      "questions": "Preguntas clave",
       "news": "Noticias recientes",
       "sources": "Fuentes consultadas"
     },
+    "challenges": {
+      "strategic": "Estratégicos",
+      "operational": "Operativos / Tecnológicos",
+      "customerExperience": "Experiencia del cliente",
+      "regulatory": "Regulatorios / Riesgo"
+    },
+    "techvision": {
+      "current": "Qué hace hoy",
+      "future": "Hacia dónde debería ir"
+    },
     "findings": {
       "all": "Todos",
-      "commercial": "Insight comercial"
+      "insight": "Insight comercial",
+      "source": "Fuente"
     },
     "stakeholders": {
-      "painPoints": "Pain points",
-      "approach": "Approach"
+      "painPoints": "Puntos de dolor",
+      "approach": "Cómo abordarlo",
+      "interests": "Intereses",
+      "dataDate": "Info desde",
+      "hierarchy": {
+        "STRATEGIC_DECISOR": "Decisor estratégico",
+        "TECH_DECISOR": "Decisor técnico",
+        "INFLUENCER": "Influenciador",
+        "GATEKEEPER": "Gatekeeper",
+        "FINANCIAL_DECISOR": "Decisor financiero"
+      }
+    },
+    "purchasing": {
+      "technology": "Tecnología",
+      "services": "Servicios",
+      "vendors": "Proveedores actuales",
+      "opportunity": "Oportunidad T&S"
     },
     "pvs": {
       "pain": "Dolor del cliente",
@@ -194,7 +224,72 @@
     "internationalAlert": {
       "title": "Cliente internacional"
     },
-    "copyTable": "Copiar"
+    "copyTable": "Copiar",
+    "errorTitle": "Error al procesar el análisis",
+    "errorMessage": "El agente no generó datos en el formato esperado. Intenta una nueva investigación.",
+    "noAnalysisTitle": "Análisis no disponible",
+    "noAnalysisMessage": "La investigación se completó pero no se generó el análisis. Inicia una nueva investigación.",
+    "loading": "Cargando resultados..."
+  },
+  "home": {
+    "badge": "DESIGN DOCS + CONTEXT ENGINEERING",
+    "title": "Orquestador de Agentes",
+    "lead": "Portal de inteligencia artificial de <strong>Tech and Solve</strong> — cada módulo es una <strong>orquestación agéntica</strong> diseñada, especificada e implementada con IA usando nuestra metodología de desarrollo.",
+    "statAi": "Generado con IA",
+    "statModules": "Módulos agénticos",
+    "statSteps": "Pasos del flujo",
+    "methodTitle": "Cómo se construyó este portal",
+    "methodDesc": "Este portal se construyó refinando la metodología mientras se implementaba. Los pasos marcados como pendientes aún no se aplicaron en esta versión.",
+    "methodNote": "Este portal se construyó iterando sobre el método: refinamiento con el equipo, specs generados con IA e implementación por fases con Claude Code. La <strong>revisión QA</strong> y el <strong>ciclo de pruebas formal</strong> se incorporarán en la siguiente fase. Consulta <strong>Cómo trabajamos</strong> para ver el marco de trabajo completo con sprints y entregas al cliente.",
+    "methodCta": "Ver marco de trabajo completo",
+    "modulesTitle": "Módulos del portal",
+    "modulesDesc": "Cada módulo es una orquestación agéntica independiente — un flujo de IA especializado que resuelve un problema de negocio concreto.",
+    "footerText": "Construido por <strong>Tech and Solve</strong> con la metodología Design Docs + Context Engineering — donde la IA no adivina, ejecuta con contexto.",
+    "pending": "Pendiente",
+    "sprintLabel": "Sprint — Ciclo de entrega",
+    "sprintReviewTitle": "Demo / Review con cliente",
+    "sprintReviewDesc": "El cliente valida el incremento, da feedback y se planifica el siguiente sprint.",
+    "qaAgentTitle": "Agente QA — Generación de casos de prueba",
+    "qaAgentDesc": "Contamos con un agente de IA que genera casos de prueba a partir del spec aprobado, <strong>agilizando tareas repetitivas</strong> de certificación. Esto permite que la velocidad de desarrollo con IA se mantenga en todo el ciclo.",
+    "steps": {
+      "refinement": "Refinamiento",
+      "refinementDesc": "Equipo + cliente alinean la necesidad",
+      "specAi": "Spec con IA",
+      "specAiDesc": "Claude genera el spec técnico",
+      "qaReview": "Revisión QA",
+      "qaReviewDesc": "QA valida alcance y casos borde",
+      "implementation": "Implementación",
+      "implementationDesc": "Desarrollo por fases con Claude Code",
+      "delivery": "Entrega",
+      "deliveryDesc": "Pruebas, CI/CD y validación QA"
+    },
+    "modules": {
+      "accountPlanningTitle": "Account Planning",
+      "accountPlanningDesc": "Perfilamiento inteligente de clientes con búsqueda web, análisis profundo y generación de portafolio comercial.",
+      "accountPlanningTag1": "Búsqueda web",
+      "accountPlanningTag2": "LLM",
+      "accountPlanningTag3": "Dashboard ejecutivo",
+      "pmAgentTitle": "Agente PM",
+      "pmAgentDesc": "Asistente de gestión de proyectos que organiza tareas, prioriza y da seguimiento al equipo.",
+      "pmAgentTag1": "Gestión",
+      "pmAgentTag2": "Orquestación",
+      "pmAgentTag3": "Seguimiento",
+      "proposalsTitle": "Propuestas",
+      "proposalsDesc": "Generación y revisión colaborativa de propuestas comerciales con flujo de aprobación multi-rol.",
+      "proposalsTag1": "Colaboración",
+      "proposalsTag2": "Multi-rol",
+      "proposalsTag3": "Aprobación",
+      "knowledgeTitle": "Conocimiento",
+      "knowledgeDesc": "Base de conocimiento organizacional alimentada por documentos, con búsqueda semántica.",
+      "knowledgeTag1": "RAG",
+      "knowledgeTag2": "Documentos",
+      "knowledgeTag3": "Búsqueda semántica",
+      "methodologyTitle": "Metodología",
+      "methodologyDesc": "Guía interactiva de la metodología Design Docs + Context Engineering para desarrollo con IA.",
+      "methodologyTag1": "Design Docs",
+      "methodologyTag2": "Context Engineering",
+      "methodologyTag3": "Guía"
+    }
   },
   "sidebar": {
     "sector": "Sector",

@@ -6,8 +6,8 @@
       <mat-icon class="spin">autorenew</mat-icon>
     </div>
     <div class="header-text">
-      <h3>Investigación profunda en curso</h3>
-      <p>Investigando <strong>{{ clientName() }}</strong> en múltiples fuentes</p>
+      <h3>Generando plan de cuenta</h3>
+      <p>Investigando <strong>{{ clientName() }}</strong></p>
     </div>
     <div class="progress-stats">
       <span class="progress-pct">{{ job().progress }}%</span>
@@ -15,36 +15,20 @@
     </div>
   </div>
 
-  <!-- Progress bar -->
   <mat-progress-bar mode="determinate" [value]="job().progress" class="main-progress"></mat-progress-bar>
 
-  <!-- Stepper -->
-  <div class="stepper">
-    @for (phase of phases(); track phase.id; let last = $last) {
-      <div class="step" [class]="'step--' + phase.status">
-        <div class="step-indicator">
-          @if (phase.status === 'completed') {
-            <mat-icon class="step-icon step-icon--done">check_circle</mat-icon>
-          } @else if (phase.status === 'active') {
-            <div class="step-icon step-icon--active">
-              <mat-icon class="pulse">{{ phase.icon }}</mat-icon>
-            </div>
-          } @else {
-            <mat-icon class="step-icon step-icon--pending">{{ phase.icon }}</mat-icon>
-          }
-        </div>
-        <span class="step-label">{{ phase.label }}</span>
-        @if (!last) {
-          <div class="step-connector" [class.completed]="phase.status === 'completed'"></div>
+  <!-- Activity log -->
+  <div class="activity-log">
+    @for (entry of activityLog(); track entry.time) {
+      <div class="log-entry" [class.done]="entry.done">
+        @if (entry.done) {
+          <mat-icon class="log-icon log-icon--done">check_circle</mat-icon>
+        } @else {
+          <mat-icon class="log-icon log-icon--active spin-slow">sync</mat-icon>
         }
+        <span class="log-message">{{ entry.message }}</span>
       </div>
     }
-  </div>
-
-  <!-- Current activity -->
-  <div class="activity-bar">
-    <mat-icon class="activity-icon spin-slow">sync</mat-icon>
-    <span>{{ progressLabel() }}</span>
   </div>
 
 </div>

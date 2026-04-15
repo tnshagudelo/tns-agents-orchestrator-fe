@@ -17,8 +17,8 @@ export class JobPollingService extends BaseApiService {
     super(http);
   }
 
-  /** Inicia polling cada intervalMs (default 5s) hasta que el job termine o se detenga manualmente */
-  startPolling(jobId: string, intervalMs = 5000): void {
+  /** Inicia polling cada intervalMs (default 2s) hasta que el job termine o se detenga manualmente */
+  startPolling(jobId: string, intervalMs = 2000): void {
     this.stopPolling();
     this._isPolling.set(true);
 
@@ -37,6 +37,16 @@ export class JobPollingService extends BaseApiService {
   /** Consulta una sola vez el estado de un job (sin polling) */
   getStatus(jobId: string): Observable<BackgroundJobStatus_Response> {
     return this.get<BackgroundJobStatus_Response>(`/api/jobs/${jobId}/status`);
+  }
+
+  /** Busca el job más reciente de una entidad (ej: PlanningSession) y reanuda polling si está activo */
+  resumeIfActive(referenceId: string): void {
+    this.get<BackgroundJobStatus_Response[]>(`/api/jobs/by-reference/${referenceId}`).subscribe(jobs => {
+      const active = jobs.find(j => j.status === 'Running' || j.status === 'Queued');
+      if (active) {
+        this.startPolling(active.id);
+      }
+    });
   }
 
   stopPolling(): void {

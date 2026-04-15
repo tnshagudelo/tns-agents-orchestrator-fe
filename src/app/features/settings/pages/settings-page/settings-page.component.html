@@ -1,61 +1,170 @@
-<div class="page-container">
-  <div class="page-header">
-    <h1>Settings</h1>
-  </div>
+<div class="settings-page">
+  <h2>Configuración</h2>
 
-  <div class="settings-grid">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>API Configuration</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <form [formGroup]="apiForm" (ngSubmit)="saveApiSettings()">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>API Base URL</mat-label>
-            <input matInput formControlName="apiUrl" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>WebSocket URL</mat-label>
-            <input matInput formControlName="wsUrl" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>API Timeout (ms)</mat-label>
-            <input matInput type="number" formControlName="timeout" />
-          </mat-form-field>
-          <button mat-raised-button color="primary" type="submit">
-            Save API Settings
-          </button>
-        </form>
-      </mat-card-content>
-    </mat-card>
+  <!-- ═══ SEARCH PROVIDERS ═══ -->
+  <section class="settings-section">
+    <h3><mat-icon>travel_explore</mat-icon> Proveedores de búsqueda web</h3>
+    <div class="providers-grid">
+      @for (p of searchProviders(); track p.name) {
+        <mat-card class="provider-card">
+          <div class="provider-header">
+            <div class="provider-status">
+              <mat-icon [style.color]="getStatusColor(p.status)">{{ getStatusIcon(p.status) }}</mat-icon>
+              <strong>{{ p.name }}</strong>
+            </div>
+            <mat-slide-toggle [checked]="p.enabled" (change)="toggleProvider(p)" [disabled]="!p.available"></mat-slide-toggle>
+          </div>
 
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Preferences</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <form [formGroup]="prefForm" (ngSubmit)="savePreferences()">
-          <div class="toggle-row">
-            <label>Dark Mode</label>
-            <mat-slide-toggle formControlName="darkMode" />
-          </div>
-          <mat-divider />
-          <div class="toggle-row">
-            <label>Desktop Notifications</label>
-            <mat-slide-toggle formControlName="notifications" />
-          </div>
-          <mat-divider />
-          <div class="toggle-row">
-            <label>Auto-refresh Monitoring</label>
-            <mat-slide-toggle formControlName="autoRefresh" />
-          </div>
-          <div class="pref-actions">
-            <button mat-raised-button color="primary" type="submit">
-              Save Preferences
+          <div class="provider-body">
+            @if (!p.available) {
+              <div class="unavailable-msg">
+                <mat-icon>info</mat-icon>
+                <span>Requiere {{ p.dependsOn }} como LLM activo</span>
+              </div>
+            }
+
+            @if (p.name === 'Tavily') {
+              <div class="key-row">
+                @if (p.available) {
+                  <span class="key-badge key-badge--ok"><mat-icon>vpn_key</mat-icon> Configurada</span>
+                } @else {
+                  <span class="key-badge key-badge--missing"><mat-icon>warning</mat-icon> Sin API key</span>
+                }
+              </div>
+              <div class="key-input">
+                <mat-form-field appearance="outline" class="key-field">
+                  <mat-label>API Key</mat-label>
+                  <input matInput type="password" [(ngModel)]="apiKeys[p.name]" placeholder="Ingresar key Tavily..." />
+                </mat-form-field>
+                <button mat-stroked-button (click)="saveApiKey(p.name)" [disabled]="!apiKeys[p.name]?.trim()">
+                  <mat-icon>save</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <div class="key-row">
+                <span class="key-badge key-badge--info"><mat-icon>link</mat-icon> Usa la API key del LLM</span>
+              </div>
+            }
+
+            <div class="priority-row">
+              <span>Prioridad: {{ p.priority }} {{ p.priority === 1 ? '(primero)' : '(complementario)' }}</span>
+            </div>
+
+            @if (p.monthlyLimit) {
+              <div class="usage-row">
+                <span>{{ p.callsThisMonth }} / {{ p.monthlyLimit }} calls</span>
+                <mat-progress-bar mode="determinate" [value]="getUsagePercent(p.callsThisMonth, p.monthlyLimit)"
+                  [color]="getUsagePercent(p.callsThisMonth, p.monthlyLimit) > 80 ? 'warn' : 'primary'"></mat-progress-bar>
+              </div>
+            } @else {
+              <div class="usage-row"><span>{{ p.callsThisMonth }} calls este mes</span></div>
+            }
+
+            <button mat-stroked-button class="test-btn" (click)="testProvider(p.name)" [disabled]="!p.available || testing[p.name]">
+              @if (testing[p.name]) { <mat-icon class="spin">autorenew</mat-icon> } @else { <mat-icon>science</mat-icon> }
+              Probar conexión
             </button>
+            @if (testResults[p.name]; as result) {
+              <div class="test-result" [class.success]="result.success" [class.error]="!result.success">
+                <mat-icon>{{ result.success ? 'check' : 'close' }}</mat-icon>
+                {{ result.message }}
+              </div>
+            }
           </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
-  </div>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <mat-divider></mat-divider>
+
+  <!-- ═══ LLM PROVIDER ═══ -->
+  @if (llmConfig(); as llm) {
+    <section class="settings-section">
+      <h3><mat-icon>psychology</mat-icon> Proveedor LLM</h3>
+      <mat-card class="llm-card">
+        <div class="llm-providers">
+          @for (provider of llm.availableProviders; track provider.name) {
+            <div class="llm-option" [class.active]="selectedLlmProvider === provider.name" [class.disabled]="!provider.configured">
+              <mat-radio-button [value]="provider.name" [checked]="selectedLlmProvider === provider.name"
+                [disabled]="!provider.configured"
+                (change)="selectedLlmProvider = provider.name; onProviderChange()">
+                <strong>{{ provider.name === 'openai' ? 'OpenAI' : 'Anthropic (Claude)' }}</strong>
+                @if (provider.configured) {
+                  <span class="config-badge config-badge--ok">Configurado</span>
+                } @else {
+                  <span class="config-badge config-badge--no">Sin API key en backend</span>
+                }
+              </mat-radio-button>
+            </div>
+          }
+        </div>
+
+        <div class="model-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Modelo</mat-label>
+            <mat-select [(ngModel)]="selectedLlmModel">
+              @for (provider of llm.availableProviders; track provider.name) {
+                @if (provider.name === selectedLlmProvider) {
+                  @for (model of provider.models; track model) {
+                    <mat-option [value]="model">{{ model }}</mat-option>
+                  }
+                }
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="switchLlm()"
+            [disabled]="selectedLlmProvider === llm.activeProvider && selectedLlmModel === llm.activeModel">
+            <mat-icon>swap_horiz</mat-icon> Aplicar
+          </button>
+        </div>
+
+        <div class="current-llm">
+          Activo: <strong>{{ llm.activeProvider === 'openai' ? 'OpenAI' : 'Anthropic' }}</strong> / {{ llm.activeModel }}
+        </div>
+
+        <button mat-stroked-button class="test-btn" (click)="testLlm()" [disabled]="llmTesting">
+          @if (llmTesting) { <mat-icon class="spin">autorenew</mat-icon> } @else { <mat-icon>science</mat-icon> }
+          Probar conexión LLM
+        </button>
+        @if (llmTestResult; as result) {
+          <div class="test-result" [class.success]="result.success" [class.error]="!result.success">
+            <mat-icon>{{ result.success ? 'check' : 'close' }}</mat-icon>
+            {{ result.message }} ({{ result.responseTimeMs }}ms)
+          </div>
+        }
+      </mat-card>
+    </section>
+  }
+
+  <mat-divider></mat-divider>
+
+  <!-- ═══ USAGE ═══ -->
+  @if (usage(); as u) {
+    <section class="settings-section">
+      <h3><mat-icon>bar_chart</mat-icon> Consumo</h3>
+      <div class="usage-grid">
+        <mat-card class="usage-card">
+          <h4>LLM ({{ u.llm.provider }})</h4>
+          <div class="usage-stat">
+            <span class="stat-value">{{ u.llm.inputTokens + u.llm.outputTokens }}</span>
+            <span class="stat-label">tokens este mes</span>
+          </div>
+        </mat-card>
+        @for (s of u.search; track s.name) {
+          <mat-card class="usage-card">
+            <h4>{{ s.name }}</h4>
+            <div class="usage-stat">
+              <span class="stat-value">{{ s.callsThisMonth }}</span>
+              <span class="stat-label">calls este mes</span>
+            </div>
+            @if (s.limit) {
+              <mat-progress-bar mode="determinate" [value]="getUsagePercent(s.callsThisMonth, s.limit)"></mat-progress-bar>
+              <span class="usage-remaining">{{ s.remaining }} restantes</span>
+            }
+          </mat-card>
+        }
+      </div>
+    </section>
+  }
 </div>

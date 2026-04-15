@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { UpperCasePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,7 +27,7 @@ import { DashboardShellComponent } from './components/dashboard/dashboard-shell.
   selector: 'app-planning-session',
   standalone: true,
   imports: [
-    FormsModule, UpperCasePipe, MatCardModule, MatButtonModule, MatIconModule,
+    FormsModule, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatProgressBarModule, MatProgressSpinnerModule,
     MatChipsModule, TranslatePipe, SessionChatComponent, ClientSidebarComponent,
     ConfirmationCardComponent, SearchProgressComponent, DashboardShellComponent,
@@ -80,6 +79,13 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
           if (session.status === 'AwaitingReview' || session.status === 'AwaitingFocus'
             || session.status === 'UnderRevision' || session.status === 'Approved') {
             this.loadResults();
+            // Reload client sessions for version selector
+            const c = this.client();
+            if (c) {
+              this.sessionService.loadByClient(c.id).subscribe(sessions => {
+                this.clientSessions.set(sessions);
+              });
+            }
           }
         });
       }
@@ -137,6 +143,10 @@ export class PlanningSessionComponent implements OnInit, OnDestroy {
           if (session.status === 'Queued' && !this.autoStarted && this.chatHistory().length === 0) {
             this.autoStarted = true;
             setTimeout(() => this.sendAutoGreeting(session, client), 100);
+          }
+          // Resume polling if session is processing (survives F5)
+          if (['DeepSearching', 'GeneratingPortfolio'].includes(session.status)) {
+            this.pollingService.resumeIfActive(session.id);
           }
           // Load results if session already has investigation data
           if (['AwaitingReview', 'AwaitingFocus', 'GeneratingPortfolio',
