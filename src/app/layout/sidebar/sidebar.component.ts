@@ -67,6 +67,7 @@ export class SidebarComponent {
     { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
     { label: 'Propuestas', icon: 'description', route: '/proposals' },
     { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
-    { label: 'Como trabajamos', icon: 'auto_stories', route: '/dev-methodology' },
+    { label: 'Como trabajamos', icon: 'handshake', route: '/how-we-work' },
+    { label: 'Metodologia Dev', icon: 'auto_stories', route: '/dev-methodology' },
   ];
 }

@@ -1,0 +1,239 @@
+<div class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge">
+      <mat-icon>auto_awesome</mat-icon>
+      <span>{{ 'howWeWork.hero.badge' | translate }}</span>
+    </div>
+    <h1>{{ 'howWeWork.hero.title' | translate }}</h1>
+    <p class="hero-lead">{{ 'howWeWork.hero.lead' | translate }}</p>
+  </section>
+
+  <!-- Differentiators -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.diff.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>star</mat-icon>
+        {{ 'howWeWork.diff.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.diff.desc' | translate }}</p>
+    </div>
+    <div class="differentiators">
+      @for (d of differentiators; track d.titleKey) {
+        <div class="diff-card">
+          <mat-icon>{{ d.icon }}</mat-icon>
+          <h4>{{ d.titleKey | translate }}</h4>
+          <p>{{ d.descKey | translate }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Inception -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.inception.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>flag</mat-icon>
+        {{ 'howWeWork.inception.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.inception.desc' | translate }}</p>
+    </div>
+    <div class="inception-flow">
+      <div class="inception-steps">
+        @for (s of inceptionSteps; track s.titleKey) {
+          <div class="inception-step">
+            <div class="inception-step-icon">
+              <mat-icon>{{ s.icon }}</mat-icon>
+            </div>
+            <h4>{{ s.titleKey | translate }}</h4>
+            <p>{{ s.descKey | translate }}</p>
+          </div>
+        }
+      </div>
+      <div class="inception-outputs">
+        <h4>
+          <mat-icon>inventory_2</mat-icon>
+          {{ 'howWeWork.inception.outputsTitle' | translate }}
+        </h4>
+        <ul>
+          @for (o of inceptionOutputs; track o) {
+            <li>{{ o | translate }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phases -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.phases.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>loop</mat-icon>
+        {{ 'howWeWork.phases.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.phases.desc' | translate }}</p>
+    </div>
+    <div class="phases">
+      @for (ph of phases; track ph.number) {
+        <div class="phase" [class]="'phase--' + ph.color">
+          <div class="phase-number">{{ ph.number }}</div>
+          <h4>{{ ph.titleKey | translate }}</h4>
+          <p class="phase-desc">{{ ph.descKey | translate }}</p>
+          <div class="phase-output">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ ph.outputKey | translate }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Deliverables per iteration -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.deliv.iter.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>inventory</mat-icon>
+        {{ 'howWeWork.deliv.iter.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.deliv.iter.desc' | translate }}</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'howWeWork.deliv.iter.colDoc' | translate }}</th>
+            <th>{{ 'howWeWork.deliv.iter.colPurpose' | translate }}</th>
+            <th>{{ 'howWeWork.deliv.iter.colWhen' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of iterationDeliverables; track row.docKey) {
+            <tr>
+              <td>{{ row.docKey | translate }}</td>
+              <td>{{ row.purposeKey | translate }}</td>
+              <td>{{ row.whenKey | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Final deliverables -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.deliv.final.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>library_books</mat-icon>
+        {{ 'howWeWork.deliv.final.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.deliv.final.desc' | translate }}</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'howWeWork.deliv.final.colDoc' | translate }}</th>
+            <th>{{ 'howWeWork.deliv.final.colContent' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of finalDeliverables; track row.docKey) {
+            <tr>
+              <td>{{ row.docKey | translate }}</td>
+              <td>{{ row.contentKey | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Ceremonies -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.cer.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>groups</mat-icon>
+        {{ 'howWeWork.cer.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.cer.desc' | translate }}</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'howWeWork.cer.colName' | translate }}</th>
+            <th>{{ 'howWeWork.cer.colWho' | translate }}</th>
+            <th>{{ 'howWeWork.cer.colPurpose' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of ceremonies; track c.nameKey) {
+            <tr>
+              <td>{{ c.nameKey | translate }}</td>
+              <td>{{ c.whoKey | translate }}</td>
+              <td>{{ c.purposeKey | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Quality -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.quality.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>shield</mat-icon>
+        {{ 'howWeWork.quality.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.quality.desc' | translate }}</p>
+    </div>
+    <div class="quality-list">
+      @for (q of qualityItems; track q) {
+        <div class="quality-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ q | translate }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Project end -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.end.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>emoji_events</mat-icon>
+        {{ 'howWeWork.end.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.end.desc' | translate }}</p>
+    </div>
+    <div class="end-card">
+      <h3>
+        <mat-icon>flag_circle</mat-icon>
+        {{ 'howWeWork.end.cardTitle' | translate }}
+      </h3>
+      <ul>
+        <li>{{ 'howWeWork.end.item1' | translate }}</li>
+        <li>{{ 'howWeWork.end.item2' | translate }}</li>
+        <li>{{ 'howWeWork.end.item3' | translate }}</li>
+        <li>{{ 'howWeWork.end.item4' | translate }}</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer">
+    <strong>{{ 'howWeWork.footer.brand' | translate }}</strong>
+    <p>{{ 'howWeWork.footer.tagline' | translate }}</p>
+  </div>
+
+</div>

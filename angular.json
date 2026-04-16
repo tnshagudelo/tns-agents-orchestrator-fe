@@ -34,6 +34,19 @@
                 "input": "public"
               }
             ],
+            "allowedCommonJsDependencies": [
+              "cytoscape-fcose",
+              "cytoscape-cose-bilkent",
+              "@braintree/sanitize-url",
+              "dayjs",
+              "dayjs/plugin/isoWeek.js",
+              "dayjs/plugin/customParseFormat.js",
+              "dayjs/plugin/advancedFormat.js",
+              "dayjs/plugin/duration.js",
+              "vscode-languageserver-protocol",
+              "vscode-jsonrpc/lib/common/events.js",
+              "vscode-jsonrpc/lib/common/cancellation.js"
+            ],
             "styles": [
               "src/styles.scss"
             ]
@@ -48,8 +61,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "10kB",
-                  "maximumError": "16kB"
+                  "maximumWarning": "16kB",
+                  "maximumError": "24kB"
                 }
               ],
               "outputHashing": "all"

@@ -44,6 +44,11 @@ export const routes: Routes = [
           import('./features/dev-methodology/dev-methodology.routes').then(m => m.DEV_METHODOLOGY_ROUTES),
       },
       {
+        path: 'how-we-work',
+        loadChildren: () =>
+          import('./features/how-we-work/how-we-work.routes').then(m => m.HOW_WE_WORK_ROUTES),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),

@@ -1,6 +1,8 @@
 <div class="page-container">
 
-  <!-- Hero -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- HERO                                                                    -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <div class="hero">
     <span class="hero-badge">DESIGN DOCS + CONTEXT ENGINEERING</span>
     <h1>Metodología de desarrollo con IA</h1>
@@ -17,76 +19,52 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Por que esta metodologia -->
-  <div class="why-section">
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ACTO 1 — EL PANORAMA                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Ciclo de vida de una HU (visión general) -->
+  <div class="hu-section">
     <h2 class="section-title">
-      <mat-icon>bolt</mat-icon> Por qué esta metodología
+      <mat-icon>timeline</mat-icon> Ciclo de vida de una Historia de Usuario
     </h2>
     <p class="section-desc">
-      Cualquier agente de IA genera código genérico si no tiene contexto. Con Design Docs y
-      Context Engineering, el agente trabaja con la misma información que tendría un desarrollador
-      senior del equipo.
+      Así viaja cada funcionalidad desde la idea hasta la entrega.
+      Toca un paso para ver qué sucede en ese momento.
     </p>
-    <div class="why-grid">
-      @for (card of whyCards; track card.title) {
-        <div class="why-card">
-          <mat-icon>{{ card.icon }}</mat-icon>
-          <h4>{{ card.title }}</h4>
-          <p>{{ card.desc }}</p>
+    <div class="hu-flow">
+      @for (s of huSteps; track s.label; let i = $index; let last = $last) {
+        <div class="hu-node" [class.hu-node--active]="activeHuStep === i"
+             (click)="activeHuStep = activeHuStep === i ? -1 : i" tabindex="0"
+             (keydown.enter)="activeHuStep = activeHuStep === i ? -1 : i">
+          <mat-icon>{{ s.icon }}</mat-icon>
+          <span>{{ s.label }}</span>
         </div>
+        @if (!last) {
+          <mat-icon class="hu-arrow">arrow_forward</mat-icon>
+        }
       }
     </div>
+    @if (activeHuStep >= 0) {
+      <div class="hu-detail">
+        <div class="hu-detail-header">
+          <mat-icon>{{ huSteps[activeHuStep].icon }}</mat-icon>
+          <strong>{{ huSteps[activeHuStep].label }}</strong>
+        </div>
+        <p>{{ huSteps[activeHuStep].detail }}</p>
+      </div>
+    }
   </div>
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Que es un Design Doc -->
-  <div class="what-section">
-    <h2 class="section-title">
-      <mat-icon>menu_book</mat-icon> Qué es un Design Doc
-    </h2>
-    <p class="what-intro">
-      Un Design Doc es un <strong>documento técnico que se escribe ANTES de codificar</strong>.
-      Explica qué se va a construir, cómo se va a hacer y qué alternativas se consideraron.
-      No es una librería ni un framework — es una práctica de ingeniería que los equipos
-      de software más maduros del mundo usan para reducir errores y alinear al equipo
-      antes de invertir tiempo en código.
-    </p>
-    <div class="what-analogy">
-      <strong>Analogía:</strong> Un Design Doc es al software lo que un plano es a una casa.
-      Puedes construir sin plano, pero vas a tirar paredes. Con un plano, todos saben
-      qué se va a construir antes de poner el primer ladrillo.
-    </div>
-
-    <table class="company-table">
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Cómo lo llaman</th>
-          <th>Referencia</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of companies; track c.name) {
-          <tr>
-            <td><strong>{{ c.name }}</strong></td>
-            <td>{{ c.calls }}</td>
-            <td>{{ c.ref }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <mat-divider style="margin-bottom: 28px;" />
-
-  <!-- Flujo de trabajo T&S -->
+  <!-- Cómo trabajamos dentro del sprint (zoom) -->
   <div class="flow-section">
     <h2 class="section-title">
-      <mat-icon>route</mat-icon> Cómo trabajamos
+      <mat-icon>route</mat-icon> Dentro del sprint — cómo ejecutamos con IA
     </h2>
     <p class="section-desc">
-      Cada funcionalidad sigue este flujo de 5 pasos dentro de un sprint.
+      Cuando una historia llega al sprint, sigue este flujo de 5 pasos.
       La IA no reemplaza al equipo — lo potencia. Nadie arranca a implementar sin claridad del objetivo.
     </p>
 
@@ -295,7 +273,51 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Cómo se genera un Design Doc -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ACTO 2 — LA HERRAMIENTA (Design Docs)                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Qué es un Design Doc -->
+  <div class="what-section">
+    <h2 class="section-title">
+      <mat-icon>menu_book</mat-icon> Qué es un Design Doc
+    </h2>
+    <p class="what-intro">
+      Un Design Doc es un <strong>documento técnico que se escribe ANTES de codificar</strong>.
+      Explica qué se va a construir, cómo se va a hacer y qué alternativas se consideraron.
+      No es una librería ni un framework — es una práctica de ingeniería que los equipos
+      de software más maduros del mundo usan para reducir errores y alinear al equipo
+      antes de invertir tiempo en código.
+    </p>
+    <div class="what-analogy">
+      <strong>Analogía:</strong> Un Design Doc es al software lo que un plano es a una casa.
+      Puedes construir sin plano, pero vas a tirar paredes. Con un plano, todos saben
+      qué se va a construir antes de poner el primer ladrillo.
+    </div>
+
+    <table class="company-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Cómo lo llaman</th>
+          <th>Referencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of companies; track c.name) {
+          <tr>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.calls }}</td>
+            <td>{{ c.ref }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- Cómo se genera un Design Doc con IA -->
   <div class="how-section">
     <h2 class="section-title">
       <mat-icon>auto_fix_high</mat-icon> Cómo se genera un Design Doc con IA
@@ -353,7 +375,34 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Conceptos clave -->
+  <!-- Por qué esta metodología -->
+  <div class="why-section">
+    <h2 class="section-title">
+      <mat-icon>bolt</mat-icon> Por qué funciona este enfoque
+    </h2>
+    <p class="section-desc">
+      Cualquier agente de IA genera código genérico si no tiene contexto. Con Design Docs y
+      Context Engineering, el agente trabaja con la misma información que tendría un desarrollador
+      senior del equipo.
+    </p>
+    <div class="why-grid">
+      @for (card of whyCards; track card.title) {
+        <div class="why-card">
+          <mat-icon>{{ card.icon }}</mat-icon>
+          <h4>{{ card.title }}</h4>
+          <p>{{ card.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <mat-divider style="margin-bottom: 28px;" />
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- ACTO 3 — ACCIÓN                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Archivos y conceptos clave -->
   <div class="concepts-section">
     <h2 class="section-title">
       <mat-icon>school</mat-icon> Archivos y conceptos clave
@@ -377,7 +426,7 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Cuando usar Design Docs -->
+  <!-- Cuándo usar Design Docs -->
   <div class="when-section">
     <h2 class="section-title">
       <mat-icon>help_outline</mat-icon> Cuándo usar Design Docs
@@ -415,7 +464,7 @@
 
   <mat-divider style="margin-bottom: 28px;" />
 
-  <!-- Configurar tu proyecto -->
+  <!-- Configura tu proyecto -->
   <div class="modes-section">
     <h2 class="section-title">
       <mat-icon>play_circle</mat-icon> Configura tu proyecto
