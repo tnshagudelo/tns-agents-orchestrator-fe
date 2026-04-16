@@ -11,6 +11,27 @@
     <p class="hero-lead">{{ 'howWeWork.hero.lead' | translate }}</p>
   </section>
 
+  <!-- Success stories -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'howWeWork.success.eyebrow' | translate }}</span>
+      <h2 class="section-title">
+        <mat-icon>trending_up</mat-icon>
+        {{ 'howWeWork.success.title' | translate }}
+      </h2>
+      <p class="section-desc">{{ 'howWeWork.success.desc' | translate }}</p>
+    </div>
+    <div class="success-stats">
+      @for (s of successStats; track s.valueKey) {
+        <div class="success-stat" [class]="'success-stat--' + s.color">
+          <p class="success-stat-value">{{ s.valueKey | translate }}</p>
+          <p class="success-stat-label">{{ s.labelKey | translate }}</p>
+          <p class="success-stat-desc">{{ s.descKey | translate }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
   <!-- Differentiators -->
   <section class="section">
     <div class="section-header">
@@ -45,12 +66,18 @@
     <div class="inception-flow">
       <div class="inception-steps">
         @for (s of inceptionSteps; track s.titleKey) {
-          <div class="inception-step">
+          <div class="inception-step" [class.inception-step--ai]="s.ai">
             <div class="inception-step-icon">
               <mat-icon>{{ s.icon }}</mat-icon>
             </div>
             <h4>{{ s.titleKey | translate }}</h4>
             <p>{{ s.descKey | translate }}</p>
+            @if (s.ai) {
+              <span class="ai-badge">
+                <mat-icon>auto_awesome</mat-icon>
+                IA
+              </span>
+            }
           </div>
         }
       </div>

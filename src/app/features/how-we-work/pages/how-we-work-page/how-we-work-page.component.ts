@@ -6,6 +6,7 @@ interface InceptionStep {
   icon: string;
   titleKey: string;
   descKey: string;
+  ai?: boolean;
 }
 
 interface Phase {
@@ -32,6 +33,13 @@ interface Differentiator {
   icon: string;
   titleKey: string;
   descKey: string;
+}
+
+interface SuccessStat {
+  valueKey: string;
+  labelKey: string;
+  descKey: string;
+  color: 'purple' | 'emerald' | 'blue' | 'pink';
 }
 
 @Component({
@@ -126,6 +134,17 @@ interface Differentiator {
     .inception-step p {
       margin: 0; font-size: 0.7rem; color: rgba(0,0,0,0.5); line-height: 1.45;
     }
+    .inception-step--ai {
+      border-color: #e8e4f3; background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%);
+    }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; border-radius: 10px;
+      background: linear-gradient(135deg, #da6ccf, #7c3aed);
+      color: white; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.3px; margin-top: 4px;
+    }
+    .ai-badge mat-icon { font-size: 11px; width: 11px; height: 11px; }
     .inception-outputs {
       padding: 16px 18px; border-radius: 10px;
       background: white; border: 1px dashed #c7bfe0;
@@ -249,6 +268,32 @@ interface Differentiator {
       font-size: 0.85rem; line-height: 1.8; color: rgba(255,255,255,0.78);
     }
 
+    /* ── Success stats ────────────────────────────────── */
+    .success-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .success-stat {
+      padding: 22px 20px; border-radius: 12px;
+      background: white; border: 1px solid #e5e7eb;
+      text-align: center;
+    }
+    .success-stat-value {
+      font-size: 2.2rem; font-weight: 800; margin: 0 0 4px;
+      line-height: 1;
+    }
+    .success-stat--purple .success-stat-value { color: #7c3aed; }
+    .success-stat--emerald .success-stat-value { color: #059669; }
+    .success-stat--blue .success-stat-value { color: #3f51b5; }
+    .success-stat--pink .success-stat-value { color: #da6ccf; }
+    .success-stat-label {
+      font-size: 0.85rem; font-weight: 600; color: #1a1a2e;
+      margin: 0 0 8px;
+    }
+    .success-stat-desc {
+      font-size: 0.75rem; color: rgba(0,0,0,0.5); line-height: 1.55;
+      margin: 0;
+    }
     /* ── Footer ───────────────────────────────────────── */
     .footer {
       margin-top: 32px; padding: 20px 24px;
@@ -268,11 +313,12 @@ interface Differentiator {
 })
 export class HowWeWorkPageComponent {
   readonly inceptionSteps: InceptionStep[] = [
-    { icon: 'psychology_alt', titleKey: 'howWeWork.inception.understandTitle', descKey: 'howWeWork.inception.understandDesc' },
+    { icon: 'psychology_alt', titleKey: 'howWeWork.inception.understandTitle', descKey: 'howWeWork.inception.understandDesc', ai: true },
     { icon: 'map', titleKey: 'howWeWork.inception.scopeTitle', descKey: 'howWeWork.inception.scopeDesc' },
-    { icon: 'architecture', titleKey: 'howWeWork.inception.archTitle', descKey: 'howWeWork.inception.archDesc' },
-    { icon: 'format_list_bulleted', titleKey: 'howWeWork.inception.storiesTitle', descKey: 'howWeWork.inception.storiesDesc' },
-    { icon: 'route', titleKey: 'howWeWork.inception.roadmapTitle', descKey: 'howWeWork.inception.roadmapDesc' },
+    { icon: 'architecture', titleKey: 'howWeWork.inception.archTitle', descKey: 'howWeWork.inception.archDesc', ai: true },
+    { icon: 'format_list_bulleted', titleKey: 'howWeWork.inception.storiesTitle', descKey: 'howWeWork.inception.storiesDesc', ai: true },
+    { icon: 'dashboard_customize', titleKey: 'howWeWork.inception.prototypeTitle', descKey: 'howWeWork.inception.prototypeDesc', ai: true },
+    { icon: 'route', titleKey: 'howWeWork.inception.roadmapTitle', descKey: 'howWeWork.inception.roadmapDesc', ai: true },
   ];
 
   readonly inceptionOutputs: string[] = [
@@ -282,6 +328,7 @@ export class HowWeWorkPageComponent {
     'howWeWork.inception.out4',
     'howWeWork.inception.out5',
     'howWeWork.inception.out6',
+    'howWeWork.inception.out7',
   ];
 
   readonly phases: Phase[] = [
@@ -321,9 +368,15 @@ export class HowWeWorkPageComponent {
     'howWeWork.quality.ai',
     'howWeWork.quality.tests',
     'howWeWork.quality.review',
-    'howWeWork.quality.envs',
     'howWeWork.quality.versioning',
     'howWeWork.quality.logs',
+  ];
+
+  readonly successStats: SuccessStat[] = [
+    { valueKey: 'howWeWork.success.stat1Value', labelKey: 'howWeWork.success.stat1Label', descKey: 'howWeWork.success.stat1Desc', color: 'purple' },
+    { valueKey: 'howWeWork.success.stat2Value', labelKey: 'howWeWork.success.stat2Label', descKey: 'howWeWork.success.stat2Desc', color: 'emerald' },
+    { valueKey: 'howWeWork.success.stat3Value', labelKey: 'howWeWork.success.stat3Label', descKey: 'howWeWork.success.stat3Desc', color: 'blue' },
+    { valueKey: 'howWeWork.success.stat4Value', labelKey: 'howWeWork.success.stat4Label', descKey: 'howWeWork.success.stat4Desc', color: 'pink' },
   ];
 
   readonly differentiators: Differentiator[] = [
