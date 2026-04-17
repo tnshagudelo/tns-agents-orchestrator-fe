@@ -3,4 +3,9 @@ export const environment = {
   apiUrl: '/api',
   wsUrl: '/ws',
   appVersion: '1.0.0',
+  githubOAuth: {
+    clientId: '',
+    redirectUri: '/auth/callback',
+    scope: 'read:user user:email',
+  },
 };

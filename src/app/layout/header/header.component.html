@@ -56,6 +56,19 @@
     <button mat-menu-item routerLink="/settings">
       <mat-icon>settings</mat-icon> Configuración
     </button>
+    <mat-divider></mat-divider>
+    <div class="role-section-label">Cambiar rol</div>
+    @for (r of proposalRoles; track r.value) {
+      <button mat-menu-item (click)="switchRole(r.value)"
+              [disabled]="authService.currentUser()?.proposalRole === r.value">
+        <mat-icon>{{ r.icon }}</mat-icon>
+        {{ r.label }}
+        @if (authService.currentUser()?.proposalRole === r.value) {
+          <mat-icon class="role-check">check</mat-icon>
+        }
+      </button>
+    }
+    <mat-divider></mat-divider>
     <button mat-menu-item (click)="authService.logout()">
       <mat-icon>logout</mat-icon> Cerrar sesión
     </button>
