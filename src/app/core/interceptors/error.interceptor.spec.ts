@@ -39,10 +39,10 @@ describe('errorInterceptor', () => {
     return p;
   };
 
-  it('401 calls authService.logout and navigates to /auth/login', async () => {
+  it('401 calls authService.logout and navigates to /', async () => {
     await trigger(401);
     expect(auth.logout).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/auth/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('403 navigates to /forbidden', async () => {

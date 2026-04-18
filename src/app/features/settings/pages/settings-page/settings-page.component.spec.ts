@@ -20,6 +20,7 @@ describe('SettingsPageComponent', () => {
       llm: { provider: 'openai', inputTokens: 0, outputTokens: 0, estimatedCostUsd: 0 },
       search: [],
     });
+    httpMock.expectOne(r => r.url.endsWith('/api/config/allowed-domains')).flush([]);
   };
 
   beforeEach(() => {

@@ -34,7 +34,7 @@ describe('authGuard', () => {
       authGuard({} as ActivatedRouteSnapshot, { url: '/secret' } as RouterStateSnapshot),
     );
     expect(result).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/'], {
       queryParams: { returnUrl: '/secret' },
     });
   });
@@ -44,6 +44,6 @@ describe('authGuard', () => {
       authGuard({} as ActivatedRouteSnapshot, { url: '/' } as RouterStateSnapshot),
     );
     expect(result).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {});
+    expect(router.navigate).toHaveBeenCalledWith(['/'], {});
   });
 });
