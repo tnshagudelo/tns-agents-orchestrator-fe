@@ -4,8 +4,9 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
     pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/landing/landing.component').then(m => m.LandingComponent),
   },
   {
     path: '',
@@ -53,6 +54,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
       },
+      {
+        path: 'security',
+        loadChildren: () =>
+          import('./features/security/security.routes').then(m => m.SECURITY_ROUTES),
+      },
     ],
   },
   {
@@ -61,7 +67,19 @@ export const routes: Routes = [
       import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
   {
+    path: 'public',
+    loadComponent: () =>
+      import('./layout/public-layout/public-layout.component').then(m => m.PublicLayoutComponent),
+    children: [
+      {
+        path: 'how-we-work',
+        loadChildren: () =>
+          import('./features/how-we-work/how-we-work.routes').then(m => m.HOW_WE_WORK_ROUTES),
+      },
+    ],
+  },
+  {
     path: '**',
-    redirectTo: 'home',
+    redirectTo: '',
   },
 ];

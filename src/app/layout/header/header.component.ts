@@ -26,12 +26,27 @@ import { ProposalRoleType } from '../../shared/models';
     }
     .spacer { flex: 1; }
     .empty-notifications { padding: 16px 24px; color: rgba(0,0,0,0.5); }
-    .user-info {
-      padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
-      display: flex; flex-direction: column; gap: 2px;
+    .header-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      object-fit: cover; border: 2px solid #e8e4f3;
     }
+    .user-btn { overflow: visible; }
+    .user-info {
+      padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .menu-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover; border: 2px solid #e8e4f3; flex-shrink: 0;
+    }
+    .user-info-text { display: flex; flex-direction: column; gap: 1px; }
     .user-info-name { font-weight: 600; font-size: 0.9rem; }
-    .user-info-role { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
+    .user-info-email { font-size: 0.72rem; color: rgba(0,0,0,0.45); }
+    .user-info-group {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 0.7rem; color: #7c3aed;
+      mat-icon { font-size: 12px; width: 12px; height: 12px; }
+    }
     .lang-btn { font-size: 13px; min-width: auto; padding: 0 8px; }
     .role-check { font-size: 18px; width: 18px; height: 18px; margin-left: 8px; color: #da6ccf; }
     .role-section-label {

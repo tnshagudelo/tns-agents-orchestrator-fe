@@ -1,6 +1,58 @@
 <div class="settings-page">
   <h2>Configuración</h2>
 
+  <!-- ═══ ALLOWED DOMAINS ═══ -->
+  <section class="settings-section">
+    <h3><mat-icon>shield</mat-icon> Dominios autorizados</h3>
+    <p class="section-hint">Solo los correos con estos dominios podran iniciar sesion. Si no hay dominios activos, se permite cualquier correo.</p>
+
+    <mat-card class="domains-card">
+      <div class="domain-add-row">
+        <mat-form-field appearance="outline" class="domain-field">
+          <mat-label>Dominio</mat-label>
+          <input matInput [(ngModel)]="newDomain" placeholder="ejemplo.com" (keyup.enter)="addDomain()" />
+          <span matPrefix>&#64;&nbsp;</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="domain-desc-field">
+          <mat-label>Descripcion (opcional)</mat-label>
+          <input matInput [(ngModel)]="newDomainDescription" placeholder="Empresa principal" (keyup.enter)="addDomain()" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="addDomain()" [disabled]="!newDomain.trim()">
+          <mat-icon>add</mat-icon> Agregar
+        </button>
+      </div>
+
+      @if (allowedDomains().length === 0) {
+        <div class="domain-empty">
+          <mat-icon>info</mat-icon>
+          <span>Sin dominios configurados — cualquier correo puede acceder.</span>
+        </div>
+      } @else {
+        <div class="domain-list">
+          @for (d of allowedDomains(); track d.id) {
+            <div class="domain-item" [class.inactive]="!d.isActive">
+              <div class="domain-info">
+                <span class="domain-name">&#64;{{ d.domain }}</span>
+                @if (d.description) {
+                  <span class="domain-desc">{{ d.description }}</span>
+                }
+              </div>
+              <div class="domain-actions">
+                <mat-slide-toggle [checked]="d.isActive" (change)="toggleDomainActive(d)"
+                  matTooltip="{{ d.isActive ? 'Desactivar' : 'Activar' }}"></mat-slide-toggle>
+                <button mat-icon-button color="warn" (click)="removeDomain(d.id)" matTooltip="Eliminar dominio">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </mat-card>
+  </section>
+
+  <mat-divider></mat-divider>
+
   <!-- ═══ SEARCH PROVIDERS ═══ -->
   <section class="settings-section">
     <h3><mat-icon>travel_explore</mat-icon> Proveedores de búsqueda web</h3>

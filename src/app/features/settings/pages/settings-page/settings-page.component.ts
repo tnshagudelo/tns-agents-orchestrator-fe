@@ -12,6 +12,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { ConfigService, SearchProviderConfig, TestResult } from '../../services/config.service';
+import { AllowedDomainService } from '../../services/allowed-domain.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -27,17 +28,23 @@ import { ConfigService, SearchProviderConfig, TestResult } from '../../services/
 })
 export class SettingsPageComponent implements OnInit {
   private readonly configService = inject(ConfigService);
+  private readonly domainService = inject(AllowedDomainService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly searchProviders = this.configService.searchProviders;
   readonly llmConfig = this.configService.llmConfig;
   readonly usage = this.configService.usage;
+  readonly allowedDomains = this.domainService.domains;
 
   apiKeys: Record<string, string> = {};
   testResults: Record<string, TestResult | null> = {};
   testing: Record<string, boolean> = {};
   selectedLlmProvider = '';
   selectedLlmModel = '';
+
+  // Allowed domains
+  newDomain = '';
+  newDomainDescription = '';
 
   ngOnInit(): void {
     this.configService.loadSearchProviders().subscribe();
@@ -46,6 +53,7 @@ export class SettingsPageComponent implements OnInit {
       this.selectedLlmModel = config.activeModel;
     });
     this.configService.loadUsage().subscribe();
+    this.domainService.loadDomains().subscribe();
   }
 
   toggleProvider(provider: SearchProviderConfig): void {
@@ -114,5 +122,31 @@ export class SettingsPageComponent implements OnInit {
 
   getUsagePercent(calls: number, limit?: number): number {
     return limit ? Math.min(100, (calls / limit) * 100) : 0;
+  }
+
+  // ── Allowed Domains ──────────────────────────────────────────────────────
+  addDomain(): void {
+    const domain = this.newDomain.trim().toLowerCase();
+    if (!domain) return;
+    this.domainService.createDomain({
+      domain,
+      description: this.newDomainDescription.trim() || undefined,
+    }).subscribe(() => {
+      this.newDomain = '';
+      this.newDomainDescription = '';
+      this.cdr.markForCheck();
+    });
+  }
+
+  toggleDomainActive(d: { id: string; domain: string; description: string | null; isActive: boolean }): void {
+    this.domainService.updateDomain(d.id, {
+      domain: d.domain,
+      description: d.description ?? undefined,
+      isActive: !d.isActive,
+    }).subscribe();
+  }
+
+  removeDomain(id: string): void {
+    this.domainService.deleteDomain(id).subscribe();
   }
 }

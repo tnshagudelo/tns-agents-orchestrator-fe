@@ -1,14 +1,16 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface NavItem {
   label: string;
   icon: string;
   route: string;
+  moduleKey: string;
 }
 
 @Component({
@@ -59,15 +61,33 @@ interface NavItem {
   `],
 })
 export class SidebarComponent {
+  private readonly authService = inject(AuthService);
   collapsed = input(false);
 
-  readonly navItems: NavItem[] = [
-    { label: 'Inicio', icon: 'home', route: '/home' },
-    { label: 'Account Planning', icon: 'business_center', route: '/account-planning' },
-    { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent' },
-    { label: 'Propuestas', icon: 'description', route: '/proposals' },
-    { label: 'Conocimiento', icon: 'psychology', route: '/knowledge' },
-    { label: 'Como trabajamos', icon: 'handshake', route: '/how-we-work' },
-    { label: 'Metodologia Dev', icon: 'auto_stories', route: '/dev-methodology' },
+  private readonly allNavItems: NavItem[] = [
+    { label: 'Inicio', icon: 'home', route: '/home', moduleKey: 'home' },
+    { label: 'Account Planning', icon: 'business_center', route: '/account-planning', moduleKey: 'account-planning' },
+    { label: 'Agente PM', icon: 'hub', route: '/projectmanageragent', moduleKey: 'projectmanageragent' },
+    { label: 'Propuestas', icon: 'description', route: '/proposals', moduleKey: 'proposals' },
+    { label: 'Conocimiento', icon: 'psychology', route: '/knowledge', moduleKey: 'knowledge' },
+    { label: 'Como trabajamos', icon: 'handshake', route: '/how-we-work', moduleKey: 'how-we-work' },
+    { label: 'Metodologia Dev', icon: 'auto_stories', route: '/dev-methodology', moduleKey: 'dev-methodology' },
   ];
+
+  private readonly bottomItems: NavItem[] = [
+    { label: 'Configuracion', icon: 'settings', route: '/settings', moduleKey: 'settings' },
+    { label: 'Seguridad', icon: 'shield', route: '/security', moduleKey: 'security' },
+  ];
+
+  readonly navItems = computed(() => {
+    const modules = this.authService.currentUser()?.modules;
+    if (!modules || modules.length === 0) return this.allNavItems;
+    return this.allNavItems.filter(item => modules.includes(item.moduleKey));
+  });
+
+  readonly bottomNavItems = computed(() => {
+    const modules = this.authService.currentUser()?.modules;
+    if (!modules || modules.length === 0) return [];
+    return this.bottomItems.filter(item => modules.includes(item.moduleKey));
+  });
 }

@@ -8,7 +8,7 @@
   </div>
 
   <mat-nav-list>
-    @for (item of navItems; track item.route) {
+    @for (item of navItems(); track item.route) {
       <a mat-list-item
         [routerLink]="item.route"
         routerLinkActive="active-link"
@@ -22,14 +22,22 @@
     }
   </mat-nav-list>
 
-  <mat-divider />
+  @if (bottomNavItems().length > 0) {
+    <mat-divider />
 
-  <mat-nav-list class="bottom-nav">
-    <a mat-list-item routerLink="/settings" routerLinkActive="active-link">
-      <mat-icon matListItemIcon>settings</mat-icon>
-      @if (!collapsed()) {
-        <span matListItemTitle>Configuración</span>
+    <mat-nav-list class="bottom-nav">
+      @for (item of bottomNavItems(); track item.route) {
+        <a mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+          [matTooltip]="collapsed() ? item.label : ''"
+          matTooltipPosition="right">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          @if (!collapsed()) {
+            <span matListItemTitle>{{ item.label }}</span>
+          }
+        </a>
       }
-    </a>
-  </mat-nav-list>
+    </mat-nav-list>
+  }
 </aside>

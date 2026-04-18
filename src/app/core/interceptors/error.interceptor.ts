@@ -18,11 +18,13 @@ export const errorInterceptor: HttpInterceptorFn = (
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
+      const isAuthCallback = req.url.includes('/api/auth/github/callback');
+
+      if (error.status === 401 && !isAuthCallback) {
         authService.logout();
-        router.navigate(['/auth/login']);
+        router.navigate(['/']);
       }
-      if (error.status === 403) {
+      if (error.status === 403 && !isAuthCallback) {
         router.navigate(['/forbidden']);
       }
       return throwError(() => error);

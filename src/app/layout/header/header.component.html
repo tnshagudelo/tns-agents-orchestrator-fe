@@ -42,15 +42,27 @@
     }
   </mat-menu>
 
-  <button mat-icon-button [matMenuTriggerFor]="userMenu">
-    <mat-icon>account_circle</mat-icon>
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn">
+    @if (authService.currentUser()?.avatarUrl) {
+      <img [src]="authService.currentUser()!.avatarUrl" class="header-avatar" alt="" />
+    } @else {
+      <mat-icon>account_circle</mat-icon>
+    }
   </button>
 
   <mat-menu #userMenu="matMenu">
     @if (authService.currentUser(); as user) {
       <div class="user-info">
-        <span class="user-info-name">{{ user.username }}</span>
-        <span class="user-info-role">{{ roleLabel(user.proposalRole) }}</span>
+        @if (user.avatarUrl) {
+          <img [src]="user.avatarUrl" class="menu-avatar" alt="" />
+        }
+        <div class="user-info-text">
+          <span class="user-info-name">{{ user.username }}</span>
+          <span class="user-info-email">{{ user.email }}</span>
+          @if (user.groupName) {
+            <span class="user-info-group"><mat-icon>shield</mat-icon> {{ user.groupName }}</span>
+          }
+        </div>
       </div>
     }
     <button mat-menu-item routerLink="/settings">

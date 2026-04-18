@@ -1,7 +1,8 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, finalize, map, switchMap, timeout } from 'rxjs/operators';
 import { AuthState, User, ProposalRoleType, OAuthCallbackResponse } from '../../shared/models';
 import { environment } from '../../../environments/environment';
 
@@ -51,36 +52,58 @@ export class AuthService {
 
     this._state.update(s => ({ ...s, isLoading: true }));
 
-    return new Observable(subscriber => {
-      this.http
-        .post<OAuthCallbackResponse>(`${environment.apiUrl}/api/auth/github/callback`, { code })
-        .subscribe({
-          next: (res) => {
-            const user: User = {
-              id: res.user.id,
-              username: res.user.username,
-              email: res.user.email,
-              avatarUrl: res.user.avatarUrl,
-              roles: ['builder'],
-              proposalRole: 'builder',
-              authProvider: 'github',
-              token: res.token,
-            };
-            localStorage.setItem(AUTH_TOKEN_KEY, res.token);
-            localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-            if (res.githubAccessToken) {
-              localStorage.setItem(GITHUB_TOKEN_KEY, res.githubAccessToken);
-            }
-            this._state.set({ user, isAuthenticated: true, isLoading: false });
-            subscriber.next(user);
-            subscriber.complete();
-          },
-          error: (err) => {
-            this._state.update(s => ({ ...s, isLoading: false }));
-            subscriber.error(err);
-          },
-        });
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.http
+      .post<any>(`${environment.apiUrl}/api/auth/github/callback`, { code })
+      .pipe(
+        timeout(15_000),
+        switchMap((res) => {
+          // 2xx without token = pending approval / rejection (backend returns 202)
+          if (res.errorCode) {
+            return throwError(() => ({ error: res, status: 202 }));
+          }
+
+          const user: User = {
+            id: res.user.id,
+            username: res.user.username,
+            email: res.user.email,
+            avatarUrl: res.user.avatarUrl,
+            roles: ['builder'],
+            proposalRole: 'builder',
+            authProvider: 'github',
+            token: res.token,
+            groupId: res.user.groupId,
+            groupName: res.user.groupName,
+            modules: res.user.modules ?? [],
+          };
+          localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+          if (res.githubAccessToken) {
+            localStorage.setItem(GITHUB_TOKEN_KEY, res.githubAccessToken);
+          }
+          this._state.set({ user, isAuthenticated: true, isLoading: false });
+          return [user] as const;
+        }),
+        catchError((err) => {
+          // Timeout or network failure
+          if (err?.name === 'TimeoutError' || err?.status === 0) {
+            return throwError(() => ({
+              error: {
+                message: 'No se pudo conectar con el servidor de autenticacion. Verifica tu conexion e intenta de nuevo.',
+                errorCode: 'AUTH_TIMEOUT',
+              },
+              status: 0,
+            }));
+          }
+
+          // Normalize: HttpErrorResponse has err.error, our thrown objects already have it
+          const error = err?.error ?? {};
+          return throwError(() => ({ error, status: err?.status ?? 0 }));
+        }),
+        finalize(() => {
+          this._state.update(s => ({ ...s, isLoading: false }));
+        }),
+      );
   }
 
   /** Cambia el rol de propuesta del usuario actual (dev tool) */
@@ -104,7 +127,7 @@ export class AuthService {
     localStorage.removeItem(AUTH_USER_KEY);
     localStorage.removeItem(GITHUB_TOKEN_KEY);
     this._state.set({ user: null, isAuthenticated: false, isLoading: false });
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 
   getToken(): string | null {

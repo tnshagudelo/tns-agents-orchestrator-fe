@@ -1,5 +1,5 @@
 export type ProposalRoleType = 'builder' | 'reviewer' | 'approver';
-export type AuthProvider = 'mock' | 'github' | 'entraid';
+export type AuthProvider = 'github' | 'entraid';
 
 export interface User {
   id: string;
@@ -10,11 +10,9 @@ export interface User {
   avatarUrl?: string;
   authProvider?: AuthProvider;
   token?: string;
-}
-
-export interface LoginRequest {
-  username: string;
-  password: string;
+  groupId?: string;
+  groupName?: string;
+  modules?: string[];
 }
 
 export interface AuthState {
@@ -26,9 +24,14 @@ export interface AuthState {
 export interface OAuthCallbackResponse {
   user: {
     id: string;
+    gitHubId?: string;
     username: string;
     email: string;
     avatarUrl?: string;
+    groupId?: string;
+    groupName?: string;
+    modules?: string[];
+    status?: string;
   };
   token: string;
   githubAccessToken?: string;
